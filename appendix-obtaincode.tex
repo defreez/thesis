@@ -1,0 +1,21 @@
+\chapter{Obtaining the code}
+\label{app:obtaincode}
+
+All of the source code required to build the tools discussed in this paper, and the text of the paper itself,  is available on the author's github page at
+\texttt{https://github.com/defreez}. There are nine relevant git repositories, all prefaced with the word ``thesis.''
+\begin{itemize}
+\item{thesis} - The actual text of the document
+\item{thesis-ics-platform-manifest - The manifest which references all of the projects necesssary to build Android.}
+\item{thesis-ics-platform-frameworks-base - Contains modifications at the framework level, such as calls to vold from within the
+mount service.}
+\item{thesis-ics-device-samsung-crespo - Includes the product configuration necessary for the build to work on a Nexus S}
+\item{thesis-ics-platform-system-vold - The modifications to vold}
+\item{thesis-ics-platform-system-core - Changes required for init to mount eCryptfs}
+\item{thesis-ics-external-libecryptfs - eCryptfs support library}
+\item{thesis-ics-external-libkeyutils - Keyutils support library}
+\item{thesis-carve - Python scripts for carving YAFFS2 images}
+\end{itemize}
+
+A working Android ROM can be built for a Nexus S from the code above by following the directions at \texttt{source.android.com}, but
+instead of initializing the tree against the manifest provided by Google, issue the command: \texttt{repo init -u
+https://github.com/defreez/thesis-ics-platform-manifest -b finalthesis}

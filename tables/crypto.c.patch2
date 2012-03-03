@@ -1,0 +1,10 @@
+@@ -1019,6 +1019,9 @@
+ 		ecryptfs_printk(KERN_ERR, "Error initializing cryptographic "
+ 				"context for cipher [%s]: rc = [%d]\n",
+ 				crypt_stat->cipher, rc);
++
++	// Set boundary id for FEKEK generation
++	crypt_stat->boundary_uid = ecryptfs_inode->i_uid;
+ out:
+ 	return rc;
+ }

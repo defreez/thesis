@@ -1,0 +1,47 @@
+--- thesis-linux-vanilla/fs/ecryptfs/ecryptfs_kernel.h	2012-01-16
++++ thesis-linux-ecryptfs/fs/ecryptfs/ecryptfs_kernel.h	2012-01-16
+ void ecryptfs_dump_auth_tok(struct ecryptfs_auth_tok *auth_tok);
+ extern void ecryptfs_to_hex(char *dst, char *src, size_t src_size);
+@@ -217,6 +218,7 @@
+ 	unsigned char cipher[ECRYPTFS_MAX_CIPHER_NAME_SIZE];
+ 	unsigned char key[ECRYPTFS_MAX_KEY_BYTES];
+ 	unsigned char root_iv[ECRYPTFS_MAX_IV_BYTES];
++	uid_t boundary_uid;
+ 	struct list_head keysig_list;
+ 	struct mutex keysig_list_mutex;
+ 	struct mutex cs_tfm_mutex;
+@@ -269,6 +271,12 @@
+ 	unsigned char sig[ECRYPTFS_SIG_SIZE_HEX + 1];
+ };
+ 
++struct ecryptfs_boundary_key {
++	struct list_head mount_crypt_stat_list;
++	char key[16];
++	uid_t uid;
++};
++
+ /**
+  * ecryptfs_key_tfm - Persistent key tfm
+  * @key_tfm: crypto API handle to the key
+@@ -312,6 +320,7 @@
+ 	u32 flags;
+ 	struct list_head global_auth_tok_list;
+ 	struct mutex global_auth_tok_list_mutex;
++	struct list_head boundary_key_list;
+ 	size_t global_default_cipher_key_size;
+ 	size_t global_default_fn_cipher_key_bytes;
+ 	unsigned char global_default_cipher_name[ECRYPTFS_MAX_CIPHER_NAME_SIZE
+@@ -699,4 +708,10 @@
+ int ecryptfs_derive_iv(char *iv, struct ecryptfs_crypt_stat *crypt_stat,
+ 		       loff_t offset);
+ 
++int ecryptfs_find_boundary_key(struct ecryptfs_mount_crypt_stat
+*mount_crypt_stat,
++				uid_t uid, struct ecryptfs_boundary_key
+**boundary_key);
++void ecryptfs_generate_boundary_key(struct ecryptfs_crypt_stat *crypt_stat,
++				    struct ecryptfs_auth_tok *auth_tok,
++				    struct ecryptfs_boundary_key
+**boundary_key);
++				   
+ #endif /* #ifndef ECRYPTFS_KERNEL_H */

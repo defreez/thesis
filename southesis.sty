@@ -1,0 +1,46 @@
+% SOU Comuter Science Master's Thesis Style
+\ProvidesPackage{southesis}[2011/11/22]
+
+\usepackage{times}
+\usepackage{setspace}
+\usepackage[top=1.0in, left=1.5in, right=1.0in, bottom=1.0in]{geometry}
+\usepackage{apacite}
+
+% Put page numbers in top-right
+\pagestyle{myheadings}
+
+% Single-space block quotations
+\let\oldquote=\quote
+\let\oldendquote=\endquote
+\renewenvironment{quote}
+	{\singlespacing\oldquote}
+	{\oldendquote}
+
+% Single-spaced lists
+\let\oldenumerate=\enumerate
+\let\oldendenumerate=\endenumerate
+\renewenvironment{enumerate}
+	{\singlespacing\oldenumerate
+		\setlength{\itemsep}{0pt}
+		\setlength{\parskip}{0pt}}
+	{\oldendenumerate}	
+
+\let\olditemize=\itemize
+\let\oldenditemize=\enditemize
+\renewenvironment{itemize}
+	{\singlespacing\olditemize
+		\setlength{\itemsep}{0pt}
+		\setlength{\parskip}{0pt}}
+	{\oldenditemize}
+
+\newcommand{\superscript}[1]{\ensuremath{^{\textrm{#1}}}}
+\newcommand{\subscript}[1]{\ensuremath{_{\textrm{#1}}}}
+
+% 1.5 line spacing
+\onehalfspacing
+
+% Do not right justify
+\raggedright
+\parindent=1.5em
+
+\bibliographystyle{apacite}

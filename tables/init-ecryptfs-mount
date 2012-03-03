@@ -1,0 +1,4 @@
+if (!strcmp(system, "ecryptfs"))
+		options = (char*)property_get("vold.ecryptfs_options");
+
+        if (mount(source, target, system, flags, options) < 0) {

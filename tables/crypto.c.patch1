@@ -1,0 +1,47 @@
+--- thesis-linux-vanilla/fs/ecryptfs/crypto.c	2012-01-16 18:46:38.749912243
+-0800
++++ thesis-linux-ecryptfs/fs/ecryptfs/crypto.c	2012-01-16 11:13:45.872852667
+-0800
+@@ -200,6 +200,7 @@
+ 
++// should be int, returning true false based upon key status of master
++void ecryptfs_generate_boundary_key(struct ecryptfs_crypt_stat *crypt_stat,
++				    struct ecryptfs_auth_tok *auth_tok,
++				    struct ecryptfs_boundary_key
+**boundary_key)
++{
++	char *tmp;
++	int master_sz;
++	struct ecryptfs_boundary_key *new_key = NULL; 
++	struct ecryptfs_mount_crypt_stat *mount_crypt_stat =
++		crypt_stat->mount_crypt_stat;
++
++
++	if (ecryptfs_find_boundary_key(mount_crypt_stat, 
++				       crypt_stat->boundary_uid, boundary_key)) 
++		goto out;	
++
++	new_key = kmalloc(sizeof(struct ecryptfs_boundary_key), GFP_KERNEL);
++
++	master_sz = auth_tok->token.password.session_key_encryption_key_bytes;
++	tmp = kmalloc(sizeof(uid_t) + master_sz, GFP_KERNEL);
++
++	memcpy(tmp, auth_tok->token.password.session_key_encryption_key,
+master_sz);
++	memcpy(tmp + master_sz, &crypt_stat->boundary_uid, sizeof(uid_t));
++
++	ecryptfs_calculate_md5(new_key->key, crypt_stat, tmp, 
++				master_sz + sizeof(uid_t));
++	new_key->uid = crypt_stat->boundary_uid;
++
++	list_add(&new_key->mount_crypt_stat_list, 
++		 &mount_crypt_stat->boundary_key_list);
++	*boundary_key = new_key;
++
++	if (unlikely(ecryptfs_verbosity > 0)) {
++		ecryptfs_printk(KERN_DEBUG, "Generated boundary key");
++	}
++out:
++	return;
++}
++

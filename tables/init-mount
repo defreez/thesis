@@ -1,0 +1,1 @@
+mount ext4 /dev/block/platform/s3c-sdhci.0/by-name/system /system wait ro

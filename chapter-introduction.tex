@@ -1,0 +1,50 @@
+\chapter{Introduction}
+\label{ch:introduction}
+
+It has become apparent that the world is in the midst of a transition away from monolithic desktops toward mobile computing.  Two
+giants, Google and Apple, currently dominate the mobile space, with Android and iOS respectively.  Google has marketed Android as
+the more ``open" platform, while iOS remains a walled garden.  The open/closed distinction is dubious at best, as Android is still
+developed behind closed doors.  Nonetheless, Google has released most of the source code for Android and done significantly less
+than Apple to impede the efforts of the hacking community. For this reason, Android has become the platform of choice for developers
+interested in modifying the mobile experience outside of the confines of a standard application.  This project has chosen to focus
+on Android for the same reason.
+
+While the headlines have been filled with the latest applications, processors, and screen sizes, the shift to mobile computing is also
+bringing with it a deluge of security baggage. Mobile devices, like any other tool, can be used in a multitude of ways, and so comes
+crime and surveillance, privacy invasion and preservation, in a word, forensics. The majority of forensic tools available for Android
+devices are not open to inspection, and much of detailed technical information available about Android forensic methods is
+proprietary, though Andrew Hoog has broken some ground with his book \emph{Android Forensics} \cite{hoog}. This project is not an
+attempt to comprehensively describe the field of Android forensics, nor is it an introduction to computer forensics. Rather, this is
+a study in privacy preservation.
+
+Research in computer forensics is commonly circumscribed by the needs of law and corporate policy enforcement.  For example, when
+enumerating the various cases in which forensic analysis could be useful, Andrew Hoog includes civil and criminal investigations,
+internal corporate investigations, family matters, and government security \cite{hoog}.  What these scenarios all have in common is
+that the forensic techniques employed are all targeted toward providing information to investigators.  The legal right of the
+investigator to process evidence is presumed.  Yet there are a wide range of scenarios, from the dissident hiding from a dictatorial
+regime, to the prying eyes of a stalker, where the successful use of forensic techniques may inflict grave injustice upon the owner
+of the object of analysis.  In the face of untoward forensic inquiry, a person has little recourse other than to prevent forensic
+techniques from succeeding in the first place. This project is formed out of the realization that forensics can be used as a weapon.
+Anyone concerned with the nature of digital privacy should have tools of their own. The goal is to lay bare the core forensic
+techniques used to analyze Android devices, and then to demonstrate a relevant defense. It details the practical obstacles to
+modifying an operating system consisting of millions of lines of code spread across hundreds of projects in over a dozen languages.
+The goal is to provide a defense, even one that is narrowly conceived, which at least slows down forensic analysis and increases the
+safety of data on an Android device. 
+
+That defense, unsurprisingly, is encryption. Recent releases of Android include the option of full-disk encryption by default, which
+works very well when certain conditions are met: the attacker cannot have physical access to the device more than once, the
+encryption passphrase must be strong, and the attacker cannot have access to the device while it is running. All of these conditions
+are discussed later in the paper, but it is the last condition that is of particular concern. People simply do not turn off their
+phones very often, which dramatically increases the likelihood that any forensic analysis performed on an Android device will be
+performed on a \emph{running} Android device. The method of encryption introduced in this paper takes steps toward addressing this
+issue, and demonstrates a technique that could dramatically increase the safety of data on a running device.
+
+Chapter \ref{ch:forensics} introduces Android forensics. The chapter discusses how the data on an Android device is acquired. While
+the analysis of acquired data is briefly discussed, the focus here is on the process of acquisition, because that is the critical
+point at which data must be protected. That is to say, any data that has left the device unencrypted is lost to an attacker.  Next,
+an existing method for securing Android against forensic inspection is discussed in chapter \ref{ch:fde}: full-disk encryption as
+implemented by the third-party distribution of Android WhisperCore. Chapter \ref{ch:ecryptfs} provides the technical details of a
+novel method of encrypting data on an Android device. It shows how the filesystem eCryptfs can be used on an Android device to
+provide independent keys for each application, and how those keys can be wiped when the screen is locked. Finally, chapter
+\ref{ch:future} discusses future directions for similar privacy research, as well as improvements that could be made to the current
+encryption implementation.

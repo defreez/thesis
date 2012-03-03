@@ -1,0 +1,30 @@
+// Inserts eCryptfs master mount key into keyring
+int cryptfs_generate_ecryptfs_key(char *passwd)
+{
+	char auth_tok_sig_hex[ECRYPTFS_SIG_SIZE_HEX + 1];
+	char salt[ECRYPTFS_SALT_SIZE];
+	int rc = 0;
+	char ecryptfs_options[ECRYPTFS_SIG_SIZE_HEX + 64];
+
+	from_hex(salt, ECRYPTFS_DEFAULT_SALT_HEX, ECRYPTFS_SALT_SIZE);
+	
+	if ((rc = ecryptfs_add_passphrase_key_to_keyring(auth_tok_sig_hex,
+                                                         passwd,
+                                                         salt)) < 0) {
+		SLOGE("%s [%d]\n", ECRYPTFS_ERROR_INSERT_KEY, rc);
+		SLOGE("%s\n", ECRYPTFS_INFO_CHECK_LOG);
+		rc = 1;
+    	goto out;
+    } else
+         rc = 0;
+
+	auth_tok_sig_hex[ECRYPTFS_SIG_SIZE_HEX] = '\0';
+	snprintf(ecryptfs_options, sizeof(ecryptfs_options), 
+		 "ecryptfs_sig=%s,ecryptfs_cipher=aes,ecryptfs_key_bytes=16",
+		 auth_tok_sig_hex); 
+	property_set("vold.ecryptfs_options", ecryptfs_options);
+ 	SLOGI("Set eCryptfs mount options: %s", ecryptfs_options);
+
+out:
+	return rc;
+}
