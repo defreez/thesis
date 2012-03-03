@@ -11,14 +11,17 @@ pulled from an acquired Android image is described.
 
 \section{Technical Background}
 
-It is important, before diving into the details of Android forensics, to give a short overview of how Android storage in laid out.  The
-data presented here has been gathered from a Nexus One phone running Android version 2.3 (Gingerbread).  The Nexus series of phones
-(Nexus One, Nexus S, and now Galaxy Nexus) are often favored by developers, as they provide a ``clean'' build of Android that is as
-close as possible to the Android Open Source Project, hereafter referred to as AOSP. AOSP is that part of Android which has been
-released as open source, which is almost everything except for the Google proprietary applications, such as Gmail, and proprietary
-hardware drivers. In contrast, other models often come loaded with third-party applications and modifications to the underlying
-operating system. 
+The data presented here has been gathered from a Nexus One phone running Android version 2.3 (Gingerbread).  ``Nexus''
+devices\footnote{Nexus One, Nexus S, and now Galaxy Nexus} are often favored by developers, as they provide a build of Android that
+is as close as possible to the Android Open Source Project, hereafter referred to as AOSP. While Android is considered by many to be
+an open mobile platform, not everything in Android is open-source. AOSP is that part of Android for which the source code has been
+released.  It includes the majority of features in a consumer build of Android, but notably excludes many of the Google branded
+applications, such as Gmail and the Android Market. Traditionally, AOSP has also excluded propietary hardware drivers, but recently
+many drivers for Nexus devices have been made available.  The consumer builds for Nexus devices are not based on AOSP, but they
+are much closer to AOSP than the builds shipped with other models, which often come loaded with third-party applications and
+modifications to the underlying operating system.
 
+Before diving into the details of Android forensics, it is important to give a short overview of how Android storage is laid out.
 The majority of Android devices have two storage devices: an SD card \footnote{Often an actual, removable SD card is provided with
 the phone. Newer devices, however, appear to be trending toward providing an emulated SD card from internal storage.} that is
 formatted with a FAT filesystem, and an internal NAND flash that is formatted \texttt{YAFFS2} or \texttt{ext4}, with newer models
