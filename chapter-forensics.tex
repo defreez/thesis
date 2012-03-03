@@ -303,13 +303,13 @@ and Android device, partially drawn from Andrew Hoog's book \emph{Android Forens
 
 % Vboxes prevent page breaks between item descriptions and item text
 \begin{description}
-\vbox{\item[Zero] Build tools and Document Procedures \hfill \\
+\vbox{\item[Step Zero] Build tools and Document Procedures \hfill \\
 Perhaps it goes without saying, but it is imperative that the acquisition tools and procedures be developed \emph{prior} to acquisition. 
 If the phone is using YAFFS2 as the filesystem (the majority of devices at the time of writing), \texttt{nanddump} should  be used. 
 The process of building \texttt{nanddump} from source is described later in the chapter. 
 The Android Debug Bridge, provided with the Android SDK as a means of communicating with the phone over a USB cable, should be installed and tested. }
 
-\vbox{\item[First] Initial Seizure \hfill \\
+\vbox{\item[Step One] Initial Seizure \hfill \\
 Regardless of the method used to acquire the phone, it must first be secured in the analyst's possession, physically and
 electronically.  If the phone is unlocked, immediately determine if a passcode is enabled.  Determine, to the best of the analyst's
 ability if the phone is using full disk encryption; if so, do not turn off the phone.  If the phone is encrypted and already off,
@@ -318,7 +318,7 @@ settings menu prior to shutting the phone down.  USB should be enabled if possib
 performed, or the phone is encrypted, it should be powered off.  Isolate the phone from the network, either by turning it off or
 placing it in a Faraday bag.}
 
-\vbox{\item[Second] Back at the Lab \hfill \\
+\vbox{\item[Step Two] Back at the Lab \hfill \\
 If the device is locked, the password will need to be guessed or bypassed, either through brute-force or a smudge attack.  A smudge
 attack involves reading the residual oil patterns off of a touch screen in order to determine the unlock pattern or PIN
 \cite{smudge}. The SIM card should be removed and analyzed separately, though SIM cards used in Android devices do not make
@@ -327,14 +327,14 @@ also be removed and analyzed separately (in the same fashion as a thumb drive). 
 device for storing NAND images. 
 }
  
-\vbox{\item[Third] Root the phone \hfill \\
+\vbox{\item[Step Three] Root the phone \hfill \\
 If the phone does not already have root access enabled, then privilege escalation will be necessary.  A substantial amount of
 research should be done about every device before attempting to obtain root access.  There is a considerable amount of risk of
 damage to the phone, including loss of evidence.  Some phones can be rooted with a minimal footprint, as described later in this
 chapter.  Other's phones require more invasive processes.  Any analyst of modest means (i.e. without an exploit development team) is
 at the mercy of the security/hobbyist community for root access.}
 
-\vbox{\item[Fourth] Acquire an image \hfill \\
+\vbox{\item[Step Four] Acquire an image \hfill \\
 Use \texttt{nanddump} to acquire an image of each partition of the phone.  These images should be stored on the sterile SD card that
 was inserted into the phone.  After transferring the images from the SD card to the analyst's machine, they can be carved and
 mounted with \texttt{nandsim} for perusal.} 
