@@ -16,7 +16,7 @@ devices\footnote{Nexus One, Nexus S, and now Galaxy Nexus} are often favored by 
 is as close as possible to the Android Open Source Project, hereafter referred to as AOSP. While Android is considered by many to be
 an open mobile platform, not everything in Android is open-source. AOSP is that part of Android for which the source code has been
 released.  It includes the majority of features in a consumer build of Android, but notably excludes many of the Google branded
-applications, such as Gmail and the Android Market. Traditionally, AOSP has also excluded propietary hardware drivers, but recently
+applications, such as Gmail and the Android Market. Traditionally, AOSP has also excluded proprietary hardware drivers, but recently
 many drivers for Nexus devices have been made available.  The consumer builds for Nexus devices are not based on AOSP, but they
 are much closer to AOSP than the builds shipped with other models, which often come loaded with third-party applications and
 modifications to the underlying operating system.
@@ -47,10 +47,14 @@ card.}
 To determine the partition layout of an Android device:
 
 \paragraph {1. 
-Enable USB Debugging} The menu in figure \ref{fig:usbdebug} is found by going to the main \texttt{Settings} menu, then to
-\texttt{Applications}, and finally to \texttt{Development}.  Without USB debugging enabled on the device, it is impossible to gain
-shell access, which is why any unlock code that is enabled on the phone must usually be bypassed before forensic tools can be used.
-This setting is not turned on by default, which makes acquiring a device with a strong passcode difficult.
+Enable USB Debugging} Figure \ref{fig:usbdebug} shows the \texttt{Development} menu for Android 2.3, where USB Debugging can be
+enabled.  Turning on USB debugging allows shell access to the device without entering a passcode. The shell is accessed with a
+utility called the ``Android Debug Bridge,'' or ADB. Enabling USB debugging does not provide root access to the device, but it is
+often easier to execute a privilege escalation attack from within a shell than from the Android interface. Any passcode that is
+enabled must be first bypassed before USB debugging can be enabled, unless debugging was previously enabled by the device owner.
+There are a variety of techniques for bypassing a passcode \cite{hoog, lockscreenbypass0, lockscreenbypass1, lockscreenbypass2}, but
+there is no single method that is consistently successful across devices.  A strong passcode remains a significant barrier to
+accessing the information on a device.
 
 \begin{figure}[ht]
 \caption{Turning on USB Debugging}
@@ -77,11 +81,9 @@ The output of \texttt{adb devices} from a machine with one Android phone attache
 \label{fig:adbdevices}
 \end{figure}
 
-If there are no devices listed, check that the device is connected and that the \texttt{adb} service is running.  If multiple devices
-are connected, then it will be necessary to select a device for \texttt{adb} to connect to (see the \texttt{adb} help page for
-details).  Opening a shell on a phone and displaying the contents of \texttt{/proc/mtd} results in output similar to figure
-\ref{fig:mtd}.  MTD is the kernel driver in Linux that is responsible for providing an abstraction layer between filesystems and
-\emph{Memory Technology Devices}, i.e. NAND flash. YAFFS2 is a consumer of the MTD interface, and \texttt{/proc/mtd} lists all of the active MTD
+Opening a shell and displaying the contents of \texttt{/proc/mtd} results in output similar to figure \ref{fig:mtd}.  MTD is the
+kernel driver in Linux that is responsible for providing the abstraction layer that is between filesystems and \emph{Memory
+Technology Devices}, i.e. NAND flash. YAFFS2 is a consumer of the MTD interface, and \texttt{/proc/mtd} lists all of the active MTD
 partitions. 
 
 \begin{figure}[ht]
@@ -138,12 +140,11 @@ YAFFS1 has the following information associated with it:
 
 YAFFS1 relies on the Linux kernel's Memory Technology Device (MTD) driver to provide an interface to the actual NAND device.  The
 Linux MTD presents the NAND device as a series of pages (usually 2kB), similar to blocks on a conventional hard disk.  Each page is
-accompanied by 64 bytes known as the ``Out-of-Band area," or OOB, which is partially used by the MTD itself and partially used by the
-YAFFS1 filesystem. The MTD driver itself uses the OOB area to store error correction data, and additionally defines an area that can
-be used by the filesystem for whatever purposes it chooses, called the OOBFREE area.  YAFFS1 uses the OOBFREE area to store the
-above tags. In YAFFS2 the tags look a little different, but are stored in the same manner. The layout of the OOB can be seen in
-the \texttt{struct} in Table \ref{tab:oob}, taken from the Android source code. This \texttt{struct} is extremely important for
-anyone attempting to analyze a YAFFS based filesystem.
+accompanied by 64 bytes known as the ``Out-of-Band area," or OOB, which is partially used by the MTD itself and partially used by
+the YAFFS1 filesystem. The MTD driver itself uses the OOB area to store error correction data, and additionally defines an area that
+can be used by the filesystem for whatever purposes it chooses, called the OOBFREE area.  The layout of the OOB can be seen in the
+\texttt{struct} in Table \ref{tab:oob}, taken from the Android source code. This \texttt{struct} is extremely important for anyone
+attempting to analyze a YAFFS based filesystem.
 
 \begin{table}
 \lstinputlisting{tables/oobstruct.c}
@@ -249,7 +250,7 @@ SQLite record.  The \texttt{backStep} function is shown in table \ref{tab:backst
 \label{tab:backstep}
 \end{table}
 
-The \texttt{rawData} argument passed to \texttt{backStep} is simple a slice of data that is larger than the record is believed to
+The \texttt{rawData} argument passed to \texttt{backStep} is simply a slice of data that is larger than the record is believed to
 be.  When searching for browser history records, for example, this project opted for 512 bytes on either size of the record.  The
 size is arbitrary, so long as it is larger than the record being searched for, but choosing a raw data slice size that is too large
 will negatively impact validation performance.  The \texttt{bc} variable (backward cursor) is the current byte location.  The
@@ -284,19 +285,21 @@ The hard disk is then attached to a write blocking device and copied using one o
 ``image" of the drive. For analysts of average means, creating a forensically-sound duplicate of an Android device can be
 challenging. The operating system itself and the majority of forensic artifacts (with the exception of pictures, media files, and
 some application data) are stored on internal flash memory.  Removing the flash memory and attaching it to a write blocker is, while
-technically possible, beyond the reach of many forensic labs.  The NAND memory in many phones could conceivably be accessed either
-through the JTAG ports in the phone, or by physically removing the chip.  Either method would require significant electronics work
-and further reconstruction of the low-level NAND layout. Directly accessing the NAND flash is a last resort, but it may be the only
-possibility on a properly locked device \cite{chipoff}.
+technically possible, beyond the reach of many forensic labs.  The NAND memory in many devices could conceivably be accessed either
+through the JTAG\footnote{JTAG stands for ``Joint Test Action Group.'' JTAG test access ports are available on most circuit boards.
+They are used to access the CPU to perform debugging operations, and in certain situations can be used to bypass security mechanisms
+or directly access NAND storage.} ports in the device, or by physically removing the chip.  Either method would require significant
+electronics work and further reconstruction of the low-level NAND layout. Directly accessing the NAND flash is a last resort, but it
+may be the only possibility on a properly locked device \cite{chipoff}.
 
 Further challenges are presented by the inability of standard users to perform the low-level operations necessary to forensically
-acquire a phone, as the Android security model does not usually provide root access.  Additionally, flash memory stores metadata in
+acquire a device, as the Android security model does not usually provide root access.  Additionally, flash memory stores metadata in
 a fashion that is not taken into account by traditional forensic acquisition methods.  The sections that follow describe the
 peculiarities of Android and how to approximate a forensically-sound duplicate of an Android device.
 
 \subsection{A Basic Android Acquisition}
 
-The acquisition of an Android phone is not, in a broad view, much different than the acquisition of a desktop computer. 
+The acquisition of an Android device is not, in a broad view, much different than the acquisition of a desktop computer. 
 The device must be seized, and an image of the device must be created that is as forensically sound as possible.  There are,
 however, several Android specific details that must be addressed.  What follows is an overview of the steps necessary for acquiring
 and Android device, partially drawn from Andrew Hoog's book \emph{Android Forensics} \cite{hoog}.
@@ -350,20 +353,18 @@ this OOB free area, and it is therefore of paramount importance that a flash-awa
 Without the OOB area it is impossible to fully reconstruct the YAFFS2 filesystem of an Android device.
 
 \subsection{Nanddump}
-Hoog's book provides an excellent primer on how android forensics is performed.  Unfortunately, a great number of
+Hoog's book \cite{hoog} provides an excellent primer on how Android forensics is performed.  Unfortunately, a great number of
 implementation details are glossed over in favor of describing opaque forensic tools, such as Hoog's own AFLogical/AFPhysical tools,
 or Cellebrite's more well-known UFED. These tools are only available to the law enforcement community, limiting their academic
 value. The tool used here for acquiring Android images is \texttt{nanddump}. The same tool is included in Hoog's tool set, but his
-description of cross-compiling \texttt{nanddump} for ARM is limited to: \begin{quote} Cross-compiling source code to run on the ARM
-platform can be quite difficult and there is sparse support for it online.  One possible solution is to use Android's Native
-Development Kit (NDK) to build compatible binaries.  Another option is to use Linux and install a cross-compiler such as Code
-Sourcery's G++ Lite 2009q3-67 for ARM GNU/Linux from \url{http:///www.codesourcery.com/sgpp/lite/arm/portal/release1039}.  Once a
-cross-compiler is installed, you must modify the source code's Makefile to indicate the cross-compiling option.  Also check the
-book's web site at http://viaforensics.com/education/android-forensics-mobile-security-book/ for future updates.
-
-\hspace{\fill}\cite{hoog}
-\end{quote}
-The above characterization is roughly accurate, but leaves a daunting exercise to the reader. 
+description of cross-compiling \texttt{nanddump} for ARM is limited to: 
+\begin{quote} Cross-compiling source code to run on the ARM platform can be quite difficult and there is sparse support for it
+online.  One possible solution is to use Android's Native Development Kit (NDK) to build compatible binaries.  Another option is to
+use Linux and install a cross-compiler such as Code Sourcery's G++ Lite 2009q3-67 for ARM GNU/Linux from
+http:///www.codesourcery.com/sgpp/lite/arm/portal/release1039.  Once a cross-compiler is installed, you must modify the source
+code's Makefile to indicate the cross-compiling option.  Also check the book's web site at
+http://viaforensics.com/education/android-forensics-mobile-security-book/ for future updates.  \hspace{\fill}\cite{hoog} \end{quote}
+The above characterization is accurate, but leaves a daunting exercise to the reader. 
 
 Unlike \texttt{dd}, \texttt{nanddump} does acquire the OOB area in addition to the data portion of a NAND device.  In Ubuntu,
 \texttt{nanddump} is provided by the \texttt{mtd-utils} package.  The binary that comes with the \texttt{mtd-utils} package is not
@@ -382,7 +383,7 @@ must be part of the \texttt{PATH} environment variable.
 
 Once CodeSourcery is installed, obtain the source code for nanddump and then cross-compile compile it with the CodeSourcery
 \texttt{gcc}.  The source code from \texttt{nanddump} is provided by the \texttt{mtd-utils} source package and can be retrieved
-using apt on a Debian based system.  The source code can also be obtained from the project homepage at
+using \texttt{apt-get source} on a Debian based system.  The source code can also be obtained from the project homepage at
 \url{www.linux-mtd.infradead.org}.  The \texttt{mtd-utils} package includes the source code for a number of other utilities that
 aren't needed for \texttt{nanddump} to operate.  Since building the entire \texttt{mtd-utils} package is mildly complicated, the
 easiest and recommended route is to copy out \texttt{nanddump.c} and the \texttt{include} directory, and build \texttt{nanddump}
@@ -409,45 +410,52 @@ but also for the privacy conscious user.
 
 Obtaining root access on an Android device can, depending on the device, be the most challenging step of the process.  Acquiring
 root access on the majority of commercially available Android phones requires using a local privilege escalation exploit.  With each
-major release Google provides fixes for the exploits that were previously used to obtain root, and as with the iPhone, each major
-release sees the development of new exploits, or as is more often the case, old Linux exploits ported to Android.  The Nexus series
-of phones, which serve as the flagship phones for new Android releases, are an exception.\footnote{As is the Motorola XOOM, the
-flagship Honeycomb tablet} Nexus phones allow an end user to easily unlock the bootloader and flash (upload) whatever code they
-would like onto the phone using a utility called \texttt{fastboot}.  As discussed in chapter \ref{ch:fde}, these bootloaders come
-with their own security considerations.  In any case, most other Android phones are not so friendly.  It remains to be seen how this
-cat and mouse game will play out.  So far the security measures put in place by Google have not proven to be a serious deterrent to
-the rooting community, but that may change in the future.  The sheer number of different Android models may lead to a situation
-where only the most popular models have well-known techniques for obtaining root, while the less popular ones remain locked into
-whatever configuration the manufacturer desires.  This could lead to an increase in the necessity of off-chip NAND acquisition
-techniques, which are only possible for analysts with significant hardware and personnel resources.
+major release, Google provides fixes for the exploits that were previously used to obtain root, and each major release sees the
+development of new exploits, or as is more often the case, old Linux exploits ported to Android.  So far the security measures put
+in place by Google have not proven to be a serious deterrent to the rooting community, but that may change in the future.  The sheer
+number of different Android models may lead to a situation where only the most popular models have well-known techniques for
+obtaining root, while the less popular ones remain locked into whatever configuration the manufacturer desires.  This could lead to
+an increase in the necessity of off-chip NAND acquisition techniques, where the NAND chips is physically removed from the phone to
+be accessed. These techniques are only possible for analysts with significant hardware and personnel resources.
 
 \subsubsection{An Example: Exploid CVE-2009-1185}
-Before looking into how to use pre-built code to practically and quickly obtain root access on a couple of phone models, it is important to understand the fundamentals of rooting and what is actually going on. 
-In an ironic and unfortunate turn of events for a community celebrating an open source operating system, the source code for a number of the exploits used to obtain root access on Android is not available. 
-These exploits work well and are largely safe, allowing the hobbyist community to root their phones, whilst the forensic analyst is left without tools due to his or her inability to explain how the exploit works. 
-Fortunately one of the most talented researchers in the field, whose code has been used in a number of Android root exploits, freely published\footnote{Sebastian has since moved on from Android exploit research} proof-of-concept code on his blog, ``C-Skills."\footnote{c-skills.blogspot.com}. 
-While each phone is different, and while each could conceivably require a different method of exploitation, ports of old Linux bugs are frequently found to be applicable to most versions of Android. 
-Hardware manufacturers seem to spend little time hardening Android past what has been done by Google, and the infrequency of updates means exploits stay unpatched in the wild for a very long time. 
-While this particular exploit has been patched, it is valuable to take a look at one of the most famous local root exploits on Android: Sebastian Krahmer's port of CVE-2009-1185. \footnote{CVE stands for "Common Vulnerabilities and Exposures," and the CVE number is a common method of identifying public vulnerabilities.}
+Before looking into how to use pre-built code to practically and quickly obtain root access on a couple of phone models, it is
+important to understand the fundamentals of rooting and what is actually going on.  In an ironic and unfortunate turn of events for
+a community celebrating an open source operating system, the source code for a number of the exploits used to obtain root access on
+Android is not available.  These exploits work well and are largely safe, allowing the hobbyist community to root their phones,
+whilst the forensic analyst is left without tools due to his or her inability to explain how the exploit works.  Fortunately one of
+the most talented researchers in the field, whose code has been used in a number of Android root exploits, freely
+published\footnote{Sebastian has since moved on from Android exploit research} proof-of-concept code on his blog,
+``C-Skills."\footnote{c-skills.blogspot.com}.  While each phone is different, and while each could conceivably require a different
+method of exploitation, ports of old Linux bugs are frequently found to be applicable to most versions of Android.  Hardware
+manufacturers seem to spend little time hardening Android past what has been done by Google, and the infrequency of updates means
+exploits stay unpatched in the wild for a very long time.  While this particular exploit has been patched, it is valuable to take a
+look at one of the most famous local root exploits on Android: Sebastian Krahmer's port of CVE-2009-1185. \footnote{CVE stands for
+"Common Vulnerabilities and Exposures," and the CVE number is a common method of identifying public vulnerabilities. The full 
+database is available at \texttt{cve.mitre.org}. }
  
-Modern Linux systems use \texttt{udev} as their device manager. 
-\texttt{Udev} is the interface between userspace and the kernel as far as devices are concerned. 
-All device messages and events, including hotplugs, are passed through \texttt{udev}. 
-If the kernel wishes to have a particular action performed in userspace, it passes a message along (via a \texttt{netlink} socket) and \texttt{udev} makes it happen. 
-When a user plugs a USB drive into their machine and it is automatically mounted, \texttt{udev} has handled a message from the kernel that a device was attached and forwarded it along to the correct abstraction layer. 
-All devices under \texttt{/dev} are handled by \texttt{udev} and as such it necessarily runs as root. 
-Android uses \texttt{udev}, but instead of giving \texttt{udev} its own service (normally \texttt{udevd}), it has been moved into \texttt{init}, which is typically the first userspace process to run in a Linux system.
+Modern Linux systems use \texttt{udev} as their device manager.  \texttt{Udev} is the interface between userspace and the kernel as
+far as devices are concerned.  All device messages and events, including hotplugs, are passed through \texttt{udev}.  If the kernel
+wishes to have a particular action performed in userspace, it passes a message along (via a \texttt{netlink} socket) and
+\texttt{udev} makes it happen.  When a user plugs a USB drive into their machine and it is automatically mounted, \texttt{udev} has
+handled a message from the kernel that a device was attached and forwarded it along to the correct abstraction layer.  All devices
+under \texttt{/dev} are handled by \texttt{udev} and as such it necessarily runs as root.  Android uses \texttt{udev}, but instead
+of giving \texttt{udev} its own service (normally \texttt{udevd}), it has been moved into \texttt{init}, which is typically the
+first userspace process to run in a Linux system.
 
-Local root exploits in Linux often are a result of invalidated input into a process that is running as root, as is the case with CVE-2009-1185. 
-As described in the CVE entry, "udev before 1.4.1 does not verify whether a NETLINK message originates from kernel space, which allows local users to gain privileges by sending a NETLINK message from user space" \cite{udevcve}. 
-This means that any process, running anywhere, can send a NETLINK message to \texttt{udev} causing virtually arbitrary actions to be run as root. 
-Sebastian Krahmer provided proof-of-concept C code.
-Anthony Lineberry, David Luke Richardson, and Tim Wyatt took the C implementation and linked it to Java via JNI, allowing it to be run by any Android application (without special permissions) \cite{arentpermissions}.
+Local root exploits in Linux often are a result of invalidated input into a process that is running as root, as is the case with
+CVE-2009-1185.  As described in the CVE entry, "udev before 1.4.1 does not verify whether a NETLINK message originates from kernel
+space, which allows local users to gain privileges by sending a NETLINK message from user space" \cite{udevcve}.  This means that
+any process, running anywhere, can send a NETLINK message to \texttt{udev} causing virtually arbitrary actions to be run as root.
+Sebastian Krahmer provided proof-of-concept C code.  Anthony Lineberry, David Luke Richardson, and Tim Wyatt took the C
+implementation and linked it to Java via JNI, allowing it to be run by any Android application \cite{arentpermissions}.
 
-Krahmer's implemenation - commonly referred to as ``exploid," though ``exploid" can refer to a number of exploits derived from Krahmer's code - crafts a \texttt{NETLINK\_KOBJECT\_UEVENT} that directs \texttt{udev} to spawn a copy of ``exploid" on the next hotplug event, as shown in the code snippet below. 
-Instructions will typically direct the end-user to turn WiFi on and off, triggering a hotplug event. 
-When \texttt{udev} spawns another copy of ``exploid" it will be running as root, so exploid copies \texttt{/bin/sh} to \texttt{/bin/rootshell} with setuid root, such that the shell will always execute as root. 
-It is a beautiful piece of work.
+Krahmer's implementation - commonly referred to as ``exploid," though ``exploid" can refer to a number of exploits derived from
+Krahmer's code - crafts a \texttt{NETLINK\_KOBJECT\_UEVENT} that directs \texttt{udev} to spawn a copy of ``exploid" on the next
+hotplug event, as shown in the code snippet below.  Instructions will typically direct the end-user to turn WiFi on and off,
+triggering a hotplug event.  When \texttt{udev} spawns another copy of ``exploid" it will be running as root, so exploid copies
+\texttt{/bin/sh} to \texttt{/bin/rootshell} with setuid root, such that the shell will always execute as root.  It is a beautiful
+piece of work.
 
 \begin{table}
 \lstinputlisting{tables/exploid.c}
@@ -481,10 +489,10 @@ Simply get the code on to the device, run it, then turn WiFi on and off and be g
 The Nexus series of phones occupy a somewhat unique place in the Android product line.  While the hardware is still built by a
 third-party manufacturer such as HTC in the case of the Nexus One, or Samsung in the case of the Nexus S, they are clearly the
 flagship Android phones.  The Nexus phones come loaded with a vanilla version of Android, in comparison to other models which often
-have signifact modifications such as HTC ``Sense" layered on.  The Nexus phones are aimed at developers and marketed to the tech
+have significant modifications such as HTC ``Sense" layered on.  The Nexus phones are aimed at developers and marketed to the tech
 savvy, so it is actually a feature that users are able to unlock the bootloader and load custom OS builds.  It takes only a single
 command with the phone attached in fastboot mode (hold power and trackball at boot) - \texttt{fastboot oem unlock} - to unlock the
-bootlader, allowing a developer to flash any image he or she would like to any of the partitions on the phone.
+bootloader, allowing a developer to flash any image to any of the partitions on the phone.
 
 During a forensic acquisition, flashing a custom version of Android is probably not the best course of action, as it is a
 destructive operation.  The next easiest way to obtain root on a Nexus One is to flash a custom boot image, but leave the rest of
@@ -515,10 +523,10 @@ RageAgainstTheCage is available on Sebastian Krahmer's blog and can be used to r
 	\item \texttt{\#}
 \end{enumerate}	
 
-\section{Accessing a NandDump Image}
+\section{Accessing a Nanddump Image}
 
 Once a \texttt{nanddump} image of each partition has been acquired, what is one to do with them?  Images of more traditional
-filesystems are normally mounted read-only via the loopback device in Linux.  That simply isn't possible for an MTD image, as there
+filesystems are normally mounted read-only via the ``loopback'' device in Linux.  That simply isn't possible for an MTD image, as there
 is a significant amount of metadata (the OOB) interwoven between the blocks, which is partially under the control of the MTD driver
 and partially under the control of YAFFS2 (the OOBFREE area).  Fortunately, there is a debugging utility called \texttt{nandsim}
 that can present virtual NAND devices.  It is imperative, however, that the OOB layout of the MTD kernel module on the analysis
@@ -529,17 +537,18 @@ Furthermore, the YAFFS2 filesystem itself is not distributed with most popular L
 The source can be retrieved from the maintainers of YAFFS, Aleph1, through a simple \texttt{git clone}.\footnote{git clone git://www.aleph1.co.uk/yaffs2\cite{gityaffs}} YAFFS2 can be built to utilize the features of very new kernels, or with legacy support for older kernels. 
 The safest route is to rename the \texttt{yportenv\_multi.h} file to \texttt{yportenv.h}, enabling support for many kernel versions, and build with \texttt{make}. 
 YAFFS2 can then be enabled by running \texttt{modprobe mtdblock \&\& insmod yaffs2multi.ko}. 
-YAFFS2 should show up in the list of filesystems in \texttt{/proc/fileystems}.
+YAFFS2 should show up in the list of filesystems in \texttt{/proc/filesystems}.
 
-At this point, mounting the image is straightforward, once one figures out the magic MTD paramaters.
-Android YAFFS2 images can be mounted if \texttt{nandsim} is started with the following incantation for a 512MiB flash image:
+At this point, mounting the image is straightforward, once one figures out the magic MTD parameters.
+Android YAFFS2 images can be mounted if \texttt{nandsim} is started with the following incantation for a 512MB flash image:
 \texttt{sudo modprobe nandsim first\_id\_byte=0x20 second\_id\_byte=0xa2 third\_id\_byte=0x00 fourth\_id\_byte=0x15}.
-These paramaters are drawn directly from the MTD documentation, and are determined by the geometry of the image \cite{mtdfaq}
+These parameters are drawn directly from the MTD documentation, and are determined by the geometry of the image \cite{mtdfaq}
 After \texttt{nandsim} has been loaded, \texttt{/dev/mtdblock0} can be mounted read-only as a YAFFS2 filesystem and read.
 
-The image can also be carved for SQLite artifacts or stale browser cache files directly using the tools provided in this project.
-The utility \texttt{browserhistory.py} uses the algorithm discussed previously to carve for SQLite artifacts that match \texttt{browser.db} records.
-The utility \texttt{browsercache.py} searches the YAFFS2 image for unallocated YAFFS2 chunks that are potential browser cache files.
+The image can also be carved for SQLite artifacts or stale browser cache files directly using the tools provided in
+Appendix \ref{app:obtaincode}.  The utility \texttt{browserhistory.py} uses the algorithm discussed previously to carve for SQLite artifacts
+that match \texttt{browser.db} records.  The utility \texttt{browsercache.py} searches the YAFFS2 image for unallocated YAFFS2
+chunks that are potential browser cache files.
 
 \section{Summary}
 
