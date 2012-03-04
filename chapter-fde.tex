@@ -8,12 +8,12 @@ attack on Android \cite{androidevilmaid}.}
 There is, it would seem, an obvious method of protecting data against the forensic inquiry outlined in chapter \ref{ch:forensics}.
 Full Disk Encryption (FDE) is generally regarded as the best way to protect data in the event a device falls into the wrong hands,
 be it thief or forensic investigator \cite{fdeworks}.  For Android, in particular, Whisper Systems has included FDE in their
-security-oriented build WhisperCore \cite{whispercore}, and Google itself has included FDE in Android 3.x and 4.x. This chapter
-focuses on the implementation of FDE provided in WhisperCore rather than the native Android encryption scheme for a couple of
-reasons.  First, the ability to modify Android is at the heart of this paper, and WhisperCore is the only popular FDE implementation
-for Android provided by aftermarket modifications to the OS.  Partially prompted by Twitter's purchase of Whisper Systems and the
-subsequent unavailability of WhisperCore, Chris Soghoian once commented to Ars Technica:
-\begin{quote} 
+security-oriented build WhisperCore \cite{whispercore}, and Google itself has included FDE in Android 3.x and 4.x. Though chapter
+\ref{ch:ecryptfs} is primarily concerned Google's implementation of FDE for ext4 devices running Ice Cream Sandwich, this chapter
+focuses on the implementation of FDE provided in WhisperCore for a couple of reasons.  First, the ability to modify Android is at
+the heart of this paper, and WhisperCore is the only popular FDE implementation for Android provided by aftermarket modifications to
+the OS.  Partially prompted by Twitter's purchase of Whisper Systems and the subsequent unavailability of WhisperCore, Chris
+Soghoian once commented to Ars Technica: \begin{quote} 
 \ldots these applications that people are creating, that activists are creating, and then abandoning six months after their funding
 runs out -- those are just a waste of time. Those are never going to go anywhere and they're never going to be used by anyone. We
 need technologies that can be used by millions of consumers, without playing with configuration options. 

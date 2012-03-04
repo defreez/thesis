@@ -3,24 +3,24 @@
 
 \section{Overview} 
 With Android 4.0 (Ice Cream Sandwich or ICS), Google introduced native support for full-disk encryption. Ice Cream Sandwich encrypts
-the entire \texttt{/data} partition with \texttt{dm-crypt}, which provides transparent block-level encryption, sitting in-between
-the filesystem and the device. From a privacy perspective, introducing block-level encryption is a significant step forward for
-Android because it makes offline attacks against a mobile device much more difficult; the data is locked away securely as soon as
-the phone is turned off, assuming a strong passphrase. Live acquisition, however, remains a possibility if the unlock screen can be
-bypassed.  Bypassing a lock screen is non-trivial, but possible if an exploit is available for the device, at which point encryption
-is of little use, because an attacker can simply copy the data off. This is an especially important observation given that very few
-people turn off their cell phone when it is not in use. Disk encryption, as it is implemented in Android, requires an attacker to
-gain access to phone without turning it off, but operating system security, rather than cryptography, remains the principle
-protection. While, at the time of writing, there are no known exploits against a locked ICS device, an alarming number of bugs have
-been found over time in various implementations of the lock screen
-\cite{lockscreenbypass0} \cite{lockscreenbypass1} \cite{lockscreenbypass2}.
+the entire \texttt{/data} (see chapter \ref{ch:forensics}) partition with \texttt{dm-crypt}, which provides transparent block-level
+encryption, sitting in-between the filesystem and the device. From a privacy perspective, introducing block-level encryption is a
+significant step forward for Android because it makes offline attacks against a mobile device much more difficult; the data is
+locked away securely as soon as the phone is turned off, assuming a strong passphrase. Live acquisition, however, remains a
+possibility if the unlock screen can be bypassed.  Bypassing a lock screen is non-trivial, but possible if an exploit is available
+for the device. Encryption is of little use if an attacker can bypass the lock screen, because an attacker can simply copy the
+already decrypted files to another device.  This is an especially important observation given that very few people turn off their
+cell phone when it is not in use. Disk encryption, as it is implemented in Android, requires an attacker to gain access to a device
+without turning it off, but operating system security, rather than cryptography, remains the principle protection. While, at the
+time of writing, there are no known exploits against a locked ICS device, an alarming number of bugs have been found over time in
+various implementations of the lock screen \cite{hoog, lockscreenbypass0, lockscreenbypass1, lockscreenbypass2}
 
 This chapter describes a novel method which can foil the logical acquisition of an Android device, even if the lock screen is
-bypassed. This means that sensitive data cannot simply be copied off of the phone if the correct password was not entered at the
-lock screen. It is likely that a sophisticated attacker could still retrieve the decryption keys from memory, but the method
-presented could be extended without too much difficulty to prevent that as well, meaning a running Android device could remain
+bypassed. This means that sensitive data cannot be copied off of the phone if the correct password was not entered at the lock
+screen. It is likely that a sophisticated attacker could still retrieve the decryption keys from memory, but the method presented
+could be extended without too much difficulty to prevent that as well, meaning a running Android device could remain
 cryptographically secure any time the device was locked (see chapter \ref{ch:future}). This is accomplished by stacking an
-additional cryptographic filesystem - eCryptfs - on top of the normal \texttt{userdata} filesystem. The eCryptfs module being used
+additional cryptographic filesystem - eCryptfs - on top of the normal ext4 filesystem. The eCryptfs module being used
 has been modified to incorporate the concept of boundaries, where different portions of the filesystem use different keys, based
 upon the user id of the file owner. When the phone is locked, keys for select applications storing sensitive data are removed from
 memory, preventing access to those applications.
@@ -42,10 +42,10 @@ inability to encrypt swap space is not particularly relevant to Android, which t
 Michael Halcrow was the principal architect of eCryptfs, which extended Erez Zadok's Cryptfs \cite{Halcrow}. It was designed after
 the FiST stackable filesystem framework, which allows it to run on top of an existing filesystem, such as ext4. The idea behind
 ``stacking'' filesystems is an underlying filesystem (ext4 in this case) can be used to provide most of the basic functionality,
-while the new features exist in a relatively thin layer on top of that filesystem. From an end-user perspective, eCryptfs works like
-this: a special directory is created that houses private data; the files stored in this directory will all be encrypted on disk;
-the encrypted directory is then mounted somewhere else as an eCryptfs filesystem; the files viewed from the eCryptfs mount point are
-transparently decrypted, yet eCryptfs does not have to worry about the low-level details, because that is managed by ext4. 
+while the new features exist in a relatively thin layer on top of that filesystem. From an end-user perspective eCryptfs is almost
+completely transparent after initial setup.  A special directory is created that houses private data, and all of the files stored in
+this directory will be encrypted on disk. The encrypted directory is then mounted somewhere else as an eCryptfs filesystem, and the files
+viewed from the eCryptfs mount point are transparently decrypted. 
 
 Key handling in eCryptfs is convolute, perhaps, but important to understand because the extension to eCryptfs described in this
 chapter is simply a modification to the way keys are handled. A number of methods are supported by eCryptfs for handling the private
@@ -165,35 +165,39 @@ system service responsible for keeping track of storage on an Android device. Th
 with the outside world, including \texttt{vold}, is the notion of a \emph{system property}.  Android has an elaborate property system
 which is outside the scope of this discussion, but essentially \texttt{init} maintains a shared memory region where properties can
 be set and get. This shared region is visible to every process on the system \cite{propertysystem}. These ``native'' system
-properties are distinct from system properties in Java, though native system properties are available to Java code via JNI. The
-Honeycomb implementation document describes how these properties are used during boot with an encrypted device,
+properties are distinct from system properties in Java, though native system properties are available to Java code via
+JNI\footnote{JNI is the ``Java Native Interface,'' which is used to execute native code, typically C++, from within Java. Android
+makes extensive use of JNI.}. The Honeycomb implementation document describes how these properties are used during boot with an
+encrypted device:
 
 \begin{quote} When init fails to mount /data, it assumes the filesystem is encrypted, and sets several properties: ro.crypto.state =
 ``encrypted" vold.decrypt = 1. It then mounts /data on a tmpfs ramdisk, using parameters it picks up from ro.crypto.tmpfs\_options,
 which is set in init.rc.  \ldots The framework starts up, and sees that vold.decrypt is set to ``1". This tells the framework that it
 is booting on a tmpfs /data disk, and it needs to get the user password. First, however, it needs to make sure that the disk was
 properly encrypted. It sends the command ``cryptfs cryptocomplete" to vold, and vold returns 0 if encryption was completed
-successfully, or -1 on internal error, or -2 if encryption was not completed successfully.  \hspace{\fill}\cite{honeycombcrypt}
+successfully, or -1 on internal error, or -2 if encryption was not completed successfully.  
+
+\hspace{\fill}\cite{honeycombcrypt}
 \end{quote}
 
-So, to summarize, \texttt{init} always attempts to mount \texttt{/data} as if it were unencrypted. It fails if the device is
-encrypted, and then sets the appropriate system properties to denote the results of the attempted mount. When the framework starts, it
-reads those properties, and calls \texttt{vold} if necessary. When called upon, it is the responsibility of \texttt{vold} to handle
-setup for the \texttt{dm-crypt} device, making sure it gets mounted in the clear at \texttt{/data}, while it is the responsibility of the
-minimal framework to accept a password from the user and pass it to \texttt{vold}. Once \texttt{/data} is successfully mounted, the rest of
-the framework services are started and the system is ready for use.
+To summarize, \texttt{init} always attempts to mount \texttt{/data} as if it were unencrypted. This fails if the device is
+encrypted, and then sets the appropriate system properties to denote the results of the attempted mount. When the framework starts,
+\texttt{init} reads those properties, and calls \texttt{vold} if necessary. When called upon, it is the responsibility of
+\texttt{vold} to handle setup for the \texttt{dm-crypt} device, making sure it gets mounted in the clear at \texttt{/data}, while it
+is the responsibility of the minimal framework to accept a password from the user and pass it to \texttt{vold}. Once \texttt{/data}
+is successfully mounted, the rest of the framework services are started and the system is ready for use.
 
 \subsection{Supporting eCryptfs in \texttt{vold}} \label{sec:ecryptfsvold} Just as the brains for handling \texttt{dm-crypt} were
 placed in \texttt{vold} by Google, here all of the support for handling eCryptfs volumes is also placed in \texttt{vold}. Normally,
 eCryptfs ships with a fully developed set of userspace utilities to help with key and volume management. Rather than cross-compiling
-the full set of utilities, the decision was made to build only a minimal set of eCryptfs userspace functionality into an external
-library, available in this project's source tree at \texttt{external/libecryptfs}.  The eCryptfs code was mostly kept intact, with
-the exception of the hash function. The stock utilities use Mozilla's \texttt{libnss} to perform the necessary hashes, but Android
-does not have \texttt{libnss} and cross-compilation is non-trivial. Android does, however, ship with the OpenSSL crypto libraries,
-which include a full set of hash functions. Those functions were used in lieu of \texttt{libnss}.  Additionally, Android does not
-ship with keyutils, which is the userspace library for interacting with the kernel key retention service.  This library is required
-by \texttt{libecryptfs} to insert the key into the kernel. The keyutils library is included in this project's source in the
-directory \texttt{external/libkeyutils}. 
+the full set of utilities, the decision was made by the author to build only a minimal set of eCryptfs userspace functionality into
+an external library, available in the source tree accompanying this paper at \texttt{external/libecryptfs}.  The eCryptfs code was
+mostly kept intact, with the exception of the hash function. The stock utilities use Mozilla's \texttt{libnss} to perform the
+necessary hashes, but Android does not have \texttt{libnss} and cross-compilation is non-trivial. Android does, however, ship with
+the OpenSSL crypto libraries, which include a full set of hash functions. Those functions were used in lieu of \texttt{libnss}.
+Additionally, Android does not ship with keyutils, which is the userspace library for interacting with the kernel key retention
+service.  This library is required by \texttt{libecryptfs} to insert the key into the kernel. The keyutils library is included in
+the source tree accompanying this paper at \texttt{external/libkeyutils}. 
 
 Normally, if an eCryptfs volume is mounted by hand, a user generates a key from a passphrase and adds it to a keyring in the kernel
 by using \texttt{ecryptfs-add-passphrase}.  This key is used as the master key for the eCryptfs volume. On Android the same
@@ -202,9 +206,10 @@ system property \texttt{vold.ecryptfs\_options}, which actually contains the lit
 volume on the device. Table \ref{tab:generate-key} shows the actual code in \texttt{vold} which calls \texttt{libecryptfs} to insert
 the key into the kernel. 
 
-
-\begin{table} \lstinputlisting{tables/generate-key} \label{tab:generate-key}
+\begin{table} 
+\lstinputlisting{tables/generate-key} 
 \caption{Function added to \texttt{vold} for eCryptfs Key Generation}
+\label{tab:generate-key}
 \end{table}
 
 The \texttt{vold} function \texttt{cryptfs\_check\_passwd}, which is used to verify that a password is correct for mounting an
@@ -218,20 +223,20 @@ includes the modified kernel source in the \texttt{kernel} subdirectory, and the
 \texttt{device/samsung/crespo} (crespo because a Nexus S was used for testing).
 
 \subsection{Enabling eCryptfs Encryption} Normally, an Android 4.0 device is encrypted in-place, that is the existing data is
-encrypted without being moved, but this is a difficult operation with eCryptfs. In-place encryption is a relatively easy
-operation with block level encryption, as the device can be unmounted and each block encrypted where it lay. A whole gaggle of
-problems present themselves when the issue of encrypting existing data files with eCryptfs is contemplated.  The typical
-process for encrypting existing files with eCryptfs is to create an empty eCryptfs mount and then copy the existing files to the
-eCryptfs filesystem.  This could be done, but it would come with the requirement that no more than half the data partition be in use
-prior to encryption. Even if that constraint were accepted, Android does not include a native file copy utility.\footnote{Android
+encrypted without being moved, but this is a difficult operation with eCryptfs. In-place encryption is a relatively easy operation
+with block level encryption, as the device can be unmounted and each block encrypted where it lay. On the other hand, a multitude of
+problems present themselves when the issue of encrypting existing data files with eCryptfs is contemplated.  The typical process for
+encrypting existing files with eCryptfs is to create an empty eCryptfs mount and then copy the existing files to the eCryptfs
+filesystem.  This could be done, but it would come with the requirement that no more than half the data partition be in use prior to
+encryption. Even if that constraint were accepted, Android does not include a native file copy utility.\footnote{Android
 \texttt{init} does have a file copy, but it is incredibly simple and would not suffice for the purpose at hand.} Copy functionality
 could be written, of course, but a robust file copy is not as simple as it may seem. Instead of reinventing the wheel, Busybox could
 be included in the system build, but then core OS functions are relying on shell scripts. In short, encrypting existing files with
-eCryptfs is a dark and murky path that this author would rather not tread.
+eCryptfs on Android is possible, but appeared to be more trouble than it was worth.
 
 There is another option, however. When a device is encrypted, the command ``cryptfs enablecrypto inplace'' is sent to \texttt{vold},
 which instructs it to perform an in-place encryption of the \texttt{userdata} partition. Yet \texttt{vold} also supports the command
-``cryptfs enablecrypto wipe,'' it just is not enabled in the official Android release. The Android mount service, which is the Java
+``cryptfs enablecrypto wipe,'' though is not enabled in the official Android release. The Android mount service, which is the Java
 service that makes the call to \texttt{vold}, can be easily modified to send the ``wipe'' incantation instead of ``inplace.'' It is
 important to note that this does not securely wipe the device. It simply recreates the filesystem. Doing a secure wipe at this
 point, if possible, would certainly be desirable, but it has not implemented at this time. Any data that existed prior to encrypting
@@ -269,7 +274,7 @@ the filesystem type is ``ecryptfs,'' as shown in table \ref{tab:init-ecryptfs-mo
 
 \section{Removing Keys}
 
-Jumping through all of these hoops to encrypt the data partition of the phone with separate keys for each application serves little
+The previous work to encrypt the data partition of the phone with separate keys for each application serves little
 purpose if the boundary keys are not removed when the device is locked. This section describes how a press of the power button on a
 device can trigger the removal of the master key and any specified boundary keys. This demonstration does not sufficiently sanitize
 freed memory to completely prevent key extraction through live analysis (see chapter \ref{ch:future} for more details).
