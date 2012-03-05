@@ -32,12 +32,12 @@ The goal is to provide a defense, even one that is narrowly conceived, which at 
 safety of data on an Android device. 
 
 That defense, unsurprisingly, is encryption. Recent releases of Android include the option of full-disk encryption by default, which
-works very well when certain conditions are met: the attacker cannot have physical access to the device more than once, the
-encryption passphrase must be strong, and the attacker cannot have access to the device while it is running. All of these conditions
-are discussed later in the paper, but it is the last condition that is of particular concern. People simply do not turn off their
-phones very often, which dramatically increases the likelihood that any forensic analysis performed on an Android device will be
-performed on a \emph{running} Android device. The method of encryption introduced in this paper takes steps toward addressing this
-issue, and demonstrates a technique that could dramatically increase the safety of data on a running device.
+works very well when certain conditions are met: the attacker cannot have physical access to the device prior to use, the encryption
+passphrase must be strong, and the attacker cannot have privileged access to the device while it is running.  All of these
+conditions are discussed later in the paper, but it is the last condition that is of particular concern. People simply do not turn
+off their phones very often, which dramatically increases the likelihood that any forensic analysis performed on an Android device
+will be performed on a \emph{running} Android device. The method of encryption introduced in this paper takes steps toward
+addressing this issue, and demonstrates a technique that could dramatically increase the safety of data on a running device.
 
 Chapter \ref{ch:forensics} introduces Android forensics. The chapter discusses how the data on an Android device is acquired. While
 the analysis of acquired data is briefly discussed, the focus here is on the process of acquisition, because that is the critical
