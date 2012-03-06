@@ -3,27 +3,26 @@
 
 \section{Overview} 
 With Android 4.0 (Ice Cream Sandwich or ICS), Google introduced native support for full-disk encryption. Ice Cream Sandwich encrypts
-the entire \texttt{/data} (see chapter \ref{ch:forensics}) partition with \texttt{dm-crypt}, which provides transparent block-level
-encryption, sitting in-between the filesystem and the device. From a privacy perspective, introducing block-level encryption is a
-significant step forward for Android because it makes offline attacks against a mobile device much more difficult; the data is
-locked away securely as soon as the phone is turned off, assuming a strong passphrase. Live acquisition, however, remains a
-possibility if the unlock screen can be bypassed.  Bypassing a lock screen is non-trivial, but possible if an exploit is available
-for the device. Encryption is of little use if an attacker can bypass the lock screen, because an attacker can simply copy the
-already decrypted files to another device.  This is an especially important observation given that very few people turn off their
-cell phone when it is not in use. Disk encryption, as it is implemented in Android, requires an attacker to gain access to a device
-without turning it off, but operating system security, rather than cryptography, remains the principle protection. While, at the
-time of writing, there are no known exploits against a locked ICS device, an alarming number of bugs have been found over time in
-various implementations of the lock screen \cite{hoog, lockscreenbypass0, lockscreenbypass1, lockscreenbypass2}
+the entire \texttt{/data} partition with \texttt{dm-crypt}, which provides transparent block-level encryption, sitting in-between
+the filesystem and the device. From a privacy perspective, introducing block-level encryption is a significant step forward for
+Android because it makes offline attacks against a mobile device much more difficult; the data is locked away securely as soon as
+the phone is turned off, assuming a strong passphrase. Live acquisition, however, remains a possibility if the unlock screen can be
+bypassed.  Bypassing a lock screen is non-trivial, but possible if an exploit is available for the device. Encryption is of little
+use if an attacker can bypass the lock screen, because an attacker can simply copy the already decrypted files to another device.
+This is an especially important observation given that very few people turn off their cell phone when it is not in use. Disk
+encryption, as it is implemented in Android, requires an attacker to gain access to a device without turning it off, but operating
+system security, rather than cryptography, remains the principle protection. While, at the time of writing, there are no known
+exploits against a locked ICS device, an alarming number of bugs have been found over time in various implementations of the lock
+screen \cite{hoog, lockscreenbypass0, lockscreenbypass1, lockscreenbypass2}
 
 This chapter describes a novel method which can foil the logical acquisition of an Android device, even if the lock screen is
 bypassed. This means that sensitive data cannot be copied off of the phone if the correct password was not entered at the lock
 screen. It is likely that a sophisticated attacker could still retrieve the decryption keys from memory, but the method presented
 could be extended without too much difficulty to prevent that as well, meaning a running Android device could remain
-cryptographically secure any time the device was locked (see chapter \ref{ch:future}). This is accomplished by stacking an
-additional cryptographic filesystem - eCryptfs - on top of the normal ext4 filesystem. The eCryptfs module being used
-has been modified to incorporate the concept of boundaries, where different portions of the filesystem use different keys, based
-upon the user id of the file owner. When the phone is locked, keys for select applications storing sensitive data are removed from
-memory, preventing access to those applications.
+cryptographically secure any time the device was locked. This is accomplished by stacking an additional cryptographic filesystem -
+eCryptfs - on top of the normal ext4 filesystem. The eCryptfs module being used has been modified to incorporate the concept of
+boundaries, where different portions of the filesystem use different keys, based upon the user id of the file owner. When the phone
+is locked, keys for select applications storing sensitive data are removed from memory, preventing access to those applications.
 
 \section{eCryptfs} 
 \label{sec:ecryptfs}
@@ -47,29 +46,30 @@ completely transparent after initial setup.  A special directory is created that
 this directory will be encrypted on disk. The encrypted directory is then mounted somewhere else as an eCryptfs filesystem, and the files
 viewed from the eCryptfs mount point are transparently decrypted. 
 
-Key handling in eCryptfs is convolute, perhaps, but important to understand because the extension to eCryptfs described in this
-chapter is simply a modification to the way keys are handled. A number of methods are supported by eCryptfs for handling the private
-key material, but this paper is only concerned with the passphrase method of generating keys with Android. When operating normally,
-eCryptfs has two tiers of keys. There is the master key, and there are keys which are unique for each file. The file encryption key,
-or ``FEK'', is the actual encryption key used to encrypt and decrypt the contents of the file (typically with AES). The FEK is just
-a series of randomly generated bytes. When the contents of a file is encrypted, the encryption key for that particular file (the
-FEK) is encrypted with the master key, resulting in the ``encrypted file encryption key,'' or EFEK.  The EFEK is stored as metadata
-in the header of the encrypted file.  The master key here is the ``file encryption key encryption key,'' or the FEKEK, which can be
-abbreviated F(EK)\superscript{2}. Throughout this chapter, what is called the master key is always the key required to unlock the
-entire filesystem.  In normal operation the master key is F(EK)\superscript{2}. F(EK)\superscript{2} is hashed, and the signature is
-also stored in the header of the file to be encrypted. A list of available keys is maintained for each mount point. When a file is
-opened, the key signature or signatures are read out of the headers associated with the file. The list of global keys available for
-that mount point is searched for a corresponding F(EK)\superscript{2} signature, and if a corresponding key is found, the EFEK
-associated with that file is decrypted, to produce the FEK. The FEK, in turn, is used to decrypt the rest of the file.  This
-separation of master and session keys strengthens the filesystem against offline cryptanalysis. Figure \ref{fig:ecryptfsnormal}
-shows this process:
+Key handling in eCryptfs is complex. Nonetheless, the extensions to eCryptfs described in this chapter are primarily modifications
+to how eCryptfs handles keys. A number of methods are supported by eCryptfs for handling the private key material, but this paper is
+only concerned with the passphrase method of generating keys with Android. When operating normally, eCryptfs has two tiers of keys.
+There is the master key, and there are keys which are unique for each file. The file encryption key, or ``FEK'', is the actual
+encryption key used to encrypt and decrypt the contents of the file, typically with AES\footnote{AES is the ``Advanced Encryption
+Standard.'' It is a cipher, originally named Rijndael, that was chosen by the National Institute of Standards and Technology in 2001
+as the standard for encrypting U.S. government data. It is perhaps the most well-known symmetric cipher in existence.}  The FEK is
+just a series of randomly generated bytes. When the contents of a file is encrypted, the encryption key for that particular file
+(the FEK) is encrypted with the master key, resulting in the ``encrypted file encryption key,'' or EFEK.  The EFEK is stored as
+metadata in the header of the encrypted file.  Throughout this chapter, what is called the master key is always the key required to
+unlock the entire filesystem. When operating normall, the eCryptfs master key is the FEKEK, which can be abbreviated
+F(EK)\superscript{2}.  When a file is encrypted, F(EK)\superscript{2} is hashed, and that signature is also stored in the header of
+the file. A list of available keys is maintained for each mount point.  When a file is opened, the key signature or signatures are
+read out of the headers associated with the file. The list of global keys available for that mount point is searched for a
+corresponding F(EK)\superscript{2} signature, and if a corresponding key is found, the EFEK associated with that file is decrypted,
+to produce the FEK. The FEK, in turn, is used to decrypt the rest of the file.  This separation of master and session keys
+strengthens the filesystem against offline cryptanalysis. Figure \ref{fig:ecryptfsnormal} shows this process:
 \begin{enumerate}
 	\item{The user enters a passphrase}
-	\item{A utility turns this passphrase into the FEKEK, or F(EK)\superscript{2}, which is stored in the kernel}
-	\item{F(EK)\superscript{2} is hashed, and that signature is registered as being available for a given mount point}
-	\item{A new encryption key, FEK, is randomly generated for each file}
-	\item{The FEK associated with a file is encrypted with F(EK)\superscript{2} to create the EFEK, and stored in the header for the file}
-	\item{The signature of F(EK)\superscript{2} is also stored in the header of the file}
+	\item{A utility turns this passphrase into the FEKEK, or F(EK)\superscript{2}, which is stored in the kernel.}
+	\item{F(EK)\superscript{2} is hashed, and that signature is registered as being available for a given mount point.}
+	\item{A new encryption key, FEK, is randomly generated for each file to be written.}
+	\item{The FEK associated with a file is encrypted with F(EK)\superscript{2} to create the EFEK, and stored in the header for the file.}
+	\item{The signature of F(EK)\superscript{2} is also stored in the header of the file.}
 	\item{When a file is decrypted, the stored F(EK)\superscript{2} signature is compared against the list of signatures for the mount point,
 		and if a match is found, the appropriate key is retrieved and the file is decrypted.}
 \end{enumerate}
@@ -78,9 +78,10 @@ shows this process:
 \includegraphics[scale=0.4]{eCryptfsNormalOperation.png} \end{center}
 \caption{eCryptfs Normal Key Operation} \label{fig:ecryptfsnormal} \end{figure}
 \section{eCryptfs Boundary Mode}
+\label{sec:boundarymode}
 
 The modifications to eCryptfs presented in this chapter are inspired by the work of Leo Dorrendorf on increasing the resilience of
-encrypted filesystems to memory-based attacks \cite{Dorrendorf2011}. The keying method of eCryptfs has be changed to add a
+encrypted filesystems to memory-based attacks \cite{Dorrendorf2011}. The keying method of eCryptfs has been modified to add a
 notion of security boundaries between different parts of the filesystem, toward the end of providing a usable mobile device even
 while portions of the filesystem cannot be accessed. In the traditional keying mode for eCryptfs, the master key is
 F(EK)\superscript{2}, and it must always remain memory resident, for if it is removed then no files can be accessed whatsoever.
@@ -89,20 +90,27 @@ been introduced. When the device is locked, this allows the master key to be rem
 boundary keys, leaving accessible only the portion of the filesystem necessary to keep the device operational.
 
 The question of where to draw boundaries immediately arises. The Android security architecture is designed, first and foremost,
-around isolating application access. From a storage perspective, the overriding goal is to prevent a malicious application from
-accessing data that it should not, which includes preventing access to data associated with other applications.  The official
-documentation on security and permissions describes it this way: \begin{quote} A central design point of the Android security
-architecture is that no application, by default, has permission to perform any operations that would adversely impact other
-applications, the operating system, or the user.  This includes reading or writing the user's private data (such as contacts or
-e-mails), reading or writing another application's files, performing network access, keeping the device awake, etc.
-\hspace{\fill}\cite{securitydoc} \end{quote} It therefore seems natural to reinforce the security mechanisms already in place with
-cryptographic boundaries.  One detail of the Android security architecture is particularly useful for this purpose: \begin{quote} At
-install time, Android gives each package a distinct Linux user ID. The identity remains constant for the duration of the package's
-life on that device. On a different device, the same package may have a different UID; what matters is that each package has a
-distinct UID on a given device.  \hspace{\fill}\cite{securitydoc} \end{quote} This UID is used to establish file ownership for
-applications, which is convenient because it means that each UID can be associated with a boundary key. If that boundary key is
-removed from memory along with the master key, then even an attacker who has access to the running device will not be able to
-decrypt the data associated with that application.
+around ``sandboxing'' applications . From a storage perspective, this means that applications are not allowed to access either
+system data or data associated with other applications accessing data that it should not, which includes preventing access to data
+associated with other applications.  The official documentation on security and permissions describes it this way: 
+\begin{quote} A
+central design point of the Android security architecture is that no application, by default, has permission to perform any
+operations that would adversely impact other applications, the operating system, or the user.  This includes reading or writing the
+user's private data (such as contacts or e-mails), reading or writing another application's files, performing network access,
+keeping the device awake, etc.  
+
+\hspace{\fill}\cite{securitydoc} \end{quote} 
+It therefore seems natural to reinforce the security
+mechanisms already in place with cryptographic boundaries.  One detail of the Android security architecture is particularly useful
+for this purpose: 
+\begin{quote} At install time, Android gives each package a distinct Linux user ID. The identity remains constant
+for the duration of the package's life on that device. On a different device, the same package may have a different UID; what
+matters is that each package has a distinct UID on a given device.  
+
+\hspace{\fill}\cite{securitydoc} \end{quote} 
+This UID is used to establish file ownership for applications, which is convenient because it means that each UID can be associated
+with a boundary key.  If that boundary key is removed from memory along with the master key, then even an attacker who has access to
+the running device will not be able to decrypt the data associated with that application.
 
 Boundary keys are generated by concatenating the master key with the UID of the file, and then hashing the result.  Boundary keys
 are used as F(EK)\superscript{2}, and the master key generated from the user's passphrase becomes F(EK)\superscript{3}. Currently
@@ -218,8 +226,8 @@ their password to decrypt the device at boot, the corresponding eCryptfs mount k
 
 The Android kernel must also support eCryptfs and key retention, which the default Android kernel does not. Enabling support for
 these options is easy, however, as it simply involves enabling the appropriate options in the kernel configuration, building the
-kernel, and placing it into the appropriate device folder within AOSP, prior to building the Android system. The code for this paper
-includes the modified kernel source in the \texttt{kernel} subdirectory, and the compiled kernel can be found in
+kernel, and placing it into the appropriate device folder within the Android Open Source Project, prior to building. The code for
+this paper includes the modified kernel source in the \texttt{kernel} subdirectory, and the compiled kernel can be found in
 \texttt{device/samsung/crespo} (crespo because a Nexus S was used for testing).
 
 \subsection{Enabling eCryptfs Encryption} Normally, an Android 4.0 device is encrypted in-place, that is the existing data is
@@ -229,35 +237,31 @@ problems present themselves when the issue of encrypting existing data files wit
 encrypting existing files with eCryptfs is to create an empty eCryptfs mount and then copy the existing files to the eCryptfs
 filesystem.  This could be done, but it would come with the requirement that no more than half the data partition be in use prior to
 encryption. Even if that constraint were accepted, Android does not include a native file copy utility.\footnote{Android
-\texttt{init} does have a file copy, but it is incredibly simple and would not suffice for the purpose at hand.} Copy functionality
-could be written, of course, but a robust file copy is not as simple as it may seem. Instead of reinventing the wheel, Busybox could
-be included in the system build, but then core OS functions are relying on shell scripts. In short, encrypting existing files with
-eCryptfs on Android is possible, but appeared to be more trouble than it was worth.
+\texttt{init} does have a file copy, it is quite rudimentary and would not suffice for the purpose at hand.} Copy functionality
+could be written, of course, but a robust file copy is not as simple as it may seem. Instead of reinventing the wheel, a third-party
+shell such as Busybox could be included in the system build, but then core OS functions are relying on shell scripts. In short,
+encrypting existing files with eCryptfs on Android is possible, but appeared to be more trouble than it was worth.
 
-There is another option, however. When a device is encrypted, the command ``cryptfs enablecrypto inplace'' is sent to \texttt{vold},
-which instructs it to perform an in-place encryption of the \texttt{userdata} partition. Yet \texttt{vold} also supports the command
-``cryptfs enablecrypto wipe,'' though is not enabled in the official Android release. The Android mount service, which is the Java
-service that makes the call to \texttt{vold}, can be easily modified to send the ``wipe'' incantation instead of ``inplace.'' It is
-important to note that this does not securely wipe the device. It simply recreates the filesystem. Doing a secure wipe at this
-point, if possible, would certainly be desirable, but it has not implemented at this time. Any data that existed prior to encrypting
-the device should be treated as if it still exists. Furthermore, the entire data partition is not encrypted with
-eCryptfs. Only \texttt{/data/data} is encrypted, as a demonstration. This includes all of the application data on the phone, but
-certainly not all of the available forensic artifacts.
+There is a way to avoid the in-place encryption problem, however. When a device is encrypted, the command ``cryptfs enablecrypto
+inplace'' is sent to \texttt{vold}, which instructs it to perform an in-place encryption of the \texttt{userdata} partition. Yet
+\texttt{vold} also supports the command ``cryptfs enablecrypto wipe,'' though is not enabled in the official Android release. The
+Android mount service, which is the Java service that makes the call to \texttt{vold}, can be easily modified to send the ``wipe''
+incantation instead of ``inplace.'' It is important to note that this does not securely wipe the device. It simply recreates the Any
+data that existed prior to encrypting the device should be treated as if it still exists. Exploring the viability of securely wiping
+the device at this point would be an excellent direction for future research.  Moreover, the entire data partition is not encrypted
+with eCryptfs. Only \texttt{/data/data} is encrypted, as a demonstration. This includes all of the application data on the phone,
+but certainly not all of the available forensic artifacts.
 
-For the phone to boot after \texttt{/data/data} has been encrypted, \texttt{init} needs to be instructed to mount \texttt{/data/data}
-as an eCryptfs volume. This can be done with one line in \texttt{init.rc} at the end of the \texttt{post-fs-data} section. The
-\texttt{post-fs-data} section is executed as a trigger by \texttt{init}. Triggers in \texttt{init} respond to system properties
-being set to a certain value. When an encrypted phone boots, after \texttt{vold} has successfully mounted the encrypted partition and
-the master key has been inserted into the keyring, the system property \texttt{vold.decrypt} is set to the value
-\texttt{trigger\_post\_fs\_data}, which signals to \texttt{init} that the \texttt{post-fs-data} section of \texttt{init.rc} should
-be run. Triggers are easy to implement, and this one is shown in table \ref{tab:post-fs-data-trigger}.  
-\begin{table}
-\lstinputlisting{tables/post-fs-data-trigger} 
-\caption{Trigger in \texttt{init} to setup decrypted data partition} 
-\label{tab:post-fs-data-trigger}
-\end{table} 
-An attempt is made every boot to mount \texttt{/data/data} as an eCryptfs volume, and if the volume is not encrypted it will just
-silently fail. 
+For the phone to boot after \texttt{/data/data} has been encrypted, \texttt{init} needs to be instructed to mount
+\texttt{/data/data} as an eCryptfs volume. This can be done with one line in \texttt{init.rc} at the end of the
+\texttt{post-fs-data} section. The \texttt{post-fs-data} section is executed as a trigger by \texttt{init}. Triggers in
+\texttt{init} respond to system properties being set to a certain value. When an encrypted phone boots, after \texttt{vold} has
+successfully mounted the encrypted partition and the master key has been inserted into the keyring, the system property
+\texttt{vold.decrypt} is set to the value \texttt{trigger\_post\_fs\_data}. The act of setting this property signals to
+\texttt{init} that the \texttt{post-fs-data} section of \texttt{init.rc} should be run. Triggers are easy to implement, and this one
+is shown in table \ref{tab:post-fs-data-trigger}.  \begin{table} \lstinputlisting{tables/post-fs-data-trigger} \caption{Trigger in
+\texttt{init} to setup decrypted data partition} \label{tab:post-fs-data-trigger} \end{table} An attempt is made every boot to mount
+\texttt{/data/data} as an eCryptfs volume, and if the volume is not encrypted it will just silently fail. 
 
 A final modification was necessary to correctly retrieve the mount options for mounting the eCryptfs volume. This is complicated by
 the fact that eCryptfs expects the key signature of the master key to be passed as a mount option.  Including this kind of dynamic
@@ -274,43 +278,44 @@ the filesystem type is ``ecryptfs,'' as shown in table \ref{tab:init-ecryptfs-mo
 
 \section{Removing Keys}
 
-The previous work to encrypt the data partition of the phone with separate keys for each application serves little
-purpose if the boundary keys are not removed when the device is locked. This section describes how a press of the power button on a
-device can trigger the removal of the master key and any specified boundary keys. This demonstration does not sufficiently sanitize
-freed memory to completely prevent key extraction through live analysis (see chapter \ref{ch:future} for more details).
+The previous work to encrypt the data partition of the phone with separate keys for each application serves little purpose if the
+boundary keys are not removed when the device is locked. This section describes how pressing the power button on a device can
+trigger the removal of the master key and any specified boundary keys. This demonstration does not sufficiently sanitize freed
+memory to completely prevent key extraction through live analysis (see chapter \ref{ch:future} for more details).
 
 \subsection{Messaging in eCryptfs}
  
-There is already a messaging system built into eCryptfs for handling communication between userspace and kernelspace. Normally,
-eCryptfs supports running a daemon called \texttt{ecryptfsd} that can be called upon to perform tasks outside of the kernel.
-Typically, \texttt{ecryptfsd} is used to allow encryption of eCryptfs volumes with a public key and decryption with a private key.
-When an encrypted file is opened, eCryptfs reads a public key out of the file header, instead of an EFEK, and then calls out to
-\texttt{ecryptfsd} to retrieve the private key material \cite{ecryptfspki}. More generally, \texttt{ecryptfsd} provides a way 
-for the keying mechanism of eCryptfs to be extended.  Chapter \ref{ch:future} includes a discussion of how boundary keys might be
-re-implemented using \texttt{ecryptfsd}, affording a considerable increase in flexibility.
+There is a messaging system built into eCryptfs for handling communication between userspace and kernelspace. Normally, eCryptfs
+supports running a daemon called \texttt{ecryptfsd} that can be called upon to perform tasks outside of the kernel.  Typically,
+\texttt{ecryptfsd} is used to for an entirely different keying mode, where eCryptfs volumes are encrypted with a public key and
+decrypted with a private key.  When an encrypted file is opened, eCryptfs reads a public key out of the file header, instead of the
+EFEK, and then calls out to \texttt{ecryptfsd} to retrieve the private key material \cite{ecryptfspki}. More generally,
+\texttt{ecryptfsd} provides a way for the keying mechanism of eCryptfs to be extended.  Chapter \ref{ch:future} includes a
+discussion of how boundary keys might be re-implemented using \texttt{ecryptfsd}, affording a considerable increase in flexibility.
 
-Messaging within eCryptfs works by reading and writing messages to the device handle \texttt{/dev/ecryptfs}, which is registered as a
-``miscellaneous'' device. A miscellaneous devices is a small driver implemented to support a miscellaneous purpose. In this case the
-purpose is communication with \texttt{ecryptfsd}. \footnote{Previously, \texttt{NETLINK} messages were used, which is a socket-like
-mechanism for communication with the kernel, but that method has lost favor within eCryptfs.} As the current implementation of
-boundary keys does not rely on calling out to \texttt{ecryptfsd} for key computation, running \texttt{ecryptfsd} is not necessary,
-and the messaging system can still be used by writing to \texttt{/dev/ecryptfs} directly. 
+Messaging within eCryptfs works by reading and writing messages to the device handle \texttt{/dev/ecryptfs}, which is registered as
+a ``miscellaneous'' device. A miscellaneous device is a small driver implemented to support a special purpose not general enough to
+warrant a new device class in the kernel. In this case the purpose is communication with \texttt{ecryptfsd}. \footnote{Previously,
+\texttt{NETLINK} messages were used, which is a socket-like mechanism for communication with the kernel, but that method has lost
+favor within eCryptfs.} As the current implementation of boundary keys does not rely on calling out to \texttt{ecryptfsd} for key
+computation, running \texttt{ecryptfsd} is not necessary, and the messaging system can still be used by writing to
+\texttt{/dev/ecryptfs} directly. 
 
 Three new messages have been defined: \texttt{ECRYPTFS\_MSG\_CLEARMASTER}, \texttt{ECRYPTFS\_MSG\_CLEARBOUNDARY}, and
 \texttt{ECRYPTFS\_MSG\_REGMASTER}, hereafter referred to as \texttt{clearmaster}, \texttt{clearboundary}, and \texttt{regmaster},
-respectively. The payload of a \texttt{clearmaster} message needs to be the path to the mount point for which the master key should
-be cleared, as each mounted eCryptfs filesystem is keyed independently. When \texttt{clearmaster} is received by the kernel, all
+respectively. The payload of a \texttt{clearmaster} message must be the path to the mount point for which the master key should be
+cleared, as each mounted eCryptfs filesystem is keyed independently. When \texttt{clearmaster} is received by the kernel, all
 references to the master key - F(EK)\superscript{3} - within the kernel are removed from memory. This will \emph{not} remove the
 actual key from the user's keyring. It is the responsibility of userspace to remove the key from the keyring, which in the Android
-implementation is handled by \texttt{vold}.  Technically, what \texttt{clearmaster} does is walk the list of global authentication
-tokens associated with a given mount point, zero them all with \texttt{memset}, and remove them from the list.  At this point the
-key itself must be removed from the user's keyring or all files will remain decryptable. One \texttt{clearboundary} message for each
-boundary key being cleared should be sent after the master key has been cleared. If the boundary keys are cleared prior to clearing
-the master key, then it is possible the boundary keys could be recalculated for a given UID. The \texttt{clearboundary}
-message payload should start with four bytes specifying the UID of the boundary to clear, immediately followed by a string
-specifying the mount point of the eCryptfs filesystem. Boundary keys are cleared in a fashion similar to master keys: the list
-associated with the mount point is walked, each structure is zeroed, and the items removed.  In this implementation, no boundary
-keys are held in userspace memory, so they have actually been removed as soon as the message is sent to the kernel. 
+implementation is handled by \texttt{vold}.  Technically, what \texttt{clearmaster} does is ``walk'' the list of global
+authentication tokens associated with a given mount point, zero them all with \texttt{memset}, and remove them from the list.  At
+this point the key itself must be removed from the user's keyring or all files will remain decryptable. One \texttt{clearboundary}
+message for each boundary key being cleared should be sent after the master key has been cleared. If the boundary keys are cleared
+prior to clearing the master key, then it is possible the boundary keys could be recalculated for a given UID. The
+\texttt{clearboundary} message payload should start with four bytes specifying the UID of the boundary to clear, immediately
+followed by a string specifying the mount point of the eCryptfs filesystem. Boundary keys are cleared in a fashion similar to master
+keys: the list associated with the mount point is walked, each structure is zeroed, and the items removed.  In this implementation,
+no boundary keys are held in userspace memory, so they have actually been removed as soon as the message is sent to the kernel. 
 
 In order for key removal to function appropriately, it was necessary to force eCryptfs to recalculate the cryptographic context for
 each file as it is opened, which does have some impact on performance. Normally the FEK is stored in a lookaside cache after the
@@ -328,17 +333,23 @@ multiple encrypted volumes Additionally, the \texttt{clearmaster} command in \te
 handled by the kernel key retention service, which contains the actual private key material for the eCryptfs mount. This key
 material was originally generated from the unlock passphrase and stored in the keyring by \texttt{vold}.
 
-When an Android phone goes to sleep, either because the user pressed the power button or because the inactivity timeout has
+When an Android device goes to sleep, either because the user pressed the power button or because the inactivity timeout was
 triggered, the \texttt{ACTION\_SCREEN\_OFF} intent\footnote{Intents are messages within the Android framework. See
-\texttt{developer.android.com} for details.} is broadcast throughout the device. Any listeners that have registered to receive this
-intent are notified. In order to accommodate key removal, the mount service has been registered to receive this intent and calls
-\texttt{cryptfs clearmaster} along with \texttt{cryptfs clearboundary} when it is received. Finally, any applications for which
-boundary keys are being cleared are forced to stop, ensuring that the application is required to hit disk the next time it starts.
-Otherwise, the application remains in a paused state, and could be resumed despite the keys being removed. For demonstration
-purposes, the \texttt{clearboundary} call has a hard-coded UID, which is not terribly useful, but serves as a placeholder where
-custom logic could be added to determine what applications have data that should be protected, as seen in table
-\ref{tab:mountservice}. Ideally, the list would be accessible through a configuration interface presented to the user, but that is
-work for the future. 
+\texttt{developer.android.com} for details.} is broadcasted. Any listeners that have registered to receive this intent are notified.
+In order to accommodate boundary key removal, the mount service has been registered to receive this intent and calls \texttt{cryptfs
+clearmaster} along with \texttt{cryptfs clearboundary} when the intent is received. 
+
+Finally, any application that is having its boundary key cleared is forcibly stopped. This stands in contrast to the normal behavior
+of simply pausing applications when the phone is locked. An application remains memory resident when it has its activities paused.
+If the application is resumed without ever being completely killed, any data in memory is still available, even if the boundary key
+has been removed. Forcibly killing applications during the lock process, rather than merely pausing them, ensures that they must
+read data back off of disk before it can be used. If the boundary key has been removed, and the lock screen bypassed, this will fail
+only if the application has been killed, rather than paused.
+
+For demonstration purposes, the \texttt{clearboundary} call available in the code accompanying this paper has hard-coded the UID of
+the application to secure during device lock. A hard-coded UID is not terribly useful, but serves as a placeholder where custom
+logic could be added to determine what applications have data that should be protected, as seen in table \ref{tab:mountservice}.
+Ideally, the list would be accessible through a configuration interface presented to the user.
 
 \begin{table}
 \lstinputlisting{tables/mountservice.java}
@@ -368,14 +379,20 @@ on her phone, then it is all over for the poor lady. Alice would like to protect
 seized and the lock screen can be bypassed, such that a ``logical acquisition,'' in forensics parlance, would be fruitless. What is
 Alice to do?
 
-\begin{figure}[ht] \begin{center}
-\includegraphics[scale=0.6]{dhs.png}\end{center}
-\caption{DHS Mobile Forensics Training} \label{fig:dhs} \end{figure}
+\begin{figure}[ht] 
+\begin{center}
+\includegraphics[scale=0.6]{dhs.png}
+\end{center}
+\caption{DHS Mobile Forensics Training} 
+\label{fig:dhs}
+\end{figure}
 
 Alice begins running an Android distribution that supports eCryptfs boundary mode. She configures the device such that the boundary
 key for ColorNote is cleared every time the phone is locked or goes to to sleep. When she is using the phone, her private to-do list
 is easily accessible. After the keys have been removed, the application fails to start entirely unless the phone has been properly
 unlocked. Attempting to access the databases through \texttt{adb} simply returns \texttt{I/O error}. While this does not, by any
-means, provide perfect security, Alice has forced the issue out of the realm of traditional post-mortem forensics. Either live
-memory analysis needs to be performed, or an out-of-band attack needs to be executed, such as determining the passphrase from the
-smudge patterns on the screen, or simply extracting the key from Alice directly through a rubber-hose attack.
+means, provide perfect security, Alice has forced the issue out of the realm of traditional post-mortem forensics. If an attacker
+wanted to recover the data, either live memory analysis would need to be performed, or an out-of-band attack executed. The
+passphrase might be determinded from the smudge patterns on the screen, or the key simply extracted from Alice directly through a
+rubber-hose attack. Neither the acquisition process described in chapter \ref{ch:forensics} nor inspection of the device from the
+user interface as it is running are options anymore.
