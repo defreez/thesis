@@ -4,20 +4,19 @@
 \section{Improvements to eCryptfs Boundary Mode}
 \label{sec:future}
 
-The illustration which concludes the previous chaper, of Alice securely reminding herself to send flowers, may be contrived, but it
+The illustration which concludes the previous chapter, of Alice securely reminding herself to send flowers, may be contrived, but it
 is a pattern that can be used to secure locally stored data for nearly any application. The scenario was tested on an actual phone,
 running actual code, and it works, but there is a lot that still needs to be done before this could be used in any practical sense.
 As Dan Kaminsky once tweeted, ``The game is not to secure you, or me. Security for security people is just a self licking ice cream
-cone.'' It is unlikely that boundary key mode for eCryptfs, at least in its current form, will ever be widely adopted, but the
-following improvements might help.
+cone.'' What follows are a few ideas for future work.
 
-\paragraph{Configurable Application Security}
+\subsection{Configurable Application Security}
 There is, as it stands, no way to configure which applications will have their boundary keys cleared when the device sleeps. 
 Each application \texttt{uid} and package name must be hardcoded, which is ridiculous and only meant to demonstrate that the 
 boundary keys do function. A user interface needs to be built. This interface could tie to the ``manage applications'' menu and
 should provide an easy, intuitive way for the user to select which applications will be protected while the device is locked.
 
-\paragraph{Securely Handle Keys}
+\subsection{Securely Handle Keys}
 The primary achievement of eCryptfs boundary mode is that it forces an attacker to use live memory analysis to recover keys. That is
 considerably more difficult than simply copying the data off the device. Already, live forensic techniques are being developed for
 the Android platform \cite{dmd}, but they require considerably more skill to execute than post-mortem techniques. The next
@@ -39,7 +38,7 @@ handling, but it is time consuming and tedious. Validating that the password was
 tool for recovering password keys from memory. Joe Sylve's work could be used \cite{dmd} for validation, but tools have not yet been
 released at the time of writing.
 
-\paragraph{Utilize \texttt{ecryptfsd} and encrypt SD card}
+\subsection{Utilize \texttt{ecryptfsd} and encrypt SD card}
 As a demonstration of what could be done, boundary keys are currently being calculated directly in the kernel. This allowed for
 rapid development, but may not be the wisest place. Instead of hooking the passphrase keying mode of
 eCryptfs, an additional keying mode with a different header format could be developed. This mode could call out to
@@ -49,7 +48,7 @@ for a particular eCryptfs volume, for example, that could be easily configured. 
 advantageous because it would afford encryption of external storage with eCryptfs. The problem now is that all SD card files are
 owned by \texttt{system}. Clearing the boundary key for \texttt{system} is not an option, as it would result in instability of the
 device. The SD card files have a group owner of \texttt{sdcard\_rw}, though, so if the boundary key were calculated using the
-GID, then it could be cleared. More generally, callling out to \texttt{ecryptfsd} would allow for abitrary logic when
+GID, then it could be cleared. More generally, calling out to \texttt{ecryptfsd} would allow for arbitrary logic when
 boundary keys are being created.
 
 \section{Data Contraception}
@@ -83,27 +82,25 @@ toward enhancing the privacy of users.
 If a given forensic tool exists that can retrieve a known artifact, the corresponding privacy tool should prevent the retrieval of
 that artifact. For purposes of this section, the forensic tool retrieving data is called the reference tool. When developing tests
 for privacy tools, the test is only meaningful in the context of this reference tool. A tool which prevents the recovery of browser
-history, for example, presupposes that a reference tool which recovers browser history is available and can itself succesfully pass
+history, for example, presupposes that a reference tool which recovers browser history is available and can itself successfully pass
 traditional forensic validation, to an extent appropriate to the situation.
 
 Brian Carrier has provided a clear and thoughtful expose \cite{Carrier2003} on the requirements of forensic tools.  Though his paper
-is primarily a legal argument for using open-source acquistion and extraction tools, the insights he provides along the way have
+is primarily a legal argument for using open-source acquisition and extraction tools, the insights he provides along the way have
 direct counterparts in the privacy arena and can be used as general guidelines here.  Every forensic tool must pass, in a repeatable
 fashion, tests which demonstrate that it does retrieve the information the tool purports to retrieve.  If a forensic tool claims to
 recover browser history, for example, it may be tested by salting a device with known browser history and attempting to retrieve the
 data with the tool.  As noted by Carrier, The NIST Computer Forensic Tool Testing (CFTT) group publishes a wide variety of test
 methodologies and the results of those tests.  While CFTT tests provide good reference material, and provide detailed tests for
 classic forensic techniques such as disk imaging, none of their published documents provide a specific testing methodology for
-modern smartphones. 
+modern smart-phones. 
 
 While a reference tool may be developed specifically for the purpose of developing a privacy tool, doing so increases the risk of
-insufficient or biased testing.  Any reference tool developed purely for the purpose of testing a privacy tool is suspect, as
-the tool had not been previously published nor accepted by the forensics community.  This lack of publication and acceptance, in
-turn brings into question the validity of the privacy tool, leaving one to wonder whether or not a different forensic tool would be
-able to capture the artifacts.  Whenever possible, privacy tools should be validated against forensic techniques developed by
-someone other than the author of the privacy tool.  This can be difficult as the field of Android forensics is relatively new, and
-there was until very recently little literature on how Android forensics is performed. The field is growing at an astonishing rate,
-however, and tools are becoming easier to find.
+insufficient or biased testing.  Any reference tool developed purely for the purpose of testing a privacy tool is suspect, as the
+tool had not been previously published nor accepted by the forensics community.  Whenever possible, privacy tools should be
+validated against forensic techniques developed by someone other than the author of the privacy tool.  This can be difficult as the
+field of Android forensics is relatively new, and there was until very recently little literature on how Android forensics is
+performed. The field is growing at an astonishing rate, however, and tools are becoming easier to find.
 
 \subsection{Why Validation is Necessary: CyanogenMod Incognito Mode}
 
@@ -120,17 +117,17 @@ Kondik.
 One of the features of CyanogenMod that is actively promoted is incognito mode. The incognito mode in CyanogenMod 7 is not, however,
 the incognito mode that is included with Ice Cream Sandwich, as CyanogenMod 7 is based on Gingerbread. According to the CyanogenMod
 web site, incognito mode prevents browsing and download history from being saved, in addition to deleting all cookies.
-\footnote{http://www.cyanogenmod.com/features/incognito-mode} It does actually do these things, and the browser history removal
-has been validated.  Unfortunately, a very important artifact is not being protected against: cache. Failure to remove browser cache
-leaves browser history discoverable.
+\footnote{http://www.cyanogenmod.com/features/incognito-mode} It does actually do these things, and the browser history removal has
+been validated.  Unfortunately, the discovery of a very important artifact, cache, is not being protected against. Failure to remove
+browser cache leaves browser history discoverable.
 
-\subsubsection{Browser History Validaton}
+\subsubsection{Browser History Validation}
 
 The browser history on an Android device is stored in the \texttt{browser.db} database.  In a vanilla distribution of Android , this
 database is stored in the \texttt{/data/data/com.android.browser/databases} directory.  Oddly enough, the browser history is stored
 in the bookmarks table.  The screen clipping in figure \ref{fig:bookmarkschema} shows the bookmarks table as it is seen in SQLite
 browser.  Bookmarks and page visits are stored nearly identically by the Android browser, with the bookmark integer being set to 0
-if it is a normal page visit and to 1 if the URL is a bookmark.  Bookmarks also commonly store thumbnails of the saved page.
+if it is a normal page visit and to 1 if the URL is a bookmark.  Bookmarks also commonly stored thumbnails of the saved page.
 \begin{figure}
 \includegraphics[scale=0.75]{BookmarksSchema.png}
 \caption{Bookmarks Table Schema in SQLite browser}
@@ -172,7 +169,7 @@ in the popular CyanogenMod ROM does. The above method was tested side-by-side wi
 As expected, after the data partition is wiped there is no information in the browser history.  The browser database itself is
 missing until the browser is launched for the first time.  After the salt site is visited, it is clearly visible in the browser
 history available on the device and in the browser database as a unique record.  When incognito mode is enabled in CyanogenMod,
-neither method produces results indicative of a visit to the salt site, nor does the browser using the custom bypass.  
+neither method produces results indicative of a visit to the salt site.
 
 
 \subsubsection{Browser Cache Validation}
@@ -244,24 +241,24 @@ equivalent of the Tor browser is Orweb.
 
 Whisper Systems, which was acquired by Twitter in late 2011, produced a number of other great projects that were included with
 WhisperCore. RedPhone was one of these. It provided an Android implementation of encrypted voice traffic, utilizing ZRTP.
-Unfortunately the RedPhone service as shutdown after the Twitter acquisition. TextSecure, however, was open-sourced. TextSecure
-provides encrypted SMS messaging for Android using the Off-the-Record (OTR) protocol. OTR is wonderfully clever.It gets its name
-from ``off the record'' journalism sourcing, where the source remains anonymous. In OTR, in addition to traditional encryption, two
-features are included: ``perfect forward secrecy'' and deniability. Perfect forward secrecy\footnote{No, perfect forward secrecy is
-not perfect.} uses temporary session keys that are not reproducible if the master key is compromised. So, if Alice sends a message
-to Bob, and at a later date the NSA compromises either Alice or Bob's key (or both), the conversation cannot be recreated.
-Deniability refers to the ability of the participants in a conversation to deny that the conversation ever happened. In OTR, the
-participants are able to authenticate each other during the conversation, but a third-party cannot prove that the conversation
-occurred. To be clear, it can be established that \emph{a} conversation occurred between the two participants, but the contents of
-that conversation cannot be proven to be authentic \cite{otr}.
+Unfortunately the RedPhone service was shutdown after Whisper Systems was acquired by Twitter. TextSecure, however, was
+open-sourced. TextSecure provides encrypted SMS messaging for Android using the Off-the-Record (OTR) protocol. OTR is wonderfully
+clever.It gets its name from ``off the record'' journalism sourcing, where the source remains anonymous. In OTR, in addition to
+traditional encryption, two features are included: perfect forward secrecy and deniability. Perfect forward secrecy uses
+temporary session keys that are not reproducible if the master key is compromised. So, if Alice sends a message to Bob, and at a
+later date the NSA compromises either Alice or Bob's key (or both), the conversation cannot be recreated.  Deniability refers to the
+ability of the participants in a conversation to deny that the conversation ever happened. In OTR, the participants are able to
+authenticate each other during the conversation, but a third-party cannot prove that the conversation occurred. To be clear, it can
+be established that \emph{a} conversation occurred between the two participants, but the contents of that conversation cannot be
+proven to be authentic \cite{otr}.
 
 
 \section{Summary}
 
-There is a great deal of work that still needs to be done. The field of mobile forensics is progressing at a rate that far exceeds
-the field of mobile privacy. An easy-to-use form of disk encryption that is resistant to live memory analysis is desperately needed.
-If securing a device requires intimate knowledge of that device's internals, then in practice it will never be secured. This paper
-has taken steps toward building an encryption scheme for Android that may, someday, be resistant to live memory analysis, but it is
-certainly not easy to use. Additionally, this encryption project, and all of the other great privacy tools being developed, need
-to be rigorously and thoroughly validated. If there are bugs in them, the privacy community needs to find them before an attacker
-does.
+If privacy tools are to be developed that are capable of securing data against state-of-the-art forensic techniques, then there is
+still a great deal of work that still needs to be done. The field of mobile forensics is progressing at a rate that far exceeds the
+field of mobile privacy. An easy-to-use form of disk encryption that is resistant to live memory analysis is desperately needed.  If
+securing a device requires intimate knowledge of that device's internals, then in practice it will never be secured. This paper has
+taken steps toward building an encryption scheme for Android that is resistant to logical analysis and could, with minimal
+development, be resistant to live memory analysis. This encryption method in particular, and all privacy tools in general, need to
+be rigorously and thoroughly validated. If there are bugs in them, the privacy community needs to find them before an attacker does.
