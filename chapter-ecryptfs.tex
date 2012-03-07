@@ -153,7 +153,7 @@ specific to \texttt{init} that supports basic functions which should be familiar
 \texttt{chown}, as well as more advanced functionality such as triggers based upon system properties.  Triggers in \texttt{init}
 will be examined more thoroughly in section \ref{ssec:encryptionboot}. These scripts set up the filesystem layout of the device and
 start all of the system services that make up Android as the user knows it. A typical line in an \texttt{init} script might look
-like table which tells \texttt{init} to mount the \texttt{system} partition with the mount flags \texttt{wait}, and the mount
+like table \ref{tab:initmount} which tells \texttt{init} to mount the \texttt{system} partition with the mount flags \texttt{wait}, and the mount
 options \texttt{ro}. This is very similar to a standard mount command from a shell, but the syntax is slightly different. This will
 be translated by \texttt{init} into an actual mount call to the kernel. 
 \begin{table}
