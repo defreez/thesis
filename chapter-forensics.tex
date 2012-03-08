@@ -21,8 +21,8 @@ many drivers for Nexus devices have been made available.  The consumer builds fo
 are much closer to AOSP than the builds shipped with other models, which often come loaded with third-party applications and
 modifications to the underlying operating system.
 
-Before diving into the details of Android forensics, it is important to give a short overview of how Android storage is laid out.
-The majority of Android devices have two storage devices: an SD card \footnote{Often an actual, removable SD card is provided with
+Before diving into the details of Android forensics, it is important to understand how Android storage is laid out.
+The majority of Android devices have two storage devices: an SD card\footnote{Often an actual, removable SD card is provided with
 the phone. Newer devices, however, appear to be trending toward providing an emulated SD card from internal storage.} that is
 formatted with a FAT filesystem, and an internal NAND flash that is formatted \texttt{YAFFS2} or \texttt{ext4}, with newer models
 preferring \texttt{ext4}.\footnote{There are notable exceptions, such as the Samsung Galaxy S, which uses a proprietary filesystem called RFS.} The SD
@@ -34,7 +34,7 @@ Depending on the particular device, Android 2.3 has up to six partitions, exclud
 \texttt{recovery} and \texttt{misc}. 
 The \texttt{boot} partition houses the kernel and a ramdisk.
 The \texttt{system} partition holds all of the operating system files, including any of the core applications that are distributed with Android, such as the browser. 
-The \texttt{cache} partition provides a scratch space for temporary files, such market downloads.
+The \texttt{cache} partition provides a scratch space for temporary files, such as market downloads.
 The \texttt{userdata} partition is where the vast majority of application data is stored.
 The \texttt{recovery} partition is used to flash updates and new versions of Android on to the phone. 
 The \texttt{misc} partition is used to store miscellaneous hardware settings.
@@ -97,23 +97,23 @@ recorded when seizing a mobile device. The first column is the device name which
 \texttt{/dev/mtd}.  The second column shows the size of each partition in bytes. 
 The third column gives the ``eraseblock'' size for the partition.  Eraseblocks are the MTD equivalent of sectors in a conventional block
 device \cite{mtdfaq}. The eraseblock size determines what the smallest chunk of data is that can be accessed on an MTD.  When an MTD
-is presented as a virtual block device, so that it can be mounted by a filesystem, the eraseblock size becomes the block size.  Each
+is presented as a virtual block device, so that it can be mounted as a filesystem, the eraseblock size becomes the block size.  Each
 block will consist of many NAND pages, which are the smallest unit of data that the NAND device itself supports.  NAND pages are
 typically 2048 bytes, but the exact page size can be determined by looking at \texttt{dmesg} shortly after the phone boots.  The
 fourth and final column in \texttt{/proc/mtd} shows the friendly name of each partition.  The output of a standard \texttt{df}
 command will show where each device is mounted.
 
-\subsection{YAFFS2 - Yet Another Flash File System}
-Most Android devices still use YAFFS2 as the filesystem of choice for user data that is not stored on an external SD card.  YAFFS2 is
-very different from other filesystems such as NTFS or FAT32.  YAFFS was the first filesystem specifically designed for NAND flash,
-and so its structure is optimized for the specific requirements that NAND flash imposes.  Chief among these is the limit on the
-number of overwrites performed.  NAND pages have a finite lifetime, and a filesystem that does not distribute wear will quickly wear
-out some pages.  The pages storing the FAT in FAT32, for example, would quickly become corrupt without a hardware flash translation
-layer (FTL), as is used in thumb drives.  YAFFS2 is designed to operate without a hardware FTL, which is good news for forensic
-investigators, as it affords a software view into the flash device.  Overwriting NAND pages requires that those pages first be
-erased, which in NAND incurs a heavy performance hit.  This leads to what is known as the ``write once" requirement, which is that
-NAND pages should only be written to once until it is absolutely necessary to overwrite them. The write once requirement has
-influenced the design of YAFFS2 more than any other single factor.
+\subsection{YAFFS2 - Yet Another Flash File System} Most Android devices still use YAFFS2 as the filesystem of choice for user data
+that is not stored on an external SD card.  YAFFS2 is very different from other filesystems such as NTFS or FAT32.  YAFFS, which
+preceded YAFFS2,  was the first filesystem specifically designed for NAND flash, and so its structure is optimized for the specific
+requirements imposed by NAND flash.  Chief among these requirements is the limit on the number of overwrites performed.  NAND pages
+have a finite lifetime, and a filesystem that does not distribute wear will quickly wear out some pages.  The pages storing the FAT
+in FAT32, for example, would quickly become corrupt without a hardware flash translation layer (FTL), as is used in thumb drives to
+distribute wear more evenly.  YAFFS2 is designed to operate without a hardware FTL, which is good news for forensic investigators,
+as it affords a software view into the flash device.  Overwriting NAND pages requires that those pages first be erased, which in
+NAND incurs a heavy performance hit.  This leads to what is known as the ``write once" requirement, which is that NAND pages should
+only be written to once until it is absolutely necessary to overwrite them. The write once requirement has influenced the design of
+YAFFS2 more than any other single factor.
 
 YAFFS2 is known as a ``log-structured'' filesystem.  A log-structured filesystem does not reuse flash pages when a piece of data is
 updated.  Rather, it simply writes the updated data to the next available location.  A monotonically increasing sequence number
@@ -122,7 +122,7 @@ implications, as it often means there are hundreds of copies of a given piece of
 have a garbage collection routine that periodically erases old chunks in the background, but this routine appears to run
 infrequently enough that forensic analysis of deleted data in YAFFS2 is still a valuable source of evidence \cite{naval}. 
 
-Before we can understand how YAFFS2 stores data, we need to look at its predecessor, YAFFS1.\footnote{The filesystem was actually
+YAFFS2 stores data in much the same way as its predecessor, YAFFS1.\footnote{The filesystem was actually
 just called YAFFS, but for the sake of clarity it is here referred to as YAFFS1.} Every piece of data written to a YAFFS1 based file
 system is written in the form of a ``chunk", which is always the same size.  There are data chunks which hold the actual data in a
 file, and there are object header chunks, which hold metadata about objects such as directories, files, and the like.  Each chunk in
@@ -206,7 +206,7 @@ entries for not only bookmarks but browser history as well.  The searches table 
 	favicon & BLOB &  For webpages \\
 	thumbnail & BLOB &  Shown in bookmarks screen \\
 	touch\_icon & BLOB &  Unknown \\
-	user\_entered & BLOB & Boolean, created by default or not \\
+	user\_entered & BLOB & Boolean, created by user or not \\
 	\hline
 	\end{tabular}
 \end{center}
@@ -254,12 +254,11 @@ The \texttt{rawData} argument passed to \texttt{backStep} is simply a slice of d
 be.  When searching for browser history records, for example, this project opted for 512 bytes on either size of the record.  The
 size is arbitrary, so long as it is larger than the record being searched for, but choosing a raw data slice size that is too large
 will negatively impact validation performance.  The \texttt{bc} variable (backward cursor) is the current byte location.  The
-function starts by initializing a zero list that equals the size of the record (data only) as determined by the expected schema for
-that record type.  The function then proceeds to step backward one byte at a time, calling \texttt{validateHdr} with a slice of raw
-data.  If the current slice appears to be valid, then all of the data after the signature is stored in \texttt{tailingRec}, and
-\texttt{validateHdr} will have already have populated the header data.  The \texttt{validateHdr} function does the comparison
-between the record schema and the header and field sizes that have actually been found.  Effectively, the function does brute force
-carving by taking incrementally larger slices of data and testing for validity against the table schema.
+function then steps backward one byte at a time, calling \texttt{validateHdr} with a slice of raw data.  If the current
+slice appears to be valid, then all of the data after the signature is stored in \texttt{tailingRec}, and \texttt{validateHdr} will
+have already have populated the header data.  The \texttt{validateHdr} function does the comparison between the record schema and
+the header and field sizes that have actually been found.  Effectively, the function does brute force carving by taking
+incrementally larger slices of data and testing for validity against the table schema.
 
 \section{Acquisition}
 At this point, the structure of the filesystem on an Android 2.3 device has been covered, as well as an example of carving
@@ -290,19 +289,18 @@ through the JTAG\footnote{JTAG stands for ``Joint Test Action Group.'' JTAG test
 They are used to access the CPU to perform debugging operations, and in certain situations can be used to bypass security mechanisms
 or directly access NAND storage.} ports in the device, or by physically removing the chip.  Either method would require significant
 electronics work and further reconstruction of the low-level NAND layout. Directly accessing the NAND flash is a last resort, but it
-may be the only possibility on a properly locked device \cite{chipoff}.
-
-Further challenges are presented by the inability of standard users to perform the low-level operations necessary to forensically
-acquire a device, as the Android security model does not usually provide root access.  Additionally, flash memory stores metadata in
-a fashion that is not taken into account by traditional forensic acquisition methods.  The sections that follow describe the
-peculiarities of Android and how to approximate a forensically-sound duplicate of an Android device.
+may be the only possibility on a properly locked device \cite{chipoff}.  Further challenges are presented by the inability of
+standard users to perform the low-level operations necessary to forensically acquire a device, as the Android security model does
+not usually provide root access.  Additionally, flash memory stores metadata in a fashion that is not taken into account by
+traditional forensic acquisition methods.  What the average forensic analyst ends up with, then, is only an approximation of a
+forensically-sound duplicate of an Android device. 
 
 \subsection{A Basic Android Acquisition}
 
-The acquisition of an Android device is not, in a broad view, much different than the acquisition of a desktop computer. 
+In broad strokes, the acquisition of an Android device is not much different than the acquisition of a desktop computer. 
 The device must be seized, and an image of the device must be created that is as forensically sound as possible.  There are,
 however, several Android specific details that must be addressed.  What follows is an overview of the steps necessary for acquiring
-and Android device, partially drawn from Andrew Hoog's book \emph{Android Forensics} \cite{hoog}.
+an Android device, using a phone as an example, partially drawn from Andrew Hoog's book \emph{Android Forensics} \cite{hoog}.
 
 % Vboxes prevent page breaks between item descriptions and item text
 \begin{description}
@@ -335,10 +333,12 @@ If the phone does not already have root access enabled, then privilege escalatio
 research should be done about every device before attempting to obtain root access.  There is a considerable amount of risk of
 damage to the phone, including loss of evidence.  Some phones can be rooted with a minimal footprint, as described later in this
 chapter.  Other's phones require more invasive processes.  Any analyst of modest means (i.e. without an exploit development team) is
-at the mercy of the security/hobbyist community for root access.}
+at the mercy of the security/hobbyist community for root access. If the phone cannot be rooted, then an image of the phone cannot be
+taken and a logical acquisition will have to suffice. A logical acquisition consists of manually inspecting the phone from the user
+interface, or installing an application that will systematically read unsecured data.}
 
 \vbox{\item[Step Four] Acquire an image \hfill \\
-Use \texttt{nanddump} to acquire an image of each partition of the phone.  These images should be stored on the sterile SD card that
+Use \texttt{nanddump} to acquire an image of each partition on the phone.  These images should be stored on the sterile SD card that
 was inserted into the phone.  After transferring the images from the SD card to the analyst's machine, they can be carved and
 mounted with \texttt{nandsim} for perusal.} 
 \end{description}
@@ -346,7 +346,7 @@ mounted with \texttt{nandsim} for perusal.}
 Acquiring an image of an Android phone's filesystem presents a distinct challenge.  The conventional methods of forensic acquisition
 are either inadequate or not available.  One of the most popular tools for acquiring an image of a conventional (spinning disk) hard
 drive is \texttt{dd}, which reads raw data, block by block, from a one location and writes it to another, which, when the disk is
-offline, is sufficient to acquire a forensically valid image of the device.  Unfortunately, \texttt{dd} is not sufficient for the
+offline, is sufficient to acquire a forensically valid image of the device.  Unfortunately, \texttt{dd} is not sufficient for
 YAFFS devices, as it operates above the MTD layer. Android images that are acquired by a utility that is not flash-aware have no
 hope of being forensically-sound. Such utilities ignore the OOB area of the flash device. YAFFS2 relies significantly on
 this OOB free area, and it is therefore of paramount importance that a flash-aware utility is used to acquire any Android image.
@@ -405,31 +405,29 @@ used, though, the analyst performing the acquisition needs root access.
 In some ways, Android is more secure than a typical desktop distribution of Linux.  Android provides application sandboxing,
 requires applications to declare necessary permissions ahead of time, and explicitly denies root access in production builds. This
 latter restriction makes it particularly difficult to perform a full NAND dump.  By default, no user has the ability to run programs
-as root, a privilege required for raw access to the NAND device.  This presents a problem not only for the forensic investigator,
-but also for the privacy conscious user.
+as root, a privilege required for raw access to the NAND device.  
 
-Obtaining root access on an Android device can, depending on the device, be the most challenging step of the process.  Acquiring
+Obtaining root access can, depending on the device, be the most challenging step of an acquisition.  Acquiring
 root access on the majority of commercially available Android phones requires using a local privilege escalation exploit.  With each
 major release, Google provides fixes for the exploits that were previously used to obtain root, and each major release sees the
 development of new exploits, or as is more often the case, old Linux exploits ported to Android.  So far the security measures put
 in place by Google have not proven to be a serious deterrent to the rooting community, but that may change in the future.  The sheer
 number of different Android models may lead to a situation where only the most popular models have well-known techniques for
 obtaining root, while the less popular ones remain locked into whatever configuration the manufacturer desires.  This could lead to
-an increase in the necessity of off-chip NAND acquisition techniques, where the NAND chips is physically removed from the phone to
-be accessed. These techniques are only possible for analysts with significant hardware and personnel resources.
+an increase in the necessity of off-chip NAND acquisition techniques, where the NAND chip is physically removed and examined outside
+the device. Off-chip techniques are only possible for analysts with significant hardware and personnel resources.
 
 \subsubsection{An Example: Exploid CVE-2009-1185}
-Before looking into how to use pre-built code to practically and quickly obtain root access on a couple of phone models, it is
-important to understand the fundamentals of rooting and what is actually going on.  In an ironic and unfortunate turn of events for
+In an ironic and unfortunate turn of events for
 a community celebrating an open source operating system, the source code for a number of the exploits used to obtain root access on
 Android is not available.  These exploits work well and are largely safe, allowing the hobbyist community to root their phones,
 whilst the forensic analyst is left without tools due to his or her inability to explain how the exploit works.  Fortunately one of
 the most talented researchers in the field, whose code has been used in a number of Android root exploits, freely
-published\footnote{Sebastian has since moved on from Android exploit research} proof-of-concept code on his blog,
-``C-Skills."\footnote{c-skills.blogspot.com}.  While each phone is different, and while each could conceivably require a different
+published proof-of-concept code on his blog,
+``C-Skills."\footnote{c-skills.blogspot.com}  While each device is different, and while each could conceivably require a different
 method of exploitation, ports of old Linux bugs are frequently found to be applicable to most versions of Android.  Hardware
 manufacturers seem to spend little time hardening Android past what has been done by Google, and the infrequency of updates means
-exploits stay unpatched in the wild for a very long time.  While this particular exploit has been patched, it is valuable to take a
+exploits stay unpatched in the wild for a very long time. Despite being patched long ago, it is valuable to take a
 look at one of the most famous local root exploits on Android: Sebastian Krahmer's port of CVE-2009-1185. \footnote{CVE stands for
 "Common Vulnerabilities and Exposures," and the CVE number is a common method of identifying public vulnerabilities. The full 
 database is available at \texttt{cve.mitre.org}. }
@@ -439,7 +437,7 @@ far as devices are concerned.  All device messages and events, including hotplug
 wishes to have a particular action performed in userspace, it passes a message along (via a \texttt{netlink} socket) and
 \texttt{udev} makes it happen.  When a user plugs a USB drive into their machine and it is automatically mounted, \texttt{udev} has
 handled a message from the kernel that a device was attached and forwarded it along to the correct abstraction layer.  All devices
-under \texttt{/dev} are handled by \texttt{udev} and as such it necessarily runs as root.  Android uses \texttt{udev}, but instead
+under \texttt{/dev} are handled by \texttt{udev}, which necessarily runs as root.  Android uses \texttt{udev}, but instead
 of giving \texttt{udev} its own service (normally \texttt{udevd}), it has been moved into \texttt{init}, which is typically the
 first userspace process to run in a Linux system.
 
@@ -452,7 +450,7 @@ implementation and linked it to Java via JNI, allowing it to be run by any Andro
 
 Krahmer's implementation - commonly referred to as ``exploid," though ``exploid" can refer to a number of exploits derived from
 Krahmer's code - crafts a \texttt{NETLINK\_KOBJECT\_UEVENT} that directs \texttt{udev} to spawn a copy of ``exploid" on the next
-hotplug event, as shown in the code snippet below.  Instructions will typically direct the end-user to turn WiFi on and off,
+hotplug event, as shown in table \ref{tab:exploid}.  Instructions will typically direct the end-user to turn WiFi on and off,
 triggering a hotplug event.  When \texttt{udev} spawns another copy of ``exploid" it will be running as root, so exploid copies
 \texttt{/bin/sh} to \texttt{/bin/rootshell} with setuid root, such that the shell will always execute as root.  It is a beautiful
 piece of work.
@@ -466,12 +464,10 @@ piece of work.
 As always, the world of exploit development moves quickly, even if the pace is dampened by the slowness of Android updates for non-Nexus phones, and inevitably whatever is written here will be obsolete by the time it is read. 
 However, CVE-2009-1185 will remain an important case study, despite being fixed in Android 2.2.1.
 Nearly two years after being discovered in mainstream Linux, CVE-2009-1185 remained exploitable in over half of Android devices.
-The next section looks, from a practical perspective, at how to root two devices: the Nexus One and the HTC Slide. 
-The Nexus One was chosen due to its ubiquity, and the HTC slide because it is an older phone Android that is vulnerable to CVE-2009-1185.
 
 The HTC Slide, which is marketed by T-Mobile as the MyTouch Slide, runs Android 2.1, and is therefore susceptible to CVE-2009-1185. 
-Rooting an HTC Slide using Krahmer's "exploid" code is a trivial process. 
-Simply get the code on to the device, run it, then turn WiFi on and off and be greeted with a root prompt.
+Rooting an HTC Slide using Krahmer's ``exploid" code is a trivial process 
+Get the code on the device, run it, and then turn WiFi on and off.
 
 \begin{enumerate}
 	\item Download the exploid source from \url{c-skills.blogspot.com}
@@ -487,7 +483,7 @@ Simply get the code on to the device, run it, then turn WiFi on and off and be g
 \subsubsection{Rooting a Nexus One}
 
 The Nexus series of phones occupy a somewhat unique place in the Android product line.  While the hardware is still built by a
-third-party manufacturer such as HTC in the case of the Nexus One, or Samsung in the case of the Nexus S, they are clearly the
+third-party manufacturer, such as HTC in the case of the Nexus One, or Samsung in the case of the Nexus S, they are clearly the
 flagship Android phones.  The Nexus phones come loaded with a vanilla version of Android, in comparison to other models which often
 have significant modifications such as HTC ``Sense" layered on.  The Nexus phones are aimed at developers and marketed to the tech
 savvy, so it is actually a feature that users are able to unlock the bootloader and load custom OS builds.  It takes only a single
@@ -501,11 +497,10 @@ to believe artifacts might be found there.  The most elegant method of acquisiti
 without modifying any of the partitions.  This can be done by exploiting an already running phone, but exploits for the Nexus series
 tend to be hard to come by, primarily because the hobbyist community does not need an exploit to load a custom ROM.  Another one of
 Sebastian Krahmer's exploits is useful here, this one dubbed RageAgainstTheCage, or CVE-2010-EASY (there is no actual CVE for this
-issue, but the vulnerability is of a well-known class).  \texttt{Adb} normally starts as root, but calls \texttt{setuid} on itself
+issue).  \texttt{Adb} normally starts as root, but calls \texttt{setuid} on itself
 to drop permissions.  It does not, however, check that \texttt{setuid} was successful, and will remain as root if \texttt{setuid}
 fails.  CVE-2010-EASY causes \texttt{setuid} to fail by forking until the maximum number of shell processes is
-reached.\footnote{This value is different for each model of phone, but can be quickly checked with \texttt{ulimit -a}.  On a desktop
-Linux system this class of vulnerability is more difficult to exploit as the maximum number of processes is often set to unlimited.}
+reached.\footnote{This value is different for each model of phone, but can be quickly checked with \texttt{ulimit -a}.}  
 When the maximum number of processes is reached, RageAgainstTheCage kills the \texttt{adb} service that is currently running
 unprivileged, and then forks again to max out the process limit and sends a signal for \texttt{adb} to restart.  \texttt{Adb} will
 restart as root, but because the maximum number of shell process has been reached, \texttt{setuid} will fail.  \texttt{Adb} does not
@@ -544,11 +539,6 @@ Android YAFFS2 images can be mounted if \texttt{nandsim} is started with the fol
 \texttt{sudo modprobe nandsim first\_id\_byte=0x20 second\_id\_byte=0xa2 third\_id\_byte=0x00 fourth\_id\_byte=0x15}.
 These parameters are drawn directly from the MTD documentation, and are determined by the geometry of the image \cite{mtdfaq}
 After \texttt{nandsim} has been loaded, \texttt{/dev/mtdblock0} can be mounted read-only as a YAFFS2 filesystem and read.
-
-The image can also be carved for SQLite artifacts or stale browser cache files directly using the tools provided in
-Appendix \ref{app:obtaincode}.  The utility \texttt{browserhistory.py} uses the algorithm discussed previously to carve for SQLite artifacts
-that match \texttt{browser.db} records.  The utility \texttt{browsercache.py} searches the YAFFS2 image for unallocated YAFFS2
-chunks that are potential browser cache files.
 
 \section{Summary}
 

@@ -12,8 +12,8 @@ cone.'' What follows are a few ideas for future work.
 
 \subsection{Configurable Application Security}
 There is, as it stands, no way to configure which applications will have their boundary keys cleared when the device sleeps. 
-Each application \texttt{uid} and package name must be hardcoded, which is ridiculous and only meant to demonstrate that the 
-boundary keys do function. A user interface needs to be built. This interface could tie to the ``manage applications'' menu and
+Each application \texttt{uid} and package name must be hardcoded, which is only meant to demonstrate that the 
+boundary keys do function. A user interface would be beneficial. This interface could tie to the ``manage applications'' menu and
 should provide an easy, intuitive way for the user to select which applications will be protected while the device is locked.
 
 \subsection{Securely Handle Keys}
@@ -21,7 +21,7 @@ The primary achievement of eCryptfs boundary mode is that it forces an attacker 
 considerably more difficult than simply copying the data off the device. Already, live forensic techniques are being developed for
 the Android platform \cite{dmd}, but they require considerably more skill to execute than post-mortem techniques. The next
 step on the privacy side of this arms race is to prevent all access to secured application data on a live system, even in the face of
-live memory analysis. This is non-trivial, but certainly possible. The primary hurdle is that very little of the code involved was
+live memory analysis. The primary hurdle is that very little of the code involved was
 designed to withstand memory-based attacks. Android does \emph{not} handle the unlock password or the key material derived from that
 password securely. Table \ref{tab:badhandling} shows the code responsible for retrieving the unlock password from the lock screen
 and running it through \texttt{checkPassword}. The password is stored in a standard Java string, which is \emph{not} a secure
@@ -35,8 +35,8 @@ The Sun recommended method for storing passwords in memory is to use a \texttt{c
 \cite{securejava}. This is because \texttt{java.lang.String} objects are immutable. They cannot be zeroed out after usage. Arrays of
 characters can, however, be zeroed. It is not conceptually difficult to audit the password handling routines in Android for insecure
 handling, but it is time consuming and tedious. Validating that the password was being handled securely would require developing a
-tool for recovering password keys from memory. Joe Sylve's work could be used \cite{dmd} for validation, but tools have not yet been
-released at the time of writing.
+tool for recovering password keys from memory. Joe Sylve's work could be used \cite{dmd} for validation, but the tools accompanying his paper 
+had not yet been released at the time of writing.
 
 \subsection{Utilize \texttt{ecryptfsd} and encrypt SD card}
 As a demonstration of what could be done, boundary keys are currently being calculated directly in the kernel. This allowed for
@@ -70,7 +70,7 @@ remains central to any Android analysis.  This is the principle of ``Incognito M
 browser in versions 3.x and later. When incognito mode is enabled, all browsing history remains in memory and never touches disk. A
 Linux live CD is capable of doing the same thing, but with an entire operating system instead of just a browser.
 
-As of yet, there has been little exploration the possibility of a memory-only Android device, where no data is ever written. 
+As of yet, there has been little exploration of the possibility of a memory-only Android device, where no data is ever written. 
 
 
 \section{Validating Privacy Tools}

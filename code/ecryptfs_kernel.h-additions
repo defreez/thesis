@@ -1,0 +1,26 @@
+#define BOUNDARY_MODE 1
+
+uid_t boundary_uid;
+struct ecryptfs_boundary_key {
+struct list_head mount_crypt_stat_list;
+char key[16];
+uid_t uid;
+};
+
+struct list_head boundary_key_list;
+
+#define ECRYPTFS_MSG_CLEARMASTER 104
+#define ECRYPTFS_MSG_CLEARBOUNDARY 105
+#define ECRYPTFS_MSG_REGMASTER 106
+
+int ecryptfs_find_boundary_key(struct ecryptfs_mount_crypt_stat *mount_crypt_stat,
+uid_t uid, struct ecryptfs_boundary_key **boundary_key);
+void ecryptfs_generate_boundary_key(struct ecryptfs_crypt_stat *crypt_stat,
+struct ecryptfs_auth_tok *auth_tok,
+struct ecryptfs_boundary_key **boundary_key);
+
+int ecryptfs_path_to_crypt_stat(char *path, struct ecryptfs_mount_crypt_stat **mount_crypt_stat);
+void ecryptfs_clear_master(struct ecryptfs_mount_crypt_stat *mount_crypt_stat);
+int ecryptfs_reg_master(struct ecryptfs_mount_crypt_stat *mount_crypt_stat, char *sig);
+int ecryptfs_clear_boundary(struct ecryptfs_mount_crypt_stat *mount_crypt_stat, uid_t uid);
+int ecryptfs_init_global_auth_toks(struct ecryptfs_mount_crypt_stat *mount_crypt_stat);
