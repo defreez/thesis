@@ -36,7 +36,7 @@ The \texttt{boot} partition houses the kernel and a ramdisk.
 The \texttt{system} partition holds all of the operating system files, including any of the core applications that are distributed with Android, such as the browser. 
 The \texttt{cache} partition provides a scratch space for temporary files, such as market downloads.
 The \texttt{userdata} partition is where the vast majority of application data is stored.
-The \texttt{recovery} partition is used to flash updates and new versions of Android on to the phone. 
+The \texttt{recovery} partition is used to install updates and new versions of Android. 
 The \texttt{misc} partition is used to store miscellaneous hardware settings.
 Undoubtedly, from a forensic perspective, the \texttt{userdata} partition is the most interesting, and what will be focused on in
 this paper. The other partitions do hold valuable information, but at a much lower density.
@@ -96,9 +96,9 @@ This layout was taken from a Nexus One running Gingerbread.  All of the informat
 recorded when seizing a mobile device. The first column is the device name which corresponds to the device handle in
 \texttt{/dev/mtd}.  The second column shows the size of each partition in bytes. 
 The third column gives the ``eraseblock'' size for the partition.  Eraseblocks are the MTD equivalent of sectors in a conventional block
-device \cite{mtdfaq}. The eraseblock size determines what the smallest chunk of data is that can be accessed on an MTD.  When an MTD
+device \cite{mtdfaq}. The eraseblock size determines the size of the smallest chunk of data that can be accessed on an MTD.  When an MTD
 is presented as a virtual block device, so that it can be mounted as a filesystem, the eraseblock size becomes the block size.  Each
-block will consist of many NAND pages, which are the smallest unit of data that the NAND device itself supports.  NAND pages are
+block will consist of many NAND pages, which are the smallest unit of data the NAND device itself supports.  NAND pages are
 typically 2048 bytes, but the exact page size can be determined by looking at \texttt{dmesg} shortly after the phone boots.  The
 fourth and final column in \texttt{/proc/mtd} shows the friendly name of each partition.  The output of a standard \texttt{df}
 command will show where each device is mounted.
@@ -112,7 +112,7 @@ in FAT32, for example, would quickly become corrupt without a hardware flash tra
 distribute wear more evenly.  YAFFS2 is designed to operate without a hardware FTL, which is good news for forensic investigators,
 as it affords a software view into the flash device.  Overwriting NAND pages requires that those pages first be erased, which in
 NAND incurs a heavy performance hit.  This leads to what is known as the ``write once" requirement, which is that NAND pages should
-only be written to once until it is absolutely necessary to overwrite them. The write once requirement has influenced the design of
+be written to only once unless it is absolutely necessary to overwrite them. The write once requirement has influenced the design of
 YAFFS2 more than any other single factor.
 
 YAFFS2 is known as a ``log-structured'' filesystem.  A log-structured filesystem does not reuse flash pages when a piece of data is
@@ -251,12 +251,12 @@ SQLite record.  The \texttt{backStep} function is shown in table \ref{tab:backst
 \end{table}
 
 The \texttt{rawData} argument passed to \texttt{backStep} is simply a slice of data that is larger than the record is believed to
-be.  When searching for browser history records, for example, this project opted for 512 bytes on either size of the record.  The
+be.  When searching for browser history records, for example, this project opted for 512 bytes on either side of the record.  The
 size is arbitrary, so long as it is larger than the record being searched for, but choosing a raw data slice size that is too large
 will negatively impact validation performance.  The \texttt{bc} variable (backward cursor) is the current byte location.  The
 function then steps backward one byte at a time, calling \texttt{validateHdr} with a slice of raw data.  If the current
 slice appears to be valid, then all of the data after the signature is stored in \texttt{tailingRec}, and \texttt{validateHdr} will
-have already have populated the header data.  The \texttt{validateHdr} function does the comparison between the record schema and
+have already populated the header data.  The \texttt{validateHdr} function does the comparison between the record schema and
 the header and field sizes that have actually been found.  Effectively, the function does brute force carving by taking
 incrementally larger slices of data and testing for validity against the table schema.
 
@@ -264,7 +264,7 @@ incrementally larger slices of data and testing for validity against the table s
 At this point, the structure of the filesystem on an Android 2.3 device has been covered, as well as an example of carving
 forensically useful data from the device. But how was this data retrieved in the first place? In a digital investigation, the
 primary source of evidence is a copy of the target device's nonvolatile data.  Acquiring the nonvolatile data, be it from a
-conventional hard disk or from NAND flash in a mobile device, is known as ``post-mortmem'' acquisition, because the data is
+conventional hard disk or from NAND flash in a mobile device, is known as ``post-mortem'' acquisition, because the data is
 collected after the device has been powered off.  Post-mortem acquisition is a well-established process, standing in contrast to
 live system acquisition, which is a relatively new and quickly evolving process, even for desktop and laptop computers.  Forensic
 acquisition of mobile devices follows the same principles as more traditional forensic acquisitions, but the tools, techniques, and
@@ -332,7 +332,7 @@ device for storing NAND images.
 If the phone does not already have root access enabled, then privilege escalation will be necessary.  A substantial amount of
 research should be done about every device before attempting to obtain root access.  There is a considerable amount of risk of
 damage to the phone, including loss of evidence.  Some phones can be rooted with a minimal footprint, as described later in this
-chapter.  Other's phones require more invasive processes.  Any analyst of modest means (i.e. without an exploit development team) is
+chapter.  Other phones require more invasive processes.  Any analyst of modest means (i.e. without an exploit development team) is
 at the mercy of the security/hobbyist community for root access. If the phone cannot be rooted, then an image of the phone cannot be
 taken and a logical acquisition will have to suffice. A logical acquisition consists of manually inspecting the phone from the user
 interface, or installing an application that will systematically read unsecured data.}
@@ -345,7 +345,7 @@ mounted with \texttt{nandsim} for perusal.}
 
 Acquiring an image of an Android phone's filesystem presents a distinct challenge.  The conventional methods of forensic acquisition
 are either inadequate or not available.  One of the most popular tools for acquiring an image of a conventional (spinning disk) hard
-drive is \texttt{dd}, which reads raw data, block by block, from a one location and writes it to another, which, when the disk is
+drive is \texttt{dd}, which reads raw data, block by block, from one location and writes it to another, which, when the disk is
 offline, is sufficient to acquire a forensically valid image of the device.  Unfortunately, \texttt{dd} is not sufficient for
 YAFFS devices, as it operates above the MTD layer. Android images that are acquired by a utility that is not flash-aware have no
 hope of being forensically-sound. Such utilities ignore the OOB area of the flash device. YAFFS2 relies significantly on
@@ -472,12 +472,12 @@ Get the code on the device, run it, and then turn WiFi on and off.
 \begin{enumerate}
 	\item Download the exploid source from \url{c-skills.blogspot.com}
 	\item Cross-compile the source file with \texttt{arm-none-linux-gnueabi-gcc}
-	\item \texttt{adb push} the compiled binary to \texttt{/sqlite\_stmt\_journals}
+	\item \texttt{adb\footnote{This requires the ``Android Debug Bridge'' to have already been installed.} push} the compiled binary to \texttt{/sqlite\_stmt\_journals}
 	\item \texttt{adb shell}
 	\item \texttt{chmod 700} the pushed binary
 	\item \texttt{./exploid}
 	\item \texttt{/system/bin/rootshell}
-	\item \#
+	\item \texttt{Root privileges have been obtained.}
 \end{enumerate}
 
 \subsubsection{Rooting a Nexus One}
@@ -515,7 +515,7 @@ RageAgainstTheCage is available on Sebastian Krahmer's blog and can be used to r
 	\item \texttt{chmod 700 /data/local/tmp/rageagaisntthecage}
 	\item \texttt{./rageagainstthecage}
 	\item Wait for ADB session to end. When it ends, reconnect adb shell
-	\item \texttt{\#}
+	\item \texttt{Root privileges have been obtained.}
 \end{enumerate}	
 
 \section{Accessing a Nanddump Image}
@@ -525,7 +525,7 @@ filesystems are normally mounted read-only via the ``loopback'' device in Linux.
 is a significant amount of metadata (the OOB) interwoven between the blocks, which is partially under the control of the MTD driver
 and partially under the control of YAFFS2 (the OOBFREE area).  Fortunately, there is a debugging utility called \texttt{nandsim}
 that can present virtual NAND devices.  It is imperative, however, that the OOB layout of the MTD kernel module on the analysis
-machine matches the OOB layout of the target device.  This layout changes from device to device, which will require many rebuilds of
+machine matches the OOB layout of the target device.  This layout can change between build of Android, possibly necessitating many rebuilds of
 the MTD module. 
 
 Furthermore, the YAFFS2 filesystem itself is not distributed with most popular Linux distributions, and will therefore have to be built.

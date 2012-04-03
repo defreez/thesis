@@ -127,7 +127,7 @@ The browser history on an Android device is stored in the \texttt{browser.db} da
 database is stored in the \texttt{/data/data/com.android.browser/databases} directory.  Oddly enough, the browser history is stored
 in the bookmarks table.  The screen clipping in figure \ref{fig:bookmarkschema} shows the bookmarks table as it is seen in SQLite
 browser.  Bookmarks and page visits are stored nearly identically by the Android browser, with the bookmark integer being set to 0
-if it is a normal page visit and to 1 if the URL is a bookmark.  Bookmarks also commonly stored thumbnails of the saved page.
+if it is a normal page visit and to 1 if the URL is a bookmark.  Bookmarks also commonly store thumbnails of the saved page.
 \begin{figure}
 \includegraphics[scale=0.75]{BookmarksSchema.png}
 \caption{Bookmarks Table Schema in SQLite browser}
@@ -174,7 +174,7 @@ neither method produces results indicative of a visit to the salt site.
 
 \subsubsection{Browser Cache Validation}
 The Android browser cache is a particularly interesting forensic artifact.  The browser cache is implemented within the webkit
-framework, rather than the browser application.  There are, therefore, no content providers in the Android API which expose the
+framework, rather than the browser application.  There are, therefore, no content providers in the Android API that expose the
 browser cache, making it difficult to erase from the user interface, yet the cache is written as normal files to the data partition
 and indexed in a SQLite database.  These files provide a wealth of forensic information about browsing history, second only to the
 browser history itself, and often the data is of more use than the browser history as it contains the actual content viewed.
@@ -184,9 +184,9 @@ browser application itself, some trivial attempts to implement incognito mode in
 cache.  This test will do a three-way comparison: the results of a custom method completely disabling cache are contrasted with
 stock Gingerbread and CyanogenMod 7.
 
-In order to validate that browser cache is prevented from being written to disk, attempts to retrieve the cache will be made using
+In order to validate that the browser cache is prevented from being written to disk, attempts to retrieve the cache will be made using
 \texttt{adb}.  It has been established elsewhere that once data is written to flash, there is a high probability of recovery even if
-the data is deleted. The database \texttt{/data/data/com.android.browser/databases/webviewCache.db} contains the index of the
+the data is deleted \cite{naval}. The database \texttt{/data/data/com.android.browser/databases/webviewCache.db} contains the index of the
 browser cache, and \texttt{/data/data/com.android.browser/cache/webviewCache} and subdirectories contains the actual cache files. 
 
 \begin{enumerate}
@@ -206,7 +206,7 @@ expected, the logical acquisition process was successful in retrieving cached da
 \url{www.slashdot.org} visited.  Once the browser had been opened on a device running stock Android, the \texttt{webviewCache.db}
 database was populated with data from the default page that loads. 
 
-After visiting \url{www.slashdot.org} and pulling the database with \texttt{adb}, a \texttt{SELECT * from cache were URL like
+After visiting \url{www.slashdot.org} and pulling the database with \texttt{adb}, a \texttt{SELECT * FROM cache WHERE url LIKE
 '\%slashdot\%'} listed several records.  Similarly, a \texttt{grep -ri 'slashdot' webviewCache} showed a significant amount of
 \url{www.slashdot.org} data in the cache files.  This validates that the forensic tool is able to find references to a particular
 site in the web cache.
@@ -256,7 +256,7 @@ proven to be authentic \cite{otr}.
 \section{Summary}
 
 If privacy tools are to be developed that are capable of securing data against state-of-the-art forensic techniques, then there is
-still a great deal of work that still needs to be done. The field of mobile forensics is progressing at a rate that far exceeds the
+still a great deal of work that needs to be done. The field of mobile forensics is progressing at a rate that far exceeds the
 field of mobile privacy. An easy-to-use form of disk encryption that is resistant to live memory analysis is desperately needed.  If
 securing a device requires intimate knowledge of that device's internals, then in practice it will never be secured. This paper has
 taken steps toward building an encryption scheme for Android that is resistant to logical analysis and could, with minimal

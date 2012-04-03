@@ -9,7 +9,7 @@ There is, it would seem, an obvious method of protecting data against the forens
 Full Disk Encryption (FDE) is generally regarded as the best way to protect data in the event a device falls into the wrong hands,
 be it thief or forensic investigator \cite{fdeworks}.  For Android, in particular, Whisper Systems has included FDE in their
 security-oriented build WhisperCore \cite{whispercore}, and Google itself has included FDE in Android 3.x and 4.x. Though chapter
-\ref{ch:ecryptfs} is primarily concerned Google's implementation of FDE for ext4 devices running Ice Cream Sandwich, this chapter
+\ref{ch:ecryptfs} is primarily concerned with Google's implementation of FDE for ext4 devices running Ice Cream Sandwich, this chapter
 focuses on the implementation of FDE provided in WhisperCore.  The ability to modify Android is at
 the heart of this paper, and WhisperCore is the only popular FDE implementation for Android provided by aftermarket modifications to
 the OS.  Partially prompted by Twitter's purchase of Whisper Systems and the subsequent unavailability of WhisperCore, Chris
@@ -54,13 +54,14 @@ against evil maid attacks, but doing so isn't foolproof \cite{attackingbitlocker
 hardware. Moreover, even if the boot code itself is protected, the device could be physically modified. There is, when it comes
 down to it, absolutely no way to protect against an evil maid attack.  The reality of the situation is that for those truly
 concerned about privacy, if an electronic device is ever out of their hands, it should be destroyed. There are simply too many ways
-that an adversary might tamper with the device. This chapter describes one of them.
+that an adversary might tamper with the device.\footnote{Even if the software is completely secure, the device could be physically
+modified to record a passhprase as it is entered.} This chapter describes one of them.
 
 Against a desktop or laptop computer, evil maid attacks are typically implemented by booting from an alternate device, such as a
 thumb drive in Joanna Rutkowska's classic attack against TrueCrypt \cite{evilmaid}.  Mobile devices offer natural protection against evil
 maid attacks in the form of locked bootloaders.  There is no easy way to boot an Android phone or tablet from peripheral storage,
 and it is usually either impossible to modify the OS image without an exploit or doing so requires wiping the device.
-Unfortunately, the restrictive nature of the locking and unlocking mechanisms commonly impede utility by forcing the OS image to be
+Unfortunately, the restrictive nature of the locking and unlocking mechanisms commonly impedes utility by forcing the OS image to be
 signed by the vendor, rather than by the owner/operator of the device. It will be demonstrated that WhisperCore on the Nexus One,
 because it requires an unlocked bootloader, is inherently vulnerable to evil maid attacks.  WhisperCore on the Nexus S, however, is
 comparatively resistant because the Nexus S bootloader can be relocked without reverting to stock images.  
@@ -163,7 +164,7 @@ contains a \texttt{boot.img}.  Simply swap out the kernel and repack with the \t
 Source Project.  The \texttt{mkbootimg} incantation is: \texttt{mkbootimg --kernel EVILMAIDKERNEL --ramdisk EXRAMDISK -o
 /tmp/evilmaid.img --base 0x20000000}.  This boot image can be flashed to the phone and will save the decryption password as the disk
 is unlocked.  A prebuilt boot image for WhisperCore 0.5.5 running on a Nexus One is available at
-\url{http://www.defreez.com/blob/android-evilmaid-whisper-0.5.5_r0.img}.
+\url{http://www.defreez.com/blob/android-evilmaid-whisper-0.5.5\_r0.img}.
 
 To recap, the following steps will successfully perform an evil maid attack against WhisperCore on a Nexus One:
 
@@ -189,4 +190,4 @@ defending against an evil maid attack because the bootloader must remain unlocke
 to be relocked with custom images, an evil maid attack would not be easy to execute.  Attacks such as these, or simply the use of
 force against the owner of the device, makes relying solely on FDE for privacy a perilous proposition.  This is not meant to
 dissuade one against the use of encryption, quite the contrary. Disk encryption is the most powerful tool in a privacy advocate's
-arsenal. Simply be aware that encryption is not panacea.
+arsenal. Simply be aware that encryption is not a panacea.
