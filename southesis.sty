@@ -9,12 +9,10 @@
 % Put page numbers in top-right
 \pagestyle{myheadings}
 
-% Single-space block quotations
-\let\oldquote=\quote
-\let\oldendquote=\endquote
+% Single-space block quotations and only indent on the left
 \renewenvironment{quote}
-	{\singlespacing\oldquote}
-	{\oldendquote}
+	{\list{}{\leftmargin=0.5in}\singlespacing\item[]}
+	{\endlist}
 
 % Single-spaced lists
 \let\oldenumerate=\enumerate
