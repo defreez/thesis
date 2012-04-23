@@ -275,8 +275,7 @@ interest to digital investigators and incident responders. They typically adhere
 \begin{quote}
 “A ‘forensically-sound’ duplicate of a drive is, first and foremost, one created by a method which does not, in any way, alter any data on the drive being duplicated. 
 Second, a forensically-sound duplicate must contain a copy of every bit, byte and sector of the source drive, including unallocated ‘empty’ space and slack space, precisely as such data appears on the source drive relative to the other data on the drive. 
-
-\hspace{\fill}\cite{ball}
+\cite{ball}
 \end{quote}
 
 The forensically-sound duplicate outlined by Ball is usually acquired by physically removing the hard disk from the target system.
@@ -358,12 +357,14 @@ implementation details are glossed over in favor of describing opaque forensic t
 or Cellebrite's more well-known UFED. These tools are only available to the law enforcement community, limiting their academic
 value. The tool used here for acquiring Android images is \texttt{nanddump}. The same tool is included in Hoog's tool set, but his
 description of cross-compiling \texttt{nanddump} for ARM is limited to: 
-\begin{quote} Cross-compiling source code to run on the ARM platform can be quite difficult and there is sparse support for it
+\begin{quote}
+Cross-compiling source code to run on the ARM platform can be quite difficult and there is sparse support for it
 online.  One possible solution is to use Android's Native Development Kit (NDK) to build compatible binaries.  Another option is to
 use Linux and install a cross-compiler such as Code Sourcery's G++ Lite 2009q3-67 for ARM GNU/Linux from
 http:///www.codesourcery.com/sgpp/lite/arm/portal/release1039.  Once a cross-compiler is installed, you must modify the source
 code's Makefile to indicate the cross-compiling option.  Also check the book's web site at
-http://viaforensics.com/education/android-forensics-mobile-security-book/ for future updates.  \hspace{\fill}\cite{hoog} \end{quote}
+http://viaforensics.com/education/android-forensics-mobile-security-book/ for future updates. \cite{hoog}
+\end{quote}
 The above characterization is accurate, but leaves a daunting exercise to the reader. 
 
 Unlike \texttt{dd}, \texttt{nanddump} does acquire the OOB area in addition to the data portion of a NAND device.  In Ubuntu,

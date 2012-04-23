@@ -93,21 +93,20 @@ boundary keys, leaving accessible only the portion of the filesystem necessary t
 The question of where to draw boundaries immediately arises. The Android security architecture is designed, first and foremost,
 around ``sandboxing'' applications . From a storage perspective, this means that applications are not allowed to access either
 system data or data associated with other applications. The official documentation on security and permissions describes it this way: 
-\begin{quote} A
-central design point of the Android security architecture is that no application, by default, has permission to perform any
+\begin{quote} 
+A central design point of the Android security architecture is that no application, by default, has permission to perform any
 operations that would adversely impact other applications, the operating system, or the user.  This includes reading or writing the
 user's private data (such as contacts or e-mails), reading or writing another application's files, performing network access,
-keeping the device awake, etc.  
-
-\hspace{\fill}\cite{securitydoc} \end{quote} 
+keeping the device awake, etc. \cite{securitydoc} 
+\end{quote} 
 It therefore seems natural to reinforce the security
 mechanisms already in place with cryptographic boundaries.  One detail of the Android security architecture is particularly useful
 for this purpose: 
-\begin{quote} At install time, Android gives each package a distinct Linux user ID. The identity remains constant
+\begin{quote} 
+At install time, Android gives each package a distinct Linux user ID. The identity remains constant
 for the duration of the package's life on that device. On a different device, the same package may have a different UID; what
-matters is that each package has a distinct UID on a given device.  
-
-\hspace{\fill}\cite{securitydoc} \end{quote} 
+matters is that each package has a distinct UID on a given device. \cite{securitydoc}
+\end{quote} 
 This UID is used to establish file ownership for applications, which is convenient because it means that each UID can be associated
 with a boundary key.  If that boundary key is removed from memory along with the master key, then even an attacker who has access to
 the running device will not be able to decrypt the data associated with that application.
@@ -185,9 +184,7 @@ encrypted device:
 which is set in init.rc.  \ldots The framework starts up, and sees that vold.decrypt is set to ``1". This tells the framework that it
 is booting on a tmpfs /data disk, and it needs to get the user password. First, however, it needs to make sure that the disk was
 properly encrypted. It sends the command ``cryptfs cryptocomplete" to vold, and vold returns 0 if encryption was completed
-successfully, or -1 on internal error, or -2 if encryption was not completed successfully.  
-
-\hspace{\fill}\cite{honeycombcrypt}
+successfully, or -1 on internal error, or -2 if encryption was not completed successfully. \cite{honeycombcrypt}
 \end{quote}
 
 To summarize, \texttt{init} always attempts to mount \texttt{/data} as if it were unencrypted. This fails if the device is
@@ -389,7 +386,7 @@ on her phone, then it is all over for the poor lady. Alice would like to protect
 seized and the lock screen can be bypassed, such that a ``logical acquisition,'' in forensics parlance, would be fruitless. What is
 Alice to do?
 
-\begin{figure}[!h]
+\begin{figure}[htpb]
 \begin{center}
 \includegraphics[scale=0.5]{dhs.png}
 \end{center}
