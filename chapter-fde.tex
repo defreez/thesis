@@ -133,7 +133,7 @@ been written, the system partition is remounted RO. Any number of different appr
 more subtle location that could be read later, perhaps in an area out of band from the normal filesystem, or to even send the
 password out over the network. 
 
-\begin{table}[!htpb]
+\begin{table}[htpb]
 \lstinputlisting{tables/evilmaid-storepass.c}
 \label{tab:storepass}
 \caption{Evil Maid Patch: Store WhisperYAFFS Unlock Password}
@@ -144,7 +144,7 @@ hypothetical evil maid returns to collect the device, \texttt{/system} will not 
 debugging enabled.  How then, does the evil maid retrieve the password? Hardcode a backdoor.  If the user enters "evilmaid" as the
 password, then read the saved password from disk.  The partition is decrypted and the phone boots normally. 
 
-\begin{table}[!htpb]
+\begin{table}[htpb]
 \lstinputlisting{tables/evilmaid-backdoor.c}
 \label{tab:backdoor}
 \caption{Evil Maid Patch: Backdoor}

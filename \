@@ -1,0 +1,58 @@
+\documentclass[12pt]{report}
+\usepackage{southesis}
+\usepackage{listings}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{courier}
+\usepackage{caption}
+
+% So that we don't enter silly interactive mode in pdflatex
+\nonstopmode
+
+% Prevent orphans and widows at all cost (does not affect lists, so wrap those in vboxes)
+\widowpenalty=10000
+\clubpenalty=10000
+
+% Default path to images
+\graphicspath{{./figures/}}
+
+% Format code examples
+\lstset{ 
+basicstyle=\textbf\ttfamily\footnotesize,       % the size of the fonts that are used for the code
+numbers=left,
+numberstyle=\scriptsize,
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,                   % adds a frame around the code
+tabsize=2,              	% sets default tabsize to 2 spaces
+captionpos=b,                   % sets the caption-position to bottom
+breaklines=true,        	% sets automatic line breaking
+breakatwhitespace=false,    	% sets if automatic breaks should only happen at whitespace
+numbersep=5pt,
+framexrightmargin=5pt,
+framexleftmargin=12pt,
+framexbottommargin=4pt,
+}
+
+\begin{document}
+
+\tableofcontents
+\listoftables
+\listoffigures
+
+\include{chapter-introduction}
+\include{chapter-forensics}
+\include{chapter-fde}
+\include{chapter-ecryptfs}
+\include{chapter-future}
+\include{chapter-conclusion}
+
+\bibliography{thesis}
+
+\appendix
+\include{appendix-obtaincode}
+
+
+\end{document}

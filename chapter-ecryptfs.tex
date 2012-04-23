@@ -74,7 +74,7 @@ strengthens the filesystem against offline cryptanalysis. Figure \ref{fig:ecrypt
 		and if a match is found, the appropriate key is retrieved and the file is decrypted.}
 \end{enumerate}
 
-\begin{figure}[!htpb]
+\begin{figure}[htpb]
 \begin{center}
 \includegraphics[scale=0.4]{eCryptfsNormalOperation.png} \end{center}
 \caption{eCryptfs Normal Key Operation} \label{fig:ecryptfsnormal} \end{figure}
@@ -121,7 +121,7 @@ to as global authentication tokens).  When a file is opened, the boundary key fo
 cannot be located, but the master key is available, then the boundary key is derived from the master. This derivation is performed
 when an application is opened for the first time after the device has been unlocked.
 
-\begin{figure}[!htpb] 
+\begin{figure}[htpb] 
 \begin{center}
 \includegraphics[scale=0.4]{eCryptfsBoundaryMode.png}\end{center}
 \caption{eCryptfs Boundary Mode} \label{fig:ecryptfsboundary} \end{figure}
@@ -158,7 +158,7 @@ start all of the system services that make up Android as the user knows it. A ty
 like table \ref{tab:initmount} which tells \texttt{init} to mount the \texttt{system} partition with the mount flags \texttt{wait}, and the mount
 options \texttt{ro}. This is very similar to a standard mount command from a shell, but the syntax is slightly different. This will
 be translated by \texttt{init} into an actual mount call to the kernel. 
-\begin{table}[!htpb]
+\begin{table}[htpb]
 \lstinputlisting{tables/init-mount}
 \caption{Mounting a Filesystem from within \texttt{init.herring.rc}}
 \label{tab:initmount}
@@ -216,7 +216,7 @@ system property \texttt{vold.ecryptfs\_options}, which actually contains the lit
 volume on the device. Table \ref{tab:generate-key} shows the actual code in \texttt{vold} which calls \texttt{libecryptfs} to insert
 the key into the kernel. 
 
-\begin{table}[!htpb]
+\begin{table}[htpb]
 \lstinputlisting{tables/generate-key} 
 \caption{Function added to \texttt{vold} for eCryptfs Key Generation}
 \label{tab:generate-key}
@@ -261,7 +261,7 @@ successfully mounted the encrypted partition and the master key has been inserte
 \texttt{vold.decrypt} is set to the value \texttt{trigger\_post\_fs\_data}. The act of setting this property signals to
 \texttt{init} that the \texttt{post-fs-data} section of \texttt{init.rc} should be run. Triggers are easy to implement, and this one
 is shown in table \ref{tab:post-fs-data-trigger}.  
-\begin{table}[!htpb] 
+\begin{table}[htpb] 
 \lstinputlisting{tables/post-fs-data-trigger} 
 \caption{Trigger in
 \texttt{init} to setup decrypted data partition}
@@ -277,7 +277,7 @@ the reason why \texttt{cryptfs\_generate\_ecryptfs\_key} stored the necessary mo
 section \ref{sec:ecryptfsvold}. The mount function in \texttt{init} has been modified to read the mount options from this system
 property if the filesystem type is ``ecryptfs,'' as shown in table \ref{tab:init-ecryptfs-mount}.
 
-\begin{table}[!htpb] 
+\begin{table}[htpb] 
 \lstinputlisting{tables/init-ecryptfs-mount}
 \caption{Reading eCryptfs mount options from system property} 
 \label{tab:init-ecryptfs-mount}
@@ -361,7 +361,7 @@ the application to secure during device lock. A hard-coded UID is not terribly u
 logic could be added to determine what applications have data that should be protected, as seen in table \ref{tab:mountservice}.
 Ideally, the list would be accessible through a configuration interface presented to the user.
 
-\begin{table}[!htpb]
+\begin{table}[htpb]
 \lstinputlisting{tables/mountservice.java}
 \caption{Clearing Keys from the Mount Service}
 \label{tab:mountservice}
