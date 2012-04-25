@@ -299,50 +299,52 @@ forensically-sound duplicate of an Android device.
 In broad strokes, the acquisition of an Android device is not much different than the acquisition of a desktop computer. 
 The device must be seized, and an image of the device must be created that is as forensically sound as possible.  There are,
 however, several Android specific details that must be addressed.  What follows is an overview of the steps necessary for acquiring
-an Android device, using a phone as an example, partially drawn from Andrew Hoog's book \emph{Android Forensics} \cite{hoog}.
+an Android device, partially drawn from Andrew Hoog's book \emph{Android Forensics} \cite{hoog}.
 
 % Vboxes prevent page breaks between item descriptions and item text
 \begin{description}
 \vbox{\item[Step Zero] Build tools and Document Procedures \hfill \\
 Perhaps it goes without saying, but it is imperative that the acquisition tools and procedures be developed \emph{prior} to acquisition. 
-If the phone is using YAFFS2 as the filesystem (the majority of devices at the time of writing), \texttt{nanddump} should  be used. 
+If the device is using YAFFS2 as the filesystem (the majority of devices at the time of writing), \texttt{nanddump} should  be used. 
 The process of building \texttt{nanddump} from source is described later in the chapter. 
-The Android Debug Bridge, provided with the Android SDK as a means of communicating with the phone over a USB cable, should be installed and tested. }
+The Android Debug Bridge, provided with the Android SDK as a means of communicating with the device over a USB cable, should be installed and tested. }
 
 \vbox{\item[Step One] Initial Seizure \hfill \\
-Regardless of the method used to acquire the phone, it must first be secured in the analyst's possession, physically and
-electronically.  If the phone is unlocked, immediately determine if a passcode is enabled.  Determine, to the best of the analyst's
-ability if the phone is using full disk encryption; if so, do not turn off the phone.  If the phone is encrypted and already off,
-then more creative methods will need to be employed (see chapter \ref{ch:fde}).  The version of Android should be retrieved from the
-settings menu prior to shutting the phone down.  USB should be enabled if possible.  Unless a logical analysis is going to be
-performed, or the phone is encrypted, it should be powered off.  Isolate the phone from the network, either by turning it off or
-placing it in a Faraday bag.}
+Regardless of the method used to acquire the device, it must first be secured in the analyst's possession, physically and
+electronically.  If the device is unlocked at the time of seizure, it should be immediately determined if a passcode or disk
+encryption is enabled. If either protection is enabled, as much data as possible should be acquired while the device is running and
+unlocked.  If the device is encrypted and already off, then more creative methods will need to be employed (see chapter
+\ref{ch:fde}).  The version of Android should be retrieved from the settings menu prior to shutting the device down and USB debugging should be
+enabled if possible.  Unless a logical analysis is going to be performed, or the device is encrypted, it should be powered off.
+Finally, the device should be isolated from the network, either by turning it off or placing it in a Faraday bag.}
 
-\vbox{\item[Step Two] Back at the Lab \hfill \\
+\vbox{\item[Step Two] Unlock the device\hfill \\
 If the device is locked, the password will need to be guessed or bypassed, either through brute-force or a smudge attack.  A smudge
 attack involves reading the residual oil patterns off of a touch screen in order to determine the unlock pattern or PIN
 \cite{smudge}. The SIM card should be removed and analyzed separately, though SIM cards used in Android devices do not make
-particularly interesting pieces of evidence as the majority of data is stored on the phone itself.  If removable, the SD card should
-also be removed and analyzed separately (in the same fashion as a thumb drive). A sterile (zeroed) SD card should be placed in the
+particularly interesting pieces of evidence, as the majority of data is stored on the device itself.  If removable, the SD card should
+also be removed and analyzed separately (in the same fashion as a thumb drive). A zeroed SD card should be placed in the
 device for storing NAND images. 
 }
  
-\vbox{\item[Step Three] Root the phone \hfill \\
-If the phone does not already have root access enabled, then privilege escalation will be necessary.  A substantial amount of
-research should be done about every device before attempting to obtain root access.  There is a considerable amount of risk of
-damage to the phone, including loss of evidence.  Some phones can be rooted with a minimal footprint, as described later in this
-chapter.  Other phones require more invasive processes.  Any analyst of modest means (i.e. without an exploit development team) is
-at the mercy of the security/hobbyist community for root access. If the phone cannot be rooted, then an image of the phone cannot be
-taken and a logical acquisition will have to suffice. A logical acquisition consists of manually inspecting the phone from the user
-interface, or installing an application that will systematically read unsecured data.}
+\vbox{\item[Step Three] Root the device\hfill \\
+Unless root access has previously been enabled on a device, some sort of privilege escalation is generally required before an image
+of the device can be taken. The fact that exploitation is regularly involved during the process of acquisition startles many, yet it
+can be no other way, because by default Android does not provide root access even to the device owner.  A substantial
+amount of research should be done about the device before attempting to obtain root access, since an incorrectly executed attack can
+lead to inadvertent data loss. Any analyst of modest means (i.e. without an exploit development team) is at the mercy of the
+security and hobbyist communities for rooting methods. If the device cannot be rooted, then an image of the device cannot
+be taken and a logical acquisition will have to suffice. A logical acquisition consists of manually inspecting the device from the
+user interface, or installing an application that will systematically read unsecured data.
+}
 
 \vbox{\item[Step Four] Acquire an image \hfill \\
-Use \texttt{nanddump} to acquire an image of each partition on the phone.  These images should be stored on the sterile SD card that
-was inserted into the phone.  After transferring the images from the SD card to the analyst's machine, they can be carved and
-mounted with \texttt{nandsim} for perusal.} 
+An image of each partition on the device can be acquired with \texttt{nanddump}.  These images should be stored on the sterile SD
+card that was inserted into the device during initial seizure.  After the images have been transferred from the SD card to the
+analyst's machine, they can be carved and mounted with \texttt{nandsim} for perusal.} 
 \end{description}
 
-Acquiring an image of an Android phone's filesystem presents a distinct challenge.  The conventional methods of forensic acquisition
+Acquiring an image of an Android device's filesystem presents a distinct challenge.  The conventional methods of forensic acquisition
 are either inadequate or not available.  One of the most popular tools for acquiring an image of a conventional (spinning disk) hard
 drive is \texttt{dd}, which reads raw data, block by block, from one location and writes it to another, which, when the disk is
 offline, is sufficient to acquire a forensically valid image of the device.  Unfortunately, \texttt{dd} is not sufficient for
@@ -369,7 +371,7 @@ The above characterization is accurate, but leaves a daunting exercise to the re
 
 Unlike \texttt{dd}, \texttt{nanddump} does acquire the OOB area in addition to the data portion of a NAND device.  In Ubuntu,
 \texttt{nanddump} is provided by the \texttt{mtd-utils} package.  The binary that comes with the \texttt{mtd-utils} package is not
-compiled for the ARM processor, however, and so it must be cross-compiled before it can be used on an Android phone.  The following
+compiled for the ARM processor, however, and so it must be cross-compiled before it can be used on an Android device.  The following
 set of steps can be used to create an ARM \texttt{nanddump} binary.  The procedure was tested on Ubuntu 10.04.3 amd64, using version
 20090606 of the \texttt{mtd-utils} source package, and version 2011.03 of the CodeSourcery G++ Lite Edition for ARM (now branded
 Mentor Graphics).  These steps are an adaptation of a guide provided at elinux.org \cite{compilingmtd}.
