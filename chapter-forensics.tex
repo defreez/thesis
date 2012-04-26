@@ -469,18 +469,19 @@ However, CVE-2009-1185 will remain an important case study, despite being fixed 
 Nearly two years after being discovered in mainstream Linux, CVE-2009-1185 remained exploitable in over half of Android devices.
 
 The HTC Slide, which is marketed by T-Mobile as the MyTouch Slide, runs Android 2.1, and is therefore susceptible to CVE-2009-1185. 
-Rooting an HTC Slide using Krahmer's ``exploid" code is a trivial process 
-Get the code on the device, run it, and then turn WiFi on and off.
+Rooting an HTC Slide using Krahmer's ``exploid" code is not difficult at all. The following steps will obtain root access on a
+MyTouch slide: 
 
 \begin{enumerate}
 	\item Download the exploid source from \url{c-skills.blogspot.com}
 	\item Cross-compile the source file with \texttt{arm-none-linux-gnueabi-gcc}
-	\item \texttt{adb\footnote{This requires the ``Android Debug Bridge'' to have already been installed.} push} the compiled binary to \texttt{/sqlite\_stmt\_journals}
+	\item Push the compiled binary to \texttt{/sqlite\_stmt\_journals}
 	\item \texttt{adb shell}
 	\item \texttt{chmod 700} the pushed binary
 	\item \texttt{./exploid}
+	\item Turn wifi off and back on again
 	\item \texttt{/system/bin/rootshell}
-	\item \texttt{Root privileges have been obtained.}
+	\item {\# Root}
 \end{enumerate}
 
 \subsubsection{Rooting a Nexus One}
@@ -508,7 +509,6 @@ When the maximum number of processes is reached, RageAgainstTheCage kills the \t
 unprivileged, and then forks again to max out the process limit and sends a signal for \texttt{adb} to restart.  \texttt{Adb} will
 restart as root, but because the maximum number of shell process has been reached, \texttt{setuid} will fail.  \texttt{Adb} does not
 check the return value, and as such it continues to run as root.
-
 RageAgainstTheCage is available on Sebastian Krahmer's blog and can be used to root a Nexus One as follows:
 \begin{enumerate}
 	\item Download the RageAgainstTheCage source code
@@ -518,7 +518,7 @@ RageAgainstTheCage is available on Sebastian Krahmer's blog and can be used to r
 	\item \texttt{chmod 700 /data/local/tmp/rageagaisntthecage}
 	\item \texttt{./rageagainstthecage}
 	\item Wait for ADB session to end. When it ends, reconnect adb shell
-	\item \texttt{Root privileges have been obtained.}
+	\item {\# Root}
 \end{enumerate}	
 
 \section{Accessing a Nanddump Image}
