@@ -134,7 +134,7 @@ password out over the network.
 \begin{table}[htpb]
 \lstinputlisting{tables/evilmaid-storepass.c}
 \label{tab:storepass}
-\caption{Evil Maid Patch: Store WhisperYAFFS Unlock Password}
+\caption{Evil maid patch: store unlock password}
 \end{table}
 
 The system partition, while a conveniently accessible location for writing during unlock, cannot be read offline.  When the
@@ -145,7 +145,7 @@ password, then read the saved password from disk.  The partition is decrypted an
 \begin{table}[htpb]
 \lstinputlisting{tables/evilmaid-backdoor.c}
 \label{tab:backdoor}
-\caption{Evil Maid Patch: Backdoor}
+\caption{Evil maid patch: backdoor}
 \end{table}
 
 Finally, switching out the kernel will change the ``vermagic'' string.\footnote{The vermagic string identifies the kernel version

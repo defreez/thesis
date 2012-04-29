@@ -140,7 +140,7 @@ YAFFS1 has the following information associated with it:
 
 YAFFS1 relies on the Linux kernel's Memory Technology Device (MTD) driver to provide an interface to the actual NAND device.  The
 Linux MTD presents the NAND device as a series of pages (usually 2kB), similar to blocks on a conventional hard disk.  Each page is
-accompanied by 64 bytes known as the ``Out-of-Band area," or OOB, which is partially used by the MTD itself and partially used by
+accompanied by 64 bytes known as the ``Out-of-band area," or OOB, which is partially used by the MTD itself and partially used by
 the YAFFS1 filesystem. The MTD driver itself uses the OOB area to store error correction data, and additionally defines an area that
 can be used by the filesystem for whatever purposes it chooses, called the OOBFREE area.  The layout of the OOB can be seen in the
 \texttt{struct} in Table \ref{tab:oob}, taken from the Android source code. This \texttt{struct} is extremely important for anyone
@@ -148,7 +148,7 @@ attempting to analyze a YAFFS based filesystem.
 
 \begin{table}[htpb]
 \lstinputlisting{tables/oobstruct.c}
-\caption{Out-of-Band Area (OOB) \texttt{struct}}
+\caption{Out-of-band area (OOB) structure}
 \label{tab:oob}
 \end{table}
 
@@ -210,7 +210,7 @@ entries for not only bookmarks but browser history as well.  The searches table 
 	\hline
 	\end{tabular}
 \end{center}
-	\caption{Bookmarks Table Schema}
+	\caption{Bookmarks table schema}
 	\label{tab:bookmarkschema}
 \end{table}
 
@@ -246,7 +246,7 @@ SQLite record.  The \texttt{backStep} function is shown in table \ref{tab:backst
 
 \begin{table}[htpb]
 \lstinputlisting{tables/backstep.py}
-\caption{SQLite Carving Backstep Function}
+\caption{SQLite carving ``backstep'' function}
 \label{tab:backstep}
 \end{table}
 
@@ -400,7 +400,7 @@ used, though, the analyst performing the acquisition needs root access.
 
 \begin{table}[htpb]
 \lstinputlisting{tables/codesourcery.sh}
-\caption{Installing CodeSourcery and Building nanddump}
+\caption{Installing CodeSourcery and building nanddump}
 \label{tab:nanddump}
 \end{table}
 

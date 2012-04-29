@@ -159,7 +159,7 @@ options \texttt{ro}. This is very similar to a standard mount command from a she
 be translated by \texttt{init} into an actual mount call to the kernel. 
 \begin{table}[htpb]
 \lstinputlisting{tables/init-mount}
-\caption{Mounting a Filesystem from within \texttt{init.herring.rc}}
+\caption{Mounting a filesystem from within init.herring.rc}
 \label{tab:initmount}
 \end{table}
 
@@ -215,7 +215,7 @@ the key into the kernel.
 
 \begin{table}[htpb]
 \lstinputlisting{tables/generate-key} 
-\caption{Function added to \texttt{vold} for eCryptfs Key Generation}
+\caption{Function added to vold for eCryptfs key generation}
 \label{tab:generate-key}
 \end{table}
 
@@ -260,8 +260,7 @@ successfully mounted the encrypted partition and the master key has been inserte
 is shown in table \ref{tab:post-fs-data-trigger}.  
 \begin{table}[htpb] 
 \lstinputlisting{tables/post-fs-data-trigger} 
-\caption{Trigger in
-\texttt{init} to setup decrypted data partition}
+\caption{Trigger in init to setup decrypted data partition}
 \label{tab:post-fs-data-trigger} 
 \end{table} 
 An attempt is made every boot to mount
@@ -360,7 +359,7 @@ Ideally, the list would be accessible through a configuration interface presente
 
 \begin{table}[htpb]
 \lstinputlisting{tables/mountservice.java}
-\caption{Clearing Keys from the Mount Service}
+\caption{Clearing keys from the mount service}
 \label{tab:mountservice}
 \end{table}
 

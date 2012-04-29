@@ -6,6 +6,7 @@
 \usepackage{float}
 \usepackage{courier}
 \usepackage{caption}
+\usepackage[titletoc]{appendix}
 
 % So that we don't enter silly interactive mode in pdflatex
 \nonstopmode
@@ -53,8 +54,9 @@ xrightmargin=5pt,		% equal to framexrightmargin
 
 \bibliography{thesis}
 
-\appendix
+\begin{appendices}
 \include{appendix-obtaincode}
+\end{appendices}
 
 
 \end{document}
