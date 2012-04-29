@@ -21,14 +21,15 @@ many drivers for Nexus devices have been made available.  The consumer builds fo
 are much closer to AOSP than the builds shipped with other models, which often come loaded with third-party applications and
 modifications to the underlying operating system.
 
-Before diving into the details of Android forensics, it is important to understand how Android storage is laid out.
-The majority of Android devices have two storage devices: an SD card\footnote{Often an actual, removable SD card is provided with
-the phone. Newer devices, however, appear to be trending toward providing an emulated SD card from internal storage.} that is
-formatted with a FAT filesystem, and an internal NAND flash that is formatted \texttt{YAFFS2} or \texttt{ext4}, with newer models
-preferring \texttt{ext4}.\footnote{There are notable exceptions, such as the Samsung Galaxy S, which uses a proprietary filesystem called RFS.} The SD
-card provides a wealth of forensic artifacts, as it is typically on the SD card where large media files such as pictures and music
-are stored.  Applications can choose to make use of the SD card for their internal data storage, as well.  Despite its importance,
-this paper will not discuss FAT forensics, as it has been discussed at great length elsewhere \cite{carrier}. 
+Before diving into the details of Android forensics, it is important to understand how Android storage is laid out.  The majority of
+Android devices have two storage devices: an SD card\footnote{Often an actual, removable SD card is provided with the phone. Newer
+devices, however, appear to be trending toward providing an emulated SD card from internal storage.} that is formatted with a FAT
+filesystem, and an internal NAND\footnote{NAND is a type of non-volatile flash memory that is commonly used for file storage.} chip
+that is formatted \texttt{YAFFS2} or \texttt{ext4}, with newer models preferring \texttt{ext4}.\footnote{There are notable
+exceptions, such as the Samsung Galaxy S, which uses a proprietary filesystem called RFS.} The SD card provides a wealth of forensic
+artifacts, as it is typically on the SD card where large media files such as pictures and music are stored.  Applications can choose
+to make use of the SD card for their internal data storage, as well.  Despite its importance, this paper will not discuss FAT
+forensics, as it has been discussed at great length elsewhere \cite{carrier}. 
 
 Depending on the particular device, Android 2.3 has up to six partitions, excluding external storage: \texttt{boot}, \texttt{system}, \texttt{cache}, \texttt{userdata},
 \texttt{recovery} and \texttt{misc}. 
