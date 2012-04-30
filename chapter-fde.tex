@@ -1,9 +1,7 @@
-\chapter{Android Evil Maid}
+\chapter{Android Evil Maid\protect\footnote{ This chapter is adapted from an article originally posted on the author's personal
+website. It was posted there first to provide a timely commentary on secure boot environments. It remains, as far as the author is
+aware, the only demonstrated evil maid attack on Android \protect\cite{androidevilmaid}.}}
 \label{ch:fde}
-
-\emph{This chapter is adapted from an article originally posted on the author's personal website. It was posted there first to
-provide a timely commentary on secure boot environments. It remains, as far as the author is aware, the only demonstrated evil maid
-attack on Android \cite{androidevilmaid}.}
 
 There is, it would seem, an obvious method of protecting data against the forensic inquiry outlined in chapter \ref{ch:forensics}.
 Full Disk Encryption (FDE) is generally regarded as the best way to protect data in the event a device falls into the wrong hands,
@@ -27,9 +25,9 @@ leaving a device unguarded.
 
 Chapter \ref{ch:introduction} asserted that three conditions were necessary for encryption to succeed as a privacy-preserving tool.
 \begin{enumerate}
-	\item{The encryption passphrase must be strong}
-	\item{An attacker cannot have access to the device before it used}
-	\item{An attacker cannot have access to the device while it is running}
+	\item{The encryption passphrase must be strong.}
+	\item{An attacker cannot have access to the device before it used.}
+	\item{An attacker cannot have access to the device while it is running.}
 \end{enumerate}
 A fourth condition might be added, which is that the attacker is not willing to extract the key through force, what the security
 industry likes to call ``rubber-hose'' cryptanalysis \cite{rubberhose}.  The first item is mostly self-explanatory. If a phone is
@@ -37,23 +35,22 @@ encrypted with the PIN ``1111'' then it does not matter how secure the implement
 third item will be discussed in chapter \ref{ch:ecryptfs}.  It is the second condition that will now be taken up. 
 
 \section{Evil Maid}
-
-Encryption has been exceedingly successful at protecting data at rest, but implementations often remain susceptible to a class of boot-time
-attacks collectively referred to as "evil maid" attacks \cite{schneiermaid}. The typical scenario proposed for an evil maid attack
-involves a person traveling with an encrypted computer. Typically the computer is a laptop, but it could be a phone or tablet.
-While the traveler is away from his or her room, an eponymous Evil Maid comes in to clean. The data on the
-device cannot be read because it is encrypted, so the Evil Maid installs a boot-time keylogger. This keylogger could take any form,
-hardware or software, but most often it takes the form of a small piece of software installed to the unencrypted boot portion of a
-drive. When the traveler returns and decrypts the drive, the keylogger reads the FDE password as it is typed. The password could be
-saved somewhere else on the drive for the Evil Maid to retrieve later, or immediately sent out over the network.
-This is made possible by the fact that full disk encryption is something of a misnomer.  Entire partitions are often left
-unencrypted if they do not contain user data.  The bootloader itself may be signed or encrypted, offering a degree of protection
-against evil maid attacks, but doing so isn't foolproof \cite{attackingbitlocker} and comes at the price of locking down the
-hardware. Moreover, even if the boot code itself is protected, the device could be physically modified. There is, when it comes
-down to it, absolutely no way to protect against an evil maid attack.  The reality of the situation is that for those truly
-concerned about privacy, if an electronic device is ever out of their hands, it should be destroyed. There are simply too many ways
-that an adversary might tamper with the device.\footnote{Even if the software is completely secure, the device could be physically
-modified to record a passhprase as it is entered.} This chapter describes one of them.
+Encryption has been exceedingly successful at protecting data at rest, but implementations often remain susceptible to a class of
+boot-time attacks collectively referred to as "evil maid" attacks \cite{schneiermaid}. The typical scenario proposed for an evil
+maid attack involves a person traveling with an encrypted computer. Typically the computer is a laptop, but it could be a phone or
+tablet.  While the traveler is away from his or her room, an eponymous Evil Maid comes in to clean. The data on the device cannot be
+read because it is encrypted, so the Evil Maid installs a boot-time keylogger. This keylogger could take any form, hardware or
+software, but most often it takes the form of a small piece of software installed to the unencrypted boot portion of a drive. When
+the traveler returns and decrypts the drive, the keylogger reads the FDE password as it is typed. The password could be saved
+somewhere else on the drive for the Evil Maid to retrieve later, or immediately sent out over the network.  This is made possible by
+the fact that full disk encryption is something of a misnomer.  Entire partitions are often left unencrypted if they do not contain
+user data.  The bootloader itself may be signed or encrypted, offering a degree of protection against evil maid attacks, but doing
+so isn't foolproof \cite{attackingbitlocker} and comes at the price of locking down the hardware. Moreover, even if the boot code
+itself is protected, the device could be physically modified. There is, when it comes down to it, absolutely no way to protect
+against an evil maid attack.  For those truly concerned about privacy, if an electronic device is ever out of their hands it should
+be destroyed. There are simply too many ways that an adversary might tamper with the device. This chapter describes
+one.\footnote{Even if the device's software is completely secure, the device itself could be physically modified to record a
+passhprase as it is entered.}
 
 Against a desktop or laptop computer, evil maid attacks are typically implemented by booting from an alternate device, such as a
 thumb drive in Joanna Rutkowska's classic attack against TrueCrypt \cite{evilmaid}.  Mobile devices offer natural protection against evil
@@ -76,8 +73,8 @@ prevent an SSL connection from any application using even an intermediate DigiNo
 
 Deploying WhisperCore to a phone necessarily involves unlocking the bootloader.  The Nexus series of phones use the HBOOT
 bootloader, which uses the fastboot protocol to communicate with a computer connected via USB.  Nexus phones are popular in the
-Android community not only because they provide a ``pure" Android experience, but because they have easily unlockable bootloaders.
-To unlock a Nexus phone, simply connect it to a computer which has the fastboot utility installed and issue one command:
+Android community not only because they provide a ``pure" Android experience, but because they have bootloaders which can be easily
+unlocked.  To unlock a Nexus One, connect it to a computer which has the \texttt{fastboot} utility installed and issue one command:
 \texttt{fastboot oem unlock}.
 
 Unlocking the bootloader wipes the phone and activates fastboot extended commands, enabling a user to flash custom images on the
@@ -90,19 +87,18 @@ possible, leaving the device susceptible to evil maid attacks.
 \subsection{WhisperYAFFS}
 WhisperCore includes two separate FDE implementations, one for the Nexus One and one for the Nexus S. WhisperCore on the Nexus
 One implements an encryption layer on top of YAFFS2, which is the native filesystem.  On the Nexus S, where ext4 is the native
-filesystem, DM-Crypt (device-mapper crypto target) is used, which is a block-level encryption layer, rather than a cryptographic
-filesystem (see chapter \ref{ch:ecryptfs} for more on the difference between block-level an file-level encryption).  DM-Crypt is the
+filesystem, DM-Crypt (device-mapper crypto target), which is a block-level encryption layer, is used rather than a cryptographic
+filesystem (see chapter \ref{ch:ecryptfs} for more on the difference between block-level and file-level encryption).  DM-Crypt is the
 same encryption mechanism that Google uses for Android devices that support FDE, and often how Linux desktops are encrypted.  The
 rest of this section will focus on WhisperCore as it exists running on a Nexus One phone.
 
-YAFFS2 does not normally support encryption.  Android is moving toward \texttt{ext4} on top of hardware
-wear-leveling, but the vast majority of devices running Android still use YAFFS2.  In order to provide encryption for devices using
-YAFFS2, Whisper Systems, impressively, developed an extension to YAFFS2 providing encryption at the page level.  This extended
-version of YAFFS2 is branded WhisperYAFFS and, unlike the rest of WhisperCore, is released as open source software (likely by
-necessity, as YAFFS2 is distributed under the GPL unless a special license is obtained from Aleph One).
+YAFFS2 does not normally support encryption.  Android is moving toward \texttt{ext4} on top of hardware wear-leveling, but the vast
+majority of devices running Android still use YAFFS2.  In order to provide encryption for devices using YAFFS2, Whisper Systems,
+impressively, developed an extension to YAFFS2 providing encryption at the page level.  This extended version of YAFFS2 is branded
+WhisperYAFFS and, unlike the rest of WhisperCore, is released as open source software.
 
 Because the source code for WhisperYAFFS is freely available \cite{whisperyaffs}, building an Android kernel with WhisperYAFFS
-support is relatively straight-forward. The kernel for the Nexus One is contained in the kernel/msm.git project, which contains the
+support is relatively straightforward. The kernel for the Nexus One is contained in the kernel/msm.git project, which contains the
 Android kernel that runs on Qualcomm chipsets.  The WhisperYAFFS code is a full replacement for YAFFS2 in the kernel; in the kernel
 source, the entire \texttt{fs/yaffs2} directory can be removed and replaced with WhisperYAFFS.  For our purposes, the most
 interesting portion of WhisperYAFFS to examine is in \texttt{yaffs\_vfs\_glue.c}.  This is where WhisperYAFFS (and YAFFS2 before it)
@@ -123,12 +119,12 @@ of the kernel, which conveniently uses the Android build system for cross-compil
 WhisperYAFFS is sufficient to boot WhisperCore.
 
 In order to retrieve the unlock password, a little bit of code is tacked on to the \texttt{yaffs\_UnlockEncryptedFilesystem}
-function in \texttt{yaffs\_vfs\_glue.c}. A section is added which reads the password as the user enters it and writes it
-out to a file on the unencrypted system partition.  The SD card would have been the first choice for a location to store the
-password, but WhisperCore contains an option to encrypt the SD card as well. The system partition is normally read-only, so it is
-first remounted read-write. The password is written to \texttt{/system/etc/em.txt}, though the location is arbitrary. After the password has
-been written, the system partition is remounted RO. Any number of different approaches could be taken to write the password out to a
-more subtle location that could be read later, perhaps in an area out of band from the normal filesystem, or to even send the
+function in \texttt{yaffs\_vfs\_glue.c}. A section is added which reads the password as the user enters it and writes it out to a
+file on the unencrypted system partition.  The SD card would have been the first choice for a location to store the password, but
+WhisperCore contains an option to encrypt the SD card as well. The system partition is normally read-only (RO), so it is first
+remounted read-write. The password is written to \texttt{/system/etc/em.txt}, though the location is arbitrary. After the password
+has been written, the system partition is remounted RO. Any number of different approaches could be taken to write the password out
+to a more subtle location that could be read later, perhaps in an area out of band from the normal filesystem, or to even send the
 password out over the network. 
 
 \begin{table}[htpb]
@@ -139,8 +135,8 @@ password out over the network.
 
 The system partition, while a conveniently accessible location for writing during unlock, cannot be read offline.  When the
 hypothetical evil maid returns to collect the device, \texttt{/system} will not be available because the device does not have USB
-debugging enabled.  How then, does the evil maid retrieve the password? Hardcode a backdoor.  If the user enters "evilmaid" as the
-password, then read the saved password from disk.  The partition is decrypted and the phone boots normally. 
+debugging enabled.  How then, does the evil maid retrieve the password? Hardcode a backdoor.  If the user enters ``evilmaid" as the
+password, then the saved password is read from disk.  The partition is decrypted and the phone boots normally. 
 
 \begin{table}[htpb]
 \lstinputlisting{tables/evilmaid-backdoor.c}
@@ -171,7 +167,7 @@ To recap, the following steps will successfully perform an evil maid attack agai
 		\item{Obtain the evil kernel.}
 		\item{Build the kernel with \texttt{build-kernel.sh} (requires functioning Android build environment, and assumes
 			the kernel is in a subdirectory of AOSP root).}
-		\item{Unpack the WhisperCore boot image with exbootimg.}
+		\item{Unpack the WhisperCore boot image with \texttt{exbootimg}.}
 		\item{Pack an evil maid boot image with \texttt{mkbootimg} using the evil maid kernel and the WhisperCore ramdisk.}
 		\item{When the target is away, flash the new boot image.}
 		\item{Wait for the target to decrypt the phone.}
@@ -182,7 +178,7 @@ To recap, the following steps will successfully perform an evil maid attack agai
 \section{Conclusion}
 While the Android community has a tendency to ridicule locked bootloaders, securing the boot environment significantly mitigates
 offline attacks against "Full Disk Encryption" (FDE).  Unfortunately, the methods typically used to secure the Android boot
-environment have not taken into account the need to protect 3rd party images.  This is demonstrated by the differing resilience to
+environment have not taken into account the need to protect third party images.  This is demonstrated by the differing resilience to
 evil maid attacks exhibited by WhisperCore on the Nexus One and the Nexus S.  On the Nexus One, WhisperCore is incapable of
 defending against an evil maid attack because the bootloader must remain unlocked.  On the Nexus S, which allows for the bootloader
 to be relocked with custom images, an evil maid attack would not be easy to execute.  Attacks such as these, or simply the use of
