@@ -125,7 +125,7 @@ browser cache leaves browser history discoverable.
 
 The browser history on an Android device is stored in the \texttt{browser.db} database.  In a vanilla distribution of Android , this
 database is stored in the \texttt{/data/data/com.android.browser/databases} directory.  Oddly enough, the browser history is stored
-in the bookmarks table.  The screen clipping in figure \ref{fig:bookmarkschema} shows the bookmarks table as it is seen in SQLite
+in the bookmarks table.  The screen clipping in Figure \ref{fig:bookmarkschema} shows the bookmarks table as it is seen in SQLite
 browser.  Bookmarks and page visits are stored nearly identically by the Android browser, with the bookmark integer being set to 0
 if it is a normal page visit and to 1 if the URL is a bookmark.  Bookmarks also commonly store thumbnails of the saved page.
 \begin{figure}[htpb]

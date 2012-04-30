@@ -82,7 +82,7 @@ The output of \texttt{adb devices} from a machine with one Android phone attache
 \label{fig:adbdevices}
 \end{figure}
 
-Opening a shell and displaying the contents of \texttt{/proc/mtd} results in output similar to figure \ref{fig:mtd}.  MTD is the
+Opening a shell and displaying the contents of \texttt{/proc/mtd} results in output similar to Figure \ref{fig:mtd}.  MTD is the
 kernel driver in Linux that is responsible for providing the abstraction layer that is between filesystems and \emph{Memory
 Technology Devices}, i.e. NAND flash. YAFFS2 is a consumer of the MTD interface, and \texttt{/proc/mtd} lists all of the active MTD
 partitions. 
@@ -243,7 +243,7 @@ that the byte after the header size must by definition be zero is used as a sani
 
 This project implemented SQLite validation in Python, using two functions.  One function ``backsteps'' from a given signature
 passing progressively larger slices to a validation function.  The validation function returns whether or not the slice could be a
-SQLite record.  The \texttt{backStep} function is shown in table \ref{tab:backstep}. 
+SQLite record.  The \texttt{backStep} function is shown in Table \ref{tab:backstep}. 
 
 \begin{table}[htpb]
 \lstinputlisting{tables/backstep.py}
