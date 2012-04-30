@@ -11,7 +11,7 @@ As Dan Kaminsky once tweeted, ``The game is not to secure you, or me. Security f
 cone.'' What follows are a few ideas for future work.
 
 \subsection{Configurable Application Security}
-There is, as it stands, no way to configure which applications will have their boundary keys cleared when the device sleeps. 
+There is, as it stands, no way to configure which applications will have their boundary keys cleared when a device sleeps. 
 Each application \texttt{uid} and package name must be hardcoded, which is only meant to demonstrate that the 
 boundary keys do function. A user interface would be beneficial. This interface could tie to the ``manage applications'' menu and
 should provide an easy, intuitive way for the user to select which applications will be protected while the device is locked.
@@ -75,9 +75,9 @@ As of yet, there has been little exploration of the possibility of a memory-only
 
 \section{Validating Privacy Tools}
 All forensic tools must be validated before they are considered to be of any value. Privacy tools should be held to the same
-standard, but there is very little literature on validating privacy tools. This section outlines what it might mean to validate a
-privacy tool and gives an example. Validating privacy tools is one of the most important steps the security community could take
-toward enhancing the privacy of users.
+standard, but there is very little literature on validating privacy tools.  Validating privacy tools is one of the most important
+steps the security community could take toward enhancing the privacy of users.  This section outlines what it might mean to validate
+a privacy tool and gives an example. 
 
 If a given forensic tool exists that can retrieve a known artifact, the corresponding privacy tool should prevent the retrieval of
 that artifact. For purposes of this section, the forensic tool retrieving data is called the reference tool. When developing tests
@@ -90,10 +90,10 @@ is primarily a legal argument for using open-source acquisition and extraction t
 direct counterparts in the privacy arena and can be used as general guidelines here.  Every forensic tool must pass, in a repeatable
 fashion, tests which demonstrate that it does retrieve the information the tool purports to retrieve.  If a forensic tool claims to
 recover browser history, for example, it may be tested by salting a device with known browser history and attempting to retrieve the
-data with the tool.  As noted by Carrier, The NIST Computer Forensic Tool Testing (CFTT) group publishes a wide variety of test
-methodologies and the results of those tests.  While CFTT tests provide good reference material, and provide detailed tests for
-classic forensic techniques such as disk imaging, none of their published documents provide a specific testing methodology for
-modern smart-phones. 
+data with the tool.  As noted by Carrier, The National Institute of Standards and Technology (NIST) Computer Forensic Tool Testing
+(CFTT) group publishes a wide variety of test methodologies and the results of those tests.  While CFTT tests provide good reference
+material, and provide detailed tests for classic forensic techniques such as disk imaging, none of their published documents provide
+a specific testing methodology for modern smart-phones. 
 
 While a reference tool may be developed specifically for the purpose of developing a privacy tool, doing so increases the risk of
 insufficient or biased testing.  Any reference tool developed purely for the purpose of testing a privacy tool is suspect, as the
@@ -138,7 +138,7 @@ Nearly every person who has ever used a browser is now aware that browsers keep 
 come with a mechanism to erase this history, but few are aware of the ineffectiveness of deleting browser history.  Many an
 investigation has turned on a forensic analyst's ability to recover deleted browser history records.  Moreover, any system which
 requires the user to remember to clear their browser history is bound to fail.  The most obvious solution is to simply disable
-browser history.  It may or may not be more desirable to keep a temporary, memory-only browser history history during the browser
+browser history.  It may or may not be more desirable to keep a temporary, memory-only browser history during the browser
 session, but disabling is more straightforward and more secure.  The pertinent code is in the browser provider, and the function in
 table \ref{tab:incognito} disables all inserts into the history database.
 
@@ -150,20 +150,20 @@ table \ref{tab:incognito} disables all inserts into the history database.
 
 It is a less than subtle, but effective, hack.  By blowing away the \texttt{updateVisitedHistory} method and immediately returning,
 the user is guaranteed that the browser history database will never be written to.  This is, in essence, what the ``Incognito Mode"
-in the popular CyanogenMod ROM does. The above method was tested side-by-side with CyanogenMod 7.
+in the popular CyanogenMod ROM does. This was tested side-by-side with CyanogenMod 7 incognito mode using the following method:
 
 \begin{enumerate}
-\item \url{www.slashdot.org} was chosen as the site for salting the device
-\item The browser history was visually inspected in the browser itself
-\item The browser database was pulled with \texttt{adb}
-\item A case-insensitive substring search of the entire data partition was performed with the Linux \texttt{strings} utility
-\item A \texttt{nanddump} was carved for deleted SQLite records containing browser history
-\item The absence of references to the salt site was confirmed
-\item The native Android browser was opened, and only \url{www.slashdot.org} was visited
-\item The browser history was pulled from the device in the same manner as above
-\item It was confirmed that there are references to the salt site
-\item Repeated for device running CyanogenMod 7 (visiting \url{www.slashdot.org} with incognito mode enabled) and analyzed acquired data
-\item Repeated for device running the custom history bypass and analyzed acquired data
+\item \url{www.slashdot.org} was chosen as the site for salting the device.
+\item The browser history was visually inspected in the browser itself.
+\item The browser database was pulled with \texttt{adb}.
+\item A case-insensitive substring search of the entire data partition was performed with the Linux \texttt{strings} utility.
+\item A \texttt{nanddump} was carved for deleted SQLite records containing browser history.
+\item The absence of references to the salt site was confirmed.
+\item The native Android browser was opened, and only \url{www.slashdot.org} was visited.
+\item The browser history was pulled from the device in the same manner as above.
+\item It was confirmed that there are references to the salt site.
+\item Repeated for device running CyanogenMod 7 (visiting \url{www.slashdot.org} with incognito mode enabled) and analyzed acquired data.
+\item Repeated for device running the custom history bypass and analyzed acquired data.
 \end{enumerate}
 
 As expected, after the data partition is wiped there is no information in the browser history.  The browser database itself is
@@ -187,7 +187,8 @@ stock Gingerbread and CyanogenMod 7.
 In order to validate that the browser cache is prevented from being written to disk, attempts to retrieve the cache will be made using
 \texttt{adb}.  It has been established elsewhere that once data is written to flash, there is a high probability of recovery even if
 the data is deleted \cite{naval}. The database \texttt{/data/data/com.android.browser/databases/webviewCache.db} contains the index of the
-browser cache, and \texttt{/data/data/com.android.browser/cache/webviewCache} and subdirectories contains the actual cache files. 
+browser cache, and \texttt{/data/data/com.android.browser/cache/webviewCache} and subdirectories contains the actual cache files.
+The following test method was used:
 
 \begin{enumerate}
 \item \url{www.slashdot.org} was  the chosen site for salting the device
@@ -226,27 +227,27 @@ Chapter \ref{ch:fde} introduced full-disk encryption in WhisperCore, but there a
 
 \subsubsection{Orbot and Orweb}
 
-Orbot is an implementation of Tor for Android. Tor stands for ``the onion router,'' and is an implementation of onion routing,
-which was patented by the United States Navy in the late 1990s.  Onion routing works by randomly routing traffic through a series of
-relays, encrypting the traffic in a series of layers, one for each relay (like an onion). Routers in the Tor network know which
-router a packet came from, and which router is next, but nothing else. The entrance and exit routers can see the content of the
-message, but are unaware of the destination and source, respectively. This allows for relatively anonymous internet connections, and
-has been used worldwide to access the internet in countries which censor the internet. Orbot works on a non-rooted Android phone,
-but is much easier to configure if the device has root access available. Because users often betray their identity through their
-browser, even when using Tor, the Tor project ships a configured version of Firefox that is tailored for privacy. The Android
+Orbot is an implementation of Tor for Android. Tor stands for ``the onion router,'' and is an implementation of onion routing, which
+was patented by the United States Navy in the late 1990s.  Onion routing works by randomly routing traffic through a series of
+relays, encrypting the traffic in a series of layers, one for each relay (like layers in an onion). Routers in the Tor network know
+which router a packet came from, and which router is next, but nothing else. The entrance and exit routers can see the content of
+the message, but are unaware of the destination and source, respectively. This allows for relatively anonymous internet connections,
+and has been used worldwide to access the internet in countries which censor the internet. Orbot works on a non-rooted Android
+phone, but is much easier to configure if the device has root access available. Because users often betray their identity through
+their browser, even when using Tor, the Tor project ships a configured version of Firefox that is tailored for privacy. The Android
 equivalent of the Tor browser is Orweb.
 
 
 \subsubsection{TextSecure}
 
 Whisper Systems, which was acquired by Twitter in late 2011, produced a number of other great projects that were included with
-WhisperCore. RedPhone was one of these. It provided an Android implementation of encrypted voice traffic, utilizing ZRTP.
-Unfortunately the RedPhone service was shutdown after Whisper Systems was acquired by Twitter. TextSecure, however, was
-open-sourced. TextSecure provides encrypted SMS messaging for Android using the Off-the-Record (OTR) protocol. OTR is wonderfully
-clever.It gets its name from ``off the record'' journalism sourcing, where the source remains anonymous. In OTR, in addition to
-traditional encryption, two features are included: perfect forward secrecy and deniability. Perfect forward secrecy uses
-temporary session keys that are not reproducible if the master key is compromised. So, if Alice sends a message to Bob, and at a
-later date the NSA compromises either Alice or Bob's key (or both), the conversation cannot be recreated.  Deniability refers to the
+WhisperCore. RedPhone was one of these. It provided an Android implementation of encrypted voice traffic.  Unfortunately the
+RedPhone service was shutdown after Whisper Systems was acquired by Twitter. TextSecure, however, was open-sourced. TextSecure
+provides encrypted SMS messaging for Android using the Off-the-Record (OTR) protocol. OTR is wonderfully clever. It gets its name
+from ``off the record'' journalism sourcing, where the source remains anonymous. In OTR, in addition to traditional encryption, two
+features are included: perfect forward secrecy and deniability. Perfect forward secrecy uses temporary session keys that are not
+reproducible if the master key is compromised. So, to return to our earlier xample, if Alice sends a message to Bob, and at a later
+date the NSA compromises either Alice's or Bob's key (or both), the conversation cannot be recreated.  Deniability refers to the
 ability of the participants in a conversation to deny that the conversation ever happened. In OTR, the participants are able to
 authenticate each other during the conversation, but a third-party cannot prove that the conversation occurred. To be clear, it can
 be established that \emph{a} conversation occurred between the two participants, but the contents of that conversation cannot be
