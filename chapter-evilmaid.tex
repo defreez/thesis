@@ -127,7 +127,7 @@ has been written, the system partition is remounted RO. Any number of different 
 to a more subtle location that could be read later, perhaps in an area out of band from the normal filesystem, or to even send the
 password out over the network. 
 
-\begin{table}[htpb]
+\begin{table}[htb]
 \lstinputlisting{tables/evilmaid-storepass.c}
 \label{tab:storepass}
 \caption{Evil maid patch: store unlock password}
@@ -138,7 +138,7 @@ hypothetical evil maid returns to collect the device, \texttt{/system} will not 
 debugging enabled.  How then, does the evil maid retrieve the password? Hardcode a backdoor.  If the user enters ``evilmaid" as the
 password, then the saved password is read from disk.  The partition is decrypted and the phone boots normally. 
 
-\begin{table}[htpb]
+\begin{table}[htb]
 \lstinputlisting{tables/evilmaid-backdoor.c}
 \label{tab:backdoor}
 \caption{Evil maid patch: backdoor}

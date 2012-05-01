@@ -26,7 +26,7 @@ designed to withstand memory-based attacks. Android does \emph{not} handle the u
 password securely. Table \ref{tab:badhandling} shows the code responsible for retrieving the unlock password from the lock screen
 and running it through \texttt{checkPassword}. The password is stored in a standard Java string, which is \emph{not} a secure
 way to store strings in memory.
-\begin{table}[htpb]
+\begin{table}[htb]
 \lstinputlisting{tables/unlock.java}
 \caption{The wrong way to handle passwords in java}
 \label{tab:badhandling}
@@ -128,7 +128,7 @@ database is stored in the \texttt{/data/data/com.android.browser/databases} dire
 in the bookmarks table.  The screen clipping in Figure \ref{fig:bookmarkschema} shows the bookmarks table as it is seen in SQLite
 browser.  Bookmarks and page visits are stored nearly identically by the Android browser, with the bookmark integer being set to 0
 if it is a normal page visit and to 1 if the URL is a bookmark.  Bookmarks also commonly store thumbnails of the saved page.
-\begin{figure}[htpb]
+\begin{figure}[htb]
 \includegraphics[scale=0.75]{BookmarksSchema.png}
 \caption{Bookmarks table schema in SQLite Browser}
 \label{fig:bookmarkschema}
@@ -142,7 +142,7 @@ browser history.  It may or may not be more desirable to keep a temporary, memor
 session, but disabling is more straightforward and more secure.  The pertinent code is in the browser provider, and the function in
 table \ref{tab:incognito} disables all inserts into the history database.
 
-\begin{table}[htpb]
+\begin{table}[htb]
 \lstinputlisting{tables/incognito.java}
 \caption{Basic incognito mode: bypass history insert}
 \label{tab:incognito}

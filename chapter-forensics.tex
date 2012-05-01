@@ -57,7 +57,7 @@ There are a variety of techniques for bypassing a passcode \cite{hoog, lockscree
 there is no single method that is consistently successful across devices.  A strong passcode remains a significant barrier to
 accessing the information on a device.
 
-\begin{figure}[htpb]
+\begin{figure}[htb]
 \caption{Turning on USB debugging}
 \begin{center}\includegraphics[scale=0.5]{usbdebug.png}\end{center}
 \label{fig:usbdebug}
@@ -76,7 +76,7 @@ When \texttt{adb} is first run, it starts a service that is then used to connect
 Once the \texttt{adb} service is started, a list of attached Android devices can be shown using the command \texttt{adb devices}. 
 The output of \texttt{adb devices} from a machine with one Android phone attached is shown in Figure \ref{fig:adbdevices}.
 
-\begin{figure}[htpb]
+\begin{figure}[htb]
 \caption{ADB connected devices}
 \begin{center}\includegraphics[scale=0.6]{adbdevices.png}\end{center}
 \label{fig:adbdevices}
@@ -87,7 +87,7 @@ kernel driver in Linux that is responsible for providing the abstraction layer t
 Technology Devices}, i.e. NAND flash. YAFFS2 is a consumer of the MTD interface, and \texttt{/proc/mtd} lists all of the active MTD
 partitions. 
 
-\begin{figure}[htpb]
+\begin{figure}[htb]
 \caption{MTD partition layout of an Android phone}
 \begin{center}\includegraphics[scale=0.6]{procmtd.png}\end{center}
 \label{fig:mtd}
@@ -147,7 +147,7 @@ can be used by the filesystem for whatever purposes it chooses, called the OOBFR
 \texttt{struct} in Table \ref{tab:oob}, taken from the Android source code. This \texttt{struct} is extremely important for anyone
 attempting to analyze a YAFFS based filesystem.
 
-\begin{table}[htpb]
+\begin{table}[htb]
 \lstinputlisting{tables/oobstruct.c}
 \caption{Out-of-band area (OOB) structure}
 \label{tab:oob}
@@ -190,7 +190,7 @@ at \texttt{/data/data/com.android.browser/databases/browser.db}, and contains th
 \texttt{bookmarks}, and \texttt{searches}.  The bookmarks table contains entries not only for bookmarks but browser history as well.
 The searches table contains search history. 
 
-\begin{table}[htpb]
+\begin{table}[htb]
 \begin {center}
 	\begin{tabular}{| c | c | c |}
 	\hline
@@ -245,7 +245,7 @@ This project implemented SQLite validation in Python, using two functions.  One 
 passing progressively larger slices to a validation function.  The validation function returns whether or not the slice could be a
 SQLite record.  The \texttt{backStep} function is shown in Table \ref{tab:backstep}. 
 
-\begin{table}[htpb]
+\begin{table}[htb]
 \lstinputlisting{tables/backstep.py}
 \caption{SQLite carving ``backstep'' function}
 \label{tab:backstep}
@@ -393,7 +393,7 @@ target is not a good idea in a forensic investigation, as those libraries may be
 be copied to the phone any number of ways, but using \texttt{adb push} is the most straightforward.  Before \texttt{nanddump} can be
 used, though, the analyst performing the acquisition needs root access.
 
-\begin{table}[htpb]
+\begin{table}[htb]
 \lstinputlisting{tables/codesourcery.sh}
 \caption{Installing CodeSourcery and building nanddump}
 \label{tab:nanddump}
@@ -453,7 +453,7 @@ triggering a hotplug event.  When \texttt{udev} spawns another copy of ``exploid
 \texttt{/bin/sh} to \texttt{/bin/rootshell} with setuid root, so that the shell will always execute as root.  It is a beautiful
 piece of work.
 
-\begin{table}[htpb]
+\begin{table}[htb]
 \lstinputlisting{tables/exploid.c}
 \caption{The heart of ``exploid"}
 \label{tab:exploid}
