@@ -142,9 +142,9 @@ primary task of the bootloader is to load the Android kernel into memory and pas
 The Android kernel will initialize the hardware and prepare the device itself for use. On an Android device, the \texttt{boot}
 partition is separated from the \texttt{system} and \texttt{userdata} partitions (see chapter \ref{ch:forensics}). The boot
 partition contains the kernel and a ``ramdisk.''  The ramdisk is a small filesystem that contains the core binaries and
-configuration files needed to start the system. In all Linux-based systems, Android included, \texttt{init} is the ``grandmother''
-of all processes \cite{EneaBoot}. Everything outside of the kernel is launched by \texttt{init} directly or by a process that was
-previously started by \texttt{init}. The Android \texttt{init} process is specialized for Android and does not coincide with
+configuration files needed to start the system. In most Linux-based systems, Android included, \texttt{init} is the ``grandmother''
+of all processes. Everything outside of the kernel is launched by \texttt{init} directly or by a process that was
+previously started by \texttt{init} \cite{eneaboot}. The Android \texttt{init} process is specialized for Android and does not coincide with
 \texttt{init} as it is implemented on any other Linux distribution, thus hereafter \texttt{init} refers to \texttt{init} as it is
 implemented in Android.  The configuration for \texttt{init} is held in two files on the ramdisk, \texttt{init.rc} and
 \texttt{init.PRODUCTNAME.rc} where \texttt{PRODUCTNAME} is the internal name for the board on the device. The Nexus S, for example, is termed
