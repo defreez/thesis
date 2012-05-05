@@ -1,0 +1,9 @@
+[daniel@misdirection ~]$ adb shell
+# cat /proc/mtd
+dev:    size   erasesize  name
+mtd0: 000e0000 00020000 "misc"
+mtd1: 00400000 00020000 "recovery"
+mtd2: 00380000 00020000 "boot"
+mtd3: 09100000 00020000 "system"
+mtd4: 05f00000 00020000 "cache"
+mtd5: 0c440000 00020000 "userdata"

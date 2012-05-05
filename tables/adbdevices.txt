@@ -1,0 +1,3 @@
+[daniel@misdirection ~]$ adb devices
+List of devices attached 
+HT068P900273	device

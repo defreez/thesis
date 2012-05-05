@@ -12,100 +12,98 @@ chapter.
 
 \section{Android File Systems}
 
-The data presented here has been gathered from a Nexus One phone running Android version 2.3 (Gingerbread).  ``Nexus''
+The \texttt{YAFFS2} data presented here has been gathered from a Nexus One phone running Android version 2.3 (Gingerbread), and the
+\texttt{ext4} data has been gathered from a Nexus S phone running Android version 4.0.3 (Ice Cream Sandwich).  ``Nexus''
 devices\footnote{Nexus One, Nexus S, and now Galaxy Nexus} are often favored by developers, as they provide a build of Android that
-is as close as possible to the Android Open Source Project, hereafter referred to as AOSP. While Android is considered by many to be
-an open mobile platform, not everything in Android is open-source. AOSP is that part of Android for which the source code has been
-released.  It includes the majority of features in a consumer build of Android, but notably excludes many of the Google branded
-applications, such as Gmail and the Android Market. Traditionally, AOSP has also excluded proprietary hardware drivers, but recently
-many drivers for Nexus devices have been made available.  The consumer builds for Nexus devices are not based on AOSP, but they
-are much closer to AOSP than the builds shipped with other models, which often come loaded with third-party applications and
+is as close as possible to the Android Open Source Project (hereafter AOSP). While Android is considered by many to be an open
+mobile platform, not everything in Android is open source, meaning the source code for most, but not all, of Android has been
+released for public inspection.  AOSP is that part of Android for which the source code has been released.  It includes the majority
+of features in a consumer build of Android, but notably excludes many of the Google branded applications, such as Gmail and the
+Android Market, as well as many device specific hardware drivers. The consumer builds for Nexus devices are not based on AOSP, but
+they are much closer to AOSP than the builds shipped with other models, which often come loaded with third-party applications and
 modifications to the underlying operating system.
 
-Before diving into the details of Android forensics, it is important to understand how Android storage is laid out.  The majority of
-Android devices have two storage devices: an SD card\footnote{Often an actual, removable SD card is provided with the phone. Newer
-devices, however, appear to be trending toward providing an emulated SD card from internal storage.} that is formatted with a FAT
-file system, and an internal NAND\footnote{NAND is a type of non-volatile flash memory that is commonly used for file storage.} chip
-that is formatted \texttt{YAFFS2} or \texttt{ext4}, with newer models preferring \texttt{ext4}.\footnote{There are notable
-exceptions, such as the Samsung Galaxy S, which uses a proprietary file system called RFS.} The SD card provides a wealth of forensic
-artifacts, as it is typically on the SD card where large media files such as pictures and music are stored.  Applications can choose
-to make use of the SD card for their internal data storage, as well.  Despite its importance, this paper will not discuss FAT
-forensics, as it has been discussed at great length elsewhere \cite{carrier}. 
+Before diving into the details of Android file systems, it is important to understand how Android storage is laid out.  There are
+typically two storage devices: an SD card\footnote{Often an actual, removable SD card is provided with the phone. Newer devices,
+however, appear to be trending toward providing an emulated SD card from internal storage.} that is formatted with a FAT file
+system, and an internal NAND\footnote{NAND is a type of non-volatile flash memory that is commonly used for file storage.} chip that
+is formatted \texttt{YAFFS2} or \texttt{ext4}, with newer models preferring \texttt{ext4}. Some device use other file systems on top
+of NAND storage, such as the Samsung Galaxy S which uses a proprietary file system called \texttt{RFS}, but far and away
+\texttt{YAFFS2} and \texttt{ext4} are the most common. The SD card is typically where large media files such as pictures and music
+are stored. This paper, which is primarily concerned with application data, does not further discuss the SD card.
 
-Depending on the particular device, Android 2.3 has up to six partitions, excluding external storage: \texttt{boot}, \texttt{system}, \texttt{cache}, \texttt{userdata},
-\texttt{recovery} and \texttt{misc}. 
-The \texttt{boot} partition houses the kernel and a ramdisk.
-The \texttt{system} partition holds all of the operating system files, including any of the core applications that are distributed with Android, such as the browser. 
-The \texttt{cache} partition provides a scratch space for temporary files, such as market downloads.
-The \texttt{userdata} partition is where the vast majority of application data is stored.
-The \texttt{recovery} partition is used to install updates and new versions of Android. 
-The \texttt{misc} partition is used to store miscellaneous hardware settings.
-Undoubtedly, from a forensic perspective, the \texttt{userdata} partition is the most interesting, and what will be focused on in
-this paper. The other partitions do hold valuable information, but at a much lower density.
-\footnote{Even though this paper does not discuss partitions outside of \texttt{userdata}, from a privacy perspective it is
-important to realize that sensitive information could still be leaked by other partitions, particularly \texttt{cache} and the SD
-card.}
+The number of persistent partitions used by Android is device and version specific.  Android 2.3, for example, has up to six
+partitions, excluding external storage and virtual filesystems such as \texttt{proc}: \texttt{boot}, \texttt{system},
+\texttt{cache}, \texttt{userdata}, \texttt{recovery} and \texttt{misc}. A Nexus S running Android 4.0, on the other hand, includes
+several additional partitions such as \texttt{efs} and \texttt{radio}. Regardless of device, in addition to the SD card, the
+\texttt{userdata} partition is the most interesting because it holds the data associated with each applications.\footnote{From While
+this paper does not discuss partitions outside of \texttt{userdata}, from a privacy perspective it is important to realize that
+sensitive information could still be leaked by other partitions, especially the SD card}. To determine the file system layout of an Android device:
 
-To determine the partition layout of an Android device:
-
-\paragraph {1. 
-Enable USB Debugging} Figure \ref{fig:usbdebug} shows the \texttt{Development} menu for Android 2.3, where USB Debugging can be
-enabled.  Turning on USB debugging allows shell access to the device without entering a passcode. The shell is accessed with a
-utility called the ``Android Debug Bridge,'' or ADB. Enabling USB debugging does not provide root access to the device, but it is
-often easier to execute a privilege escalation attack from within a shell than from the Android interface. Any passcode that is
-enabled must be first bypassed before USB debugging can be enabled, unless debugging was previously enabled by the device owner.
-There are a variety of techniques for bypassing a passcode \cite{hoog, lockscreenbypass0, lockscreenbypass1, lockscreenbypass2}, but
-there is no single method that is consistently successful across devices.  A strong passcode remains a significant barrier to
-accessing the information on a device.
+\paragraph {1. Enable USB debugging} 
+Figure \ref{fig:usbdebug} shows the \texttt{Development} menu for Android 2.3, where USB Debugging can be
+enabled.  
 
 \begin{figure}[htb]
-\caption{Turning on USB debugging}
 \begin{center}\includegraphics[scale=0.5]{usbdebug.png}\end{center}
+\caption{Turning On USB Debugging}
 \label{fig:usbdebug}
 \end{figure}
 
-\paragraph {2. Open an \texttt{adb}  Shell}
+\paragraph {2. Open an ADB shell}
+Turning on USB debugging allows shell access to the device without entering a passcode. The shell is accessed with a utility called
+the Android Debug Bridge (hereafter ADB), which is accessed by the command \texttt{adb}.  AD is the primary means by which a
+developer or forensic analyst will communicate with an Android device, and it It is provided as part of the Android Software
+Development Kit (SDK) provides the \texttt{adb} binary in \texttt{\$SDKPATH/platform-tools}.  ADB the only practical way to obtain
+low-level access to an Android device without physically removing the NAND chip.  When \texttt{adb} is first run, it starts a
+service that is then used to connect to the Android device.  Once the \texttt{adb} service is started, a list of attached Android
+devices can be shown using the command \texttt{adb devices}.  The output of \texttt{adb devices} from a machine with one Android
+phone attached is shown in Table \ref{tab:adbdevices}.
 
-The Android Debug Bridge (\texttt{adb}) is the primary means by which a developer or forensic analyst will communicate with an
-Android device. It is provided as part of the Android Software Development Kit (SDK), or can be built as part of the process of
-building the AOSP platform. The SDK provides an \texttt{adb} binary in \texttt{\$SDKPATH/platform-tools}, and the build process puts
-\texttt{adb} in \texttt{\$BUILDROOT/out/host/linux-x86/bin}.\footnote{Google has provided excellent instructions at
-\texttt{source.android.com} for building AOSP from source code.}  The Android Debug Bridge is the only practical way to obtain
-low-level access to an Android device without physically removing the NAND chip.
+\begin{table}[htb]
+\lstset{numbers=none}
+\lstinputlisting{tables/adbdevices.txt}
+\caption{ADB Connected Devices}
+\label{tab:adbdevices}
+\end{table}
 
-When \texttt{adb} is first run, it starts a service that is then used to connect to the Android device. 
-Once the \texttt{adb} service is started, a list of attached Android devices can be shown using the command \texttt{adb devices}. 
-The output of \texttt{adb devices} from a machine with one Android phone attached is shown in Figure \ref{fig:adbdevices}.
-
-\begin{figure}[htb]
-\caption{ADB connected devices}
-\begin{center}\includegraphics[scale=0.6]{adbdevices.png}\end{center}
-\label{fig:adbdevices}
-\end{figure}
-
-Opening a shell and displaying the contents of \texttt{/proc/mtd} results in output similar to Figure \ref{fig:mtd}.  MTD is the
-kernel driver in Linux that is responsible for providing the abstraction layer that is between file systems and \emph{Memory
-Technology Devices}, i.e. NAND flash. YAFFS2 is a consumer of the MTD interface, and \texttt{/proc/mtd} lists all of the active MTD
+\paragraph {3. Run \texttt{cat /proc/mtd} and \texttt{mount}}
+Opening a shell and displaying the contents of \texttt{/proc/mtd} results in output similar to Table \ref{tab:mtd}.  MTD is the
+kernel driver in Linux that is responsible for providing the abstraction layer that is between file systems and ``Memory
+Technology Devices'' (NAND memory). YAFFS2 is a consumer of the MTD interface, and \texttt{/proc/mtd} lists all of the active MTD
 partitions. 
+\begin{table}[htb]
+\lstset{numbers=none}
+\lstinputlisting{tables/procmtd.txt}
+\caption{MTD Partition Layout of an Android Phone}
+\label{tab:mtd}
+\end{table}	
 
-\begin{figure}[htb]
-\caption{MTD partition layout of an Android phone}
-\begin{center}\includegraphics[scale=0.6]{procmtd.png}\end{center}
-\label{fig:mtd}
-\end{figure}	
+The layout in Table \ref{tab:mtd} was taken from a Nexus One running Android 2.3.  The first column is the device name which corresponds to the device
+handle in \texttt{/dev/mtd}.  The second column shows the size of each partition in bytes.  The third column gives the
+``eraseblock'' size for the partition.  Eraseblocks are the MTD equivalent of sectors in a conventional block device \cite{mtdfaq}.
+The eraseblock size determines the size of the smallest chunk of data that can be accessed on an MTD.  When an MTD is presented as a
+virtual block device, so that it can be mounted as a file system, the eraseblock size becomes the block size.  Each block will
+consist of many NAND pages, which are the smallest unit of data the NAND device itself supports.  NAND pages are typically 2048
+bytes, but the exact page size can be determined by looking at \texttt{dmesg} shortly after the phone boots.  The fourth and final
+column in \texttt{/proc/mtd} shows the friendly name of each partition.  
 
-This layout was taken from a Nexus One running Gingerbread.  All of the information in \texttt{/proc/mtd} is valuable and should be
-recorded when seizing a mobile device. The first column is the device name which corresponds to the device handle in
-\texttt{/dev/mtd}.  The second column shows the size of each partition in bytes. 
-The third column gives the ``eraseblock'' size for the partition.  Eraseblocks are the MTD equivalent of sectors in a conventional block
-device \cite{mtdfaq}. The eraseblock size determines the size of the smallest chunk of data that can be accessed on an MTD.  When an MTD
-is presented as a virtual block device, so that it can be mounted as a file system, the eraseblock size becomes the block size.  Each
-block will consist of many NAND pages, which are the smallest unit of data the NAND device itself supports.  NAND pages are
-typically 2048 bytes, but the exact page size can be determined by looking at \texttt{dmesg} shortly after the phone boots.  The
-fourth and final column in \texttt{/proc/mtd} shows the friendly name of each partition.  The output of a standard \texttt{df}
-command will show where each device is mounted.
+More recent Android devices use an ``eMMC'' storage interface. Rather than providing raw access to NAND memory, an eMMC includes a
+controller presents the NAND memory as a block device. The significance of raw NAND access will become more clear when
+\texttt{YAFFS2} is discussed in Section \ref{sec:yaffs2}.  When an Android device is using a file system such as \texttt{ext4},
+which is not designed for the limitations of NAND memory, an eMMC is used to provide wear-leveling, preventing the NAND chip from
+wearing out.  The Nexus S actually has two storage chips: a straight NAND device and an eMMC. As show in Table \ref{tab:mount}, a
+Nexus S does not use MTD devices for \texttt{system} or\texttt{userdata}. 
+\begin{table}[htb]
+\lstset{numbers=none}
+\lstinputlisting{tables/mount.txt}
+\caption{Nexus S Mounted File Systems}
+\label{tab:mount}
+\end{table}	
 
-\subsection{YAFFS2 - Yet Another Flash File System} Most Android devices still use YAFFS2 as the file system of choice for user data
+\subsection{YAFFS2 - Yet Another Flash File System} 
+\label{sec:yaffs2}
+Most Android devices still use YAFFS2 as the file system of choice for user data
 that is not stored on an external SD card.  YAFFS2 is very different from other file systems such as NTFS or FAT32.
 YAFFS1,\footnote{The file system was actually just called YAFFS, but for the sake of clarity it is here referred to as YAFFS1.} which
 preceded YAFFS2,  was the first file system specifically designed for NAND flash, and so its structure is optimized for the specific
@@ -150,7 +148,7 @@ attempting to analyze a YAFFS based file system.
 
 \begin{table}[htb]
 \lstinputlisting{tables/oobstruct.c}
-\caption{Out-of-band area (OOB) structure}
+\caption{Out-of-Band Area (OOB) Structure}
 \label{tab:oob}
 \end{table}
 
@@ -212,7 +210,7 @@ The searches table contains search history.
 	\hline
 	\end{tabular}
 \end{center}
-	\caption{Bookmarks table schema}
+	\caption{Bookmarks Table Schema}
 	\label{tab:bookmarkschema}
 \end{table}
 
@@ -248,7 +246,7 @@ SQLite record.  The \texttt{backStep} function is shown in Table \ref{tab:backst
 
 \begin{table}[htb]
 \lstinputlisting{tables/backstep.py}
-\caption{SQLite carving ``backstep'' function}
+\caption{SQLite Carving ``backstep'' Function}
 \label{tab:backstep}
 \end{table}
 
@@ -396,11 +394,19 @@ used, though, the analyst performing the acquisition needs root access.
 
 \begin{table}[htb]
 \lstinputlisting{tables/codesourcery.sh}
-\caption{Installing CodeSourcery and building nanddump}
+\caption{Installing CodeSourcery and Building \texttt{nanddump}}
 \label{tab:nanddump}
 \end{table}
 
 \subsection{The Problem of Root}
+% Fix
+Enabling USB debugging does not automatically provide root access to the device, but it is
+often easier to execute a privilege escalation attack from within a shell than from the Android interface. Any passcode that is
+enabled must be first bypassed before USB debugging can be enabled, unless debugging was previously enabled by the device owner.
+There are a variety of techniques for bypassing a passcode \cite{hoog, lockscreenbypass0, lockscreenbypass1, lockscreenbypass2}, but
+there is no single method that is consistently successful across devices.  A strong passcode remains a significant barrier to
+accessing the information on a device.
+
 In some ways, Android is more secure than a typical desktop distribution of Linux.  Android provides application sandboxing,
 requires applications to declare necessary permissions ahead of time, and explicitly denies root access in production builds. This
 latter restriction makes it particularly difficult to perform a full NAND dump.  By default, no user has the ability to run programs
@@ -456,7 +462,7 @@ piece of work.
 
 \begin{table}[htb]
 \lstinputlisting{tables/exploid.c}
-\caption{The heart of ``exploid"}
+\caption{The Heart of ``exploid"}
 \label{tab:exploid}
 \end{table}
 
@@ -548,3 +554,4 @@ The vast majority of Android phones use the YAFFS2 file system, which is log-str
 device can be either mounted in \texttt{nandsim} for inspection, or carved for deleted data. By far, the largest obstacle to imaging
 an Android device is obtaining root access, but a large number of exploits are available thanks to the hobbyist and security
 communities.
+
