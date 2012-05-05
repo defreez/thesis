@@ -1,15 +1,16 @@
 \chapter{Android Forensics}
 \label{ch:forensics}
-It is impossible to develop techniques for preventing the acquisition of data without understanding how that data would be acquired.
-This chapter aims to lay bare the fundamentals of Android forensic acquisition and analysis on the Android 2.3 platform, also called
-Gingerbread. Gingerbread is the latest version of Android for which established forensic techniques have been developed.  The
-``Technical Background'' section discusses the details of the \texttt{YAFFS2} filesystem, which is used on most Gingerbread devices.
-The same section also introduces methods for extracting data from a \texttt{YAFFS2} image.  The ``Acquisition" section focuses on
-building and using the tools necessary to acquire a forensically sound image of an Android partition.  Finally, how data can be
-pulled from an acquired Android image is described.
+It is the goal of this paper to outline a method of data confidentiality for Android. The proposed method is only meaningful in
+relation to data recovery techniques which are here collectively referred to as ``Android forensics.'' This chapter gives an
+introduction to Android file system forensics and touches very briefly on Android memory forensics.  The ``Android File Systems''
+section discusses the \texttt{YAFFS2} and \texttt{ext4} file systems, which are by far the most prevalent file systems on Android
+devices. The same section also provides an example of how deleted data can be extracted from an Android device using one of
+these file systems.  The ``Acquisition" section focuses on building and using the tools necessary to acquire an ``image,'' of an
+Android partition, but also gives an overview of research regarding Android memory acquisition. The method of encryption proposed
+later, in Chapter \ref{ch:ecryptfs}, is designed to defend against the specific methods of data recovery touched on in this
+chapter.
 
-
-\section{Technical Background}
+\section{Android File Systems}
 
 The data presented here has been gathered from a Nexus One phone running Android version 2.3 (Gingerbread).  ``Nexus''
 devices\footnote{Nexus One, Nexus S, and now Galaxy Nexus} are often favored by developers, as they provide a build of Android that
@@ -24,9 +25,9 @@ modifications to the underlying operating system.
 Before diving into the details of Android forensics, it is important to understand how Android storage is laid out.  The majority of
 Android devices have two storage devices: an SD card\footnote{Often an actual, removable SD card is provided with the phone. Newer
 devices, however, appear to be trending toward providing an emulated SD card from internal storage.} that is formatted with a FAT
-filesystem, and an internal NAND\footnote{NAND is a type of non-volatile flash memory that is commonly used for file storage.} chip
+file system, and an internal NAND\footnote{NAND is a type of non-volatile flash memory that is commonly used for file storage.} chip
 that is formatted \texttt{YAFFS2} or \texttt{ext4}, with newer models preferring \texttt{ext4}.\footnote{There are notable
-exceptions, such as the Samsung Galaxy S, which uses a proprietary filesystem called RFS.} The SD card provides a wealth of forensic
+exceptions, such as the Samsung Galaxy S, which uses a proprietary file system called RFS.} The SD card provides a wealth of forensic
 artifacts, as it is typically on the SD card where large media files such as pictures and music are stored.  Applications can choose
 to make use of the SD card for their internal data storage, as well.  Despite its importance, this paper will not discuss FAT
 forensics, as it has been discussed at great length elsewhere \cite{carrier}. 
@@ -83,7 +84,7 @@ The output of \texttt{adb devices} from a machine with one Android phone attache
 \end{figure}
 
 Opening a shell and displaying the contents of \texttt{/proc/mtd} results in output similar to Figure \ref{fig:mtd}.  MTD is the
-kernel driver in Linux that is responsible for providing the abstraction layer that is between filesystems and \emph{Memory
+kernel driver in Linux that is responsible for providing the abstraction layer that is between file systems and \emph{Memory
 Technology Devices}, i.e. NAND flash. YAFFS2 is a consumer of the MTD interface, and \texttt{/proc/mtd} lists all of the active MTD
 partitions. 
 
@@ -98,18 +99,18 @@ recorded when seizing a mobile device. The first column is the device name which
 \texttt{/dev/mtd}.  The second column shows the size of each partition in bytes. 
 The third column gives the ``eraseblock'' size for the partition.  Eraseblocks are the MTD equivalent of sectors in a conventional block
 device \cite{mtdfaq}. The eraseblock size determines the size of the smallest chunk of data that can be accessed on an MTD.  When an MTD
-is presented as a virtual block device, so that it can be mounted as a filesystem, the eraseblock size becomes the block size.  Each
+is presented as a virtual block device, so that it can be mounted as a file system, the eraseblock size becomes the block size.  Each
 block will consist of many NAND pages, which are the smallest unit of data the NAND device itself supports.  NAND pages are
 typically 2048 bytes, but the exact page size can be determined by looking at \texttt{dmesg} shortly after the phone boots.  The
 fourth and final column in \texttt{/proc/mtd} shows the friendly name of each partition.  The output of a standard \texttt{df}
 command will show where each device is mounted.
 
-\subsection{YAFFS2 - Yet Another Flash File System} Most Android devices still use YAFFS2 as the filesystem of choice for user data
-that is not stored on an external SD card.  YAFFS2 is very different from other filesystems such as NTFS or FAT32.
-YAFFS1,\footnote{The filesystem was actually just called YAFFS, but for the sake of clarity it is here referred to as YAFFS1.} which
-preceded YAFFS2,  was the first filesystem specifically designed for NAND flash, and so its structure is optimized for the specific
+\subsection{YAFFS2 - Yet Another Flash File System} Most Android devices still use YAFFS2 as the file system of choice for user data
+that is not stored on an external SD card.  YAFFS2 is very different from other file systems such as NTFS or FAT32.
+YAFFS1,\footnote{The file system was actually just called YAFFS, but for the sake of clarity it is here referred to as YAFFS1.} which
+preceded YAFFS2,  was the first file system specifically designed for NAND flash, and so its structure is optimized for the specific
 requirements imposed by NAND flash.  Chief among these requirements is the limit on the number of overwrites performed.  NAND pages
-have a finite lifetime, and a filesystem that does not distribute wear will quickly wear out some pages.  The pages storing the FAT
+have a finite lifetime, and a file system that does not distribute wear will quickly wear out some pages.  The pages storing the FAT
 in FAT32, for example, would quickly become corrupt without a hardware flash translation layer (FTL), as is used in thumb drives to
 distribute wear more evenly.  YAFFS2 is designed to operate without a hardware FTL, which is good news for forensic investigators,
 as it affords a software view into the flash device.  Overwriting NAND pages requires that those pages first be erased, which in
@@ -117,7 +118,7 @@ NAND incurs a heavy performance hit.  This leads to what is known as the ``write
 be written to only once unless it is absolutely necessary to overwrite them. The write once requirement has influenced the design of
 YAFFS2 more than any other single factor.
 
-YAFFS2 is known as a ``log-structured'' filesystem.  A log-structured filesystem does not reuse flash pages when a piece of data is
+YAFFS2 is known as a ``log-structured'' file system.  A log-structured file system does not reuse flash pages when a piece of data is
 updated.  Rather, it simply writes the updated data to the next available location.  A monotonically increasing sequence number
 keeps track of which data is most current, and the older versions of the same data are ignored.  This has dramatic forensic
 implications, as it often means there are hundreds of copies of a given piece of data, even after it has been deleted.  YAFFS2 does
@@ -142,10 +143,10 @@ has the following information associated with it:
 YAFFS1 relies on the Linux kernel's Memory Technology Device (MTD) driver to provide an interface to the actual NAND device.  The
 Linux MTD presents the NAND device as a series of pages (usually 2kB), similar to blocks on a conventional hard disk.  Each page is
 accompanied by 64 bytes known as the ``Out-of-band area," or OOB, which is partially used by the MTD itself and partially used by
-the YAFFS1 filesystem. The MTD driver itself uses the OOB area to store error correction data, and additionally defines an area that
-can be used by the filesystem for whatever purposes it chooses, called the OOBFREE area.  The layout of the OOB can be seen in the
+the YAFFS1 file system. The MTD driver itself uses the OOB area to store error correction data, and additionally defines an area that
+can be used by the file system for whatever purposes it chooses, called the OOBFREE area.  The layout of the OOB can be seen in the
 \texttt{struct} in Table \ref{tab:oob}, taken from the Android source code. This \texttt{struct} is extremely important for anyone
-attempting to analyze a YAFFS based filesystem.
+attempting to analyze a YAFFS based file system.
 
 \begin{table}[htb]
 \lstinputlisting{tables/oobstruct.c}
@@ -154,21 +155,21 @@ attempting to analyze a YAFFS based filesystem.
 \end{table}
 
 The most important part of this struct, for our purposes, is the definition of the \texttt{oobfree} array.  The first element of the
-\texttt{oobfree} array gives the offset into the area that is available for filesystem usage, and the second element determines the
+\texttt{oobfree} array gives the offset into the area that is available for file system usage, and the second element determines the
 size of that area.  There may be multiple arrays in \texttt{oobfree} leading to complex, non-contiguous free areas, but Android
 appears to use one contiguous block.  This is not the standard layout used by Linux. Every file and directory within a YAFFS based
-filesystem has an object header that is stored within this OOBFREE area. The object header describes the contents of the object,
+file system has an object header that is stored within this OOBFREE area. The object header describes the contents of the object,
 which is stored in the data area of the chunk. This object header will include the object name, type, and length.  Notice that
 because the object header contains the length, it must be written to every time the file length is changed.  Because YAFFS-based
 filesystesm write sequentially, the new object header will be placed at the end of the object (with the same chunk id), and the old
 object header will be marked deleted. 
 
-YAFFS1 and YAFFS2 are actually remarkably simple compared to other filesystems. To reiterate, the NAND device is divided into
+YAFFS1 and YAFFS2 are actually remarkably simple compared to other file systems. To reiterate, the NAND device is divided into
 pages, each with a small area for metadata (OOB).  The OOB defines what type of chunk that page belongs to, which chunk the page
 belongs to, and in turn which object that chunk belongs to.  In YAFFS1 it also marks whether or not that chunk has been deleted.
 Each object has a single object header and zero or more data chunks.  That's it.  Notice the conspicuous lack of any central
-metadata location.  This makes the filesystem exceedingly simple, but at the price of \emph{scanning the OOB area of every page at
-boot}.  There is no actual filesystem structure maintained on disk, just object headers and data chunks.  The filesystem layout is
+metadata location.  This makes the file system exceedingly simple, but at the price of \emph{scanning the OOB area of every page at
+boot}.  There is no actual file system structure maintained on disk, just object headers and data chunks.  The file system layout is
 determined at scan time and maintained in memory only. 
 
 YAFFS2 is only slightly different from YAFFS1. The biggest change was the removal of the deletion marker, which was replaced with a
@@ -217,21 +218,21 @@ The searches table contains search history.
 
 Knowing the table schema of the records being searched for is of the utmost importance.  If all an investigator is interested in is
 seeing what was in a database when the phone was acquired, then the database file can be extracted from the image and opened in
-SQLite explorer.  If, on the other hand, the investigator is interested in records that may have been deleted, then the filesystem
+SQLite explorer.  If, on the other hand, the investigator is interested in records that may have been deleted, then the file system
 must be carved for structures that match the table schema.
 
 Following Pereira's work on carving for deleted Firefox history records, an Android image can be scanned for unallocated SQLite
-records.  Updating a record in a SQLite database stored on a YAFFS2 filesystem does not immediately overwrite the old record
+records.  Updating a record in a SQLite database stored on a YAFFS2 file system does not immediately overwrite the old record
 (remember YAFFS makes every effort to write sequentially).  From a forensics perspective, it is interesting to note that using the
-native Android tools to clear browser history does not remove the filesystem artifacts left by YAFFS2 wear-leveling mechanisms.
-Eventually the artifacts will be erased by the filesystem garbage collector, but on a phone with a significant amount of free space,
+native Android tools to clear browser history does not remove the file system artifacts left by YAFFS2 wear-leveling mechanisms.
+Eventually the artifacts will be erased by the file system garbage collector, but on a phone with a significant amount of free space,
 that can take a very long time.
 
 The approach taken by Pereira, which has here been adapted and somewhat generalized, is to search for a signature that is unique to
 the content of the deleted record one is attempting to locate.  Pereira was looking for Firefox browsing history records in
 unallocated space, so he used \emph{http://} for his signature.  When looking for browsing history records on an Android based
 phone, the same signature can be successfully used.  The signature chosen depends on the records one is looking for.  One might use
-the regular expression \verb|\d{3}-\d{3}-\d{4}| to search for SMS records floating around the filesystem, as those records are guaranteed
+the regular expression \verb|\d{3}-\d{3}-\d{4}| to search for SMS records floating around the file system, as those records are guaranteed
 to have a phone number field (the actual field name is \texttt{address}). 
 
 Clearly a signature alone, however, is insufficient to distinguish SQLite records from other occurrences of the signature.  The
@@ -262,7 +263,7 @@ the header and field sizes that have actually been found.  Effectively, the func
 incrementally larger slices of data and testing for validity against the table schema.
 
 \section{Acquisition}
-At this point, the structure of the filesystem on an Android 2.3 device has been reviewed, as well as an example of carving
+At this point, the structure of the file system on an Android 2.3 device has been reviewed, as well as an example of carving
 forensically useful data from the device. But how was this data retrieved in the first place? In a digital investigation, the
 primary source of evidence is a copy of the target device's nonvolatile data.  Acquiring the nonvolatile data, be it from a
 conventional hard disk or from NAND flash in a mobile device, is known as ``post-mortem'' acquisition, because the data is
@@ -304,7 +305,7 @@ an Android device, partially drawn from Andrew Hoog's book \emph{Android Forensi
 
 \paragraph{Step zero: build tools and document procedures}
 Perhaps it goes without saying, but it is imperative that the acquisition tools and procedures be developed \emph{prior} to
-acquisition.  If the device is using YAFFS2 as the filesystem (the majority of devices at the time of writing), \texttt{nanddump}
+acquisition.  If the device is using YAFFS2 as the file system (the majority of devices at the time of writing), \texttt{nanddump}
 should  be used.  The process of building \texttt{nanddump} from source is described later in the chapter.  The Android Debug
 Bridge, provided with the Android SDK as a means of communicating with the device over a USB cable, should be installed and tested. 
 
@@ -339,14 +340,14 @@ installing an application that will systematically read unsecured data.
 An image of each partition on the device can be acquired with \texttt{nanddump}.  These images should be stored on the sterile SD
 card that was inserted into the device during initial seizure.  After the images have been transferred from the SD card to the
 analyst's machine, they can be carved and mounted with \texttt{nandsim} for perusal.  Acquiring an image of an Android device's
-filesystem presents a distinct challenge.  The conventional methods of forensic acquisition are either inadequate or not available.
+file system presents a distinct challenge.  The conventional methods of forensic acquisition are either inadequate or not available.
 One of the most popular tools for acquiring an image of a conventional (spinning disk) hard drive is \texttt{dd}, which reads raw
 data, block by block, from one location and writes it to another, which, when the disk is offline, is sufficient to acquire a
 forensically valid image of the device.  Unfortunately, \texttt{dd} is not sufficient for YAFFS devices, as it operates above the
 MTD layer. Android images that are acquired by a utility that is not flash-aware have no hope of being forensically-sound. Such
 utilities ignore the OOB area of the flash device. YAFFS2 relies significantly on this OOB free area, and it is therefore of
 paramount importance that a flash-aware utility is used to acquire any Android image.  Without the OOB area it is impossible to
-fully reconstruct the YAFFS2 filesystem of an Android device.
+fully reconstruct the YAFFS2 file system of an Android device.
 
 \subsection{Nanddump}
 Hoog's book \cite{hoog} provides an excellent primer on how Android forensics is performed.  Unfortunately, a great number of
@@ -520,28 +521,28 @@ RageAgainstTheCage is available on Sebastian Krahmer's blog and can be used to r
 \section{Accessing a Nanddump Image}
 
 Once a \texttt{nanddump} image of each partition has been acquired, what is one to do with them?  Images of more traditional
-filesystems are normally mounted read-only via the ``loopback'' device in Linux.  That simply isn't possible for an MTD image, as
+file systems are normally mounted read-only via the ``loopback'' device in Linux.  That simply isn't possible for an MTD image, as
 there is a significant amount of metadata (the OOB) interwoven between the blocks, which is partially under the control of the MTD
 driver and partially under the control of YAFFS2 (the OOBFREE area).  Fortunately, there is a debugging utility called
 \texttt{nandsim} that can present a dump file as a virtual NAND device. It is imperative, however, that the OOB layout of the MTD
 kernel module on the analysis machine matches the OOB layout of the target device.  This layout can change between builds of Android,
 possibly necessitating many rebuilds of the MTD module. 
 
-Furthermore, the YAFFS2 filesystem itself is not distributed with most popular Linux distributions, and will therefore have to be built.
+Furthermore, the YAFFS2 file system itself is not distributed with most popular Linux distributions, and will therefore have to be built.
 The source can be retrieved from the maintainers of YAFFS, Aleph1, through a simple \texttt{git clone}.\footnote{git clone git://www.aleph1.co.uk/yaffs2} YAFFS2 can be built to utilize the features of very new kernels, or with legacy support for older kernels. 
 The safest route is to rename the \texttt{yportenv\_multi.h} file to \texttt{yportenv.h}, enabling support for many kernel versions, and build with \texttt{make}. 
 YAFFS2 can then be enabled by running \texttt{modprobe mtdblock \&\& insmod yaffs2multi.ko}. 
-YAFFS2 should show up in the list of filesystems in \texttt{/proc/filesystems}.
+YAFFS2 should show up in the list of file systems in \texttt{/proc/file systems}.
 
 At this point, mounting the image is straightforward, once one figures out the magic MTD parameters.
 Android YAFFS2 images can be mounted if \texttt{nandsim} is started with the following incantation for a 512MB flash image:
 \texttt{sudo modprobe nandsim first\_id\_byte=0x20 second\_id\_byte=0xa2 third\_id\_byte=0x00 fourth\_id\_byte=0x15}.
 These parameters are drawn directly from the MTD documentation and are determined by the geometry of the image \cite{mtdfaq}
-After \texttt{nandsim} has been loaded, \texttt{/dev/mtdblock0} can be mounted read-only as a YAFFS2 filesystem and read.
+After \texttt{nandsim} has been loaded, \texttt{/dev/mtdblock0} can be mounted read-only as a YAFFS2 file system and read.
 
 \section{Summary}
 
-The vast majority of Android phones use the YAFFS2 filesystem, which is log-structured and adheres as closely as possible to the
+The vast majority of Android phones use the YAFFS2 file system, which is log-structured and adheres as closely as possible to the
 ``write-once'' rule of NAND storage. Acquiring an image of an Android phone requires the use of specialized software such as
 \texttt{nanddump}, which unlike \texttt{dd}, will copy all of the YAFFS2 metadata in addition to the data itself. An image of a
 device can be either mounted in \texttt{nandsim} for inspection, or carved for deleted data. By far, the largest obstacle to imaging

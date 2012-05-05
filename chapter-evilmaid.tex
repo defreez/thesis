@@ -86,9 +86,9 @@ possible, leaving the device susceptible to evil maid attacks.
 
 \subsection{WhisperYAFFS}
 WhisperCore includes two separate FDE implementations, one for the Nexus One and one for the Nexus S. WhisperCore on the Nexus
-One implements an encryption layer on top of YAFFS2, which is the native filesystem.  On the Nexus S, where ext4 is the native
-filesystem, DM-Crypt (device-mapper crypto target), which is a block-level encryption layer, is used rather than a cryptographic
-filesystem (see chapter \ref{ch:ecryptfs} for more on the difference between block-level and file-level encryption).  DM-Crypt is the
+One implements an encryption layer on top of YAFFS2, which is the native file system.  On the Nexus S, where ext4 is the native
+file system, DM-Crypt (device-mapper crypto target), which is a block-level encryption layer, is used rather than a cryptographic
+file system (see chapter \ref{ch:ecryptfs} for more on the difference between block-level and file-level encryption).  DM-Crypt is the
 same encryption mechanism that Google uses for Android devices that support FDE, and often how Linux desktops are encrypted.  The
 rest of this section will focus on WhisperCore as it exists running on a Nexus One phone.
 
@@ -102,8 +102,8 @@ support is relatively straightforward. The kernel for the Nexus One is contained
 Android kernel that runs on Qualcomm chipsets.  The WhisperYAFFS code is a full replacement for YAFFS2 in the kernel; in the kernel
 source, the entire \texttt{fs/yaffs2} directory can be removed and replaced with WhisperYAFFS.  For our purposes, the most
 interesting portion of WhisperYAFFS to examine is in \texttt{yaffs\_vfs\_glue.c}.  This is where WhisperYAFFS (and YAFFS2 before it)
-interfaces with Linux VFS to register the filesystem and mount devices.  It turns out that the password used to mount an encrypted
-WhisperYAFFS filesystem is passed as a mount option.  WhisperYAFFS has actually added two mount options, \texttt{unlock\_encrypted=}
+interfaces with Linux VFS to register the file system and mount devices.  It turns out that the password used to mount an encrypted
+WhisperYAFFS file system is passed as a mount option.  WhisperYAFFS has actually added two mount options, \texttt{unlock\_encrypted=}
 and \texttt{create\_encrypted=}, which perform self-evident functions.  The password is passed after the equals sign, parsed into a
 struct, and then either the unlock or create functions are called.  During the boot process, a modified \texttt{init.mahimahi.rc} is
 used to call a binary on the system partition that presents a minimal UI for password entry and makes the appropriate mount call. 
@@ -124,7 +124,7 @@ file on the unencrypted system partition.  The SD card would have been the first
 WhisperCore contains an option to encrypt the SD card as well. The system partition is normally read-only (RO), so it is first
 remounted read-write. The password is written to \texttt{/system/etc/em.txt}, though the location is arbitrary. After the password
 has been written, the system partition is remounted RO. Any number of different approaches could be taken to write the password out
-to a more subtle location that could be read later, perhaps in an area out of band from the normal filesystem, or to even send the
+to a more subtle location that could be read later, perhaps in an area out of band from the normal file system, or to even send the
 password out over the network. 
 
 \begin{table}[htb]

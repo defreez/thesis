@@ -55,7 +55,7 @@ boundary keys are being created.
 Up to this point, it has been assumed that the goal was to prevent access to some piece of data on the device.  Once a forensic
 artifact has touched disk, and especially if any wear-leveling is happening, it can be very difficult to remove.  Completely
 wiping a partition is deemed by many to be forensically sound, but is a difficult and cumbersome task on the Android platform.  Data can
-be securely deleted from a YAFFS2 filesystem, but only with considerable difficulty due to the necessity of keeping track of every
+be securely deleted from a YAFFS2 file system, but only with considerable difficulty due to the necessity of keeping track of every
 chunk that a piece of data was ever written to. If a hardware ``flash translation layer'' is being used for wear-leveling, as is the
 case for most newer phones, then it may be nearly impossible to remove artifacts once they are written.  Encrypting the whole mess
 is a great start, but relying solely on encryption still leaves the chance that if the key is exposed, then historical forensic
@@ -179,7 +179,7 @@ browser cache, making it difficult to erase from the user interface, yet the cac
 and indexed in a SQLite database.  These files provide a wealth of forensic information about browsing history, second only to the
 browser history itself, and often the data is of more use than the browser history as it contains the actual content viewed.
 Because the files are written to disk, even if the application data is cleared, the cached files can usually be recovered,
-especially if a log-structured filesystem such as YAFFS2 is being used.  Because the browser cache is not implemented within the
+especially if a log-structured file system such as YAFFS2 is being used.  Because the browser cache is not implemented within the
 browser application itself, some trivial attempts to implement incognito mode in the Android browser have overlooked the browser
 cache.  This test will do a three-way comparison: the results of a custom method completely disabling cache are contrasted with
 stock Gingerbread and CyanogenMod 7.
