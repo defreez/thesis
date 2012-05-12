@@ -176,89 +176,36 @@ the same object id to be differentiated.  Whichever page has the largest sequenc
 in YAFFS2 the concept of a checkpoint was introduced to essentially store a snapshot of the data structures maintained in memory,
 allowing for a faster boot.
 
-\subsection{Carving SQLite Records Out Of YAFFS2} A large percentage of forensically interesting information on an Android phone is
-indexed in SQLite databases.  The majority of these databases are stored on the \texttt{userdata} partition of the phone, mounted at
-\texttt{/data}.  Pulling data from these databases while they are intact is trivial: simply open the relevant database with SQLite
-and query the data.  It becomes more interesting when the data has been overwritten or deleted.  Murilo Tito Pereira has done
-excellent work on carving for deleted SQLite records, and his article on carving Firefox SQLite databases forms the basis for the
-forensic methods presented this section.  \cite{carvefirefox}
+\subsection{ext4}
+The \texttt{ext4} file system operates in a very different fashion than \texttt{YAFFS2}. While \texttt{YAFFS2} was designed from the
+very beginning to run on NAND memory, \texttt{ext4}, like its predecessors \texttt{ext3} and \texttt{ext2}, is aimed at spinning
+disks. The different hardware target lead to very different optimizations in the design of the file system. While \texttt{YAFFS2}
+went to great lengths to avoid overwriting NAND pages, \texttt{ext4} overwrites blocks frequently. Instead, \texttt{ext4} is
+interested in preventing the head on a hard disk from having to travel too far, as that introduces significant latency.  The fact
+that \texttt{ext4} looks very different from \texttt{YAFFS2} under the hood matters very little to the rest of the operating system,
+because the Linux kernel provides an abstraction layer called the virtual file system (hereafter VFS), which sits on top of what is
+normally considered to be the ``real'' file system. VFS allows Linux-based operating systems to switch between different file
+systems with relative ease. The VFS interface presented to the rest of the system remains essentially identical regardless of the
+file system in use, so the rest of the system need not worry about the particular file system being used. Forensics practioners, on
+the other hand, must be acutely aware of the file system in use. The \texttt{ext4} file system is enormously complex, but the basics
+are presented here.
 
-The database used by the Android browser is a good example of forensically interesting data that might be deleted, but can still be
-recovered. The browser actually has several databases, but for now \texttt{browser.db} will suffice. The browser database is stored
-at \texttt{/data/data/com.android.browser/databases/browser.db}, and contains three tables: \texttt{android\_metadata},
-\texttt{bookmarks}, and \texttt{searches}.  The bookmarks table contains entries not only for bookmarks but browser history as well.
-The searches table contains search history. 
+The \texttt{ext4} file system is an enhancement to the \texttt{ext3} file system, which in turn was an enhancement to the
+\texttt{ext3} file system. The fundamental mechanics of \texttt{ext2}, \texttt{ext3}, and \texttt{ext4} are very similar. Where the
+operation of each is basically the same, the file system in question is referred to as \texttt{extX}, following the convention
+introduced by Carrier \citeyear{carrier} in File System Forensic Analysis. This section relies heavily upon that text, which
+contains a concise exposition of \texttt{ext2} and \texttt{ext3}, including the relevant data structures..
 
-\begin{table}[htb]
-\begin {center}
-	\begin{tabular}{| c | c | c |}
-	\hline
-	Field & Type & Comment \\
-	\hline
-	\_id & INTEGER PRIMARY KEY & \\
-	title & TEXT  &  Only used for bookmarks \\
-	url & TEXT  & Location of bookmark or history visit \\
-	visits & INTEGER  & Number of times site has been visited \\
-	date & LONG  &  Last visit \\
-	created & LONG &  Date created \\
-	description & TEXT &  User entered description \\
-	bookmark & INTEGER & Whether or not record is bookmark \\
-	favicon & BLOB &  For webpages \\
-	thumbnail & BLOB &  Shown in bookmarks screen \\
-	touch\_icon & BLOB &  Unknown \\
-	user\_entered & BLOB & Boolean, created by user or not \\
-	\hline
-	\end{tabular}
-\end{center}
-	\caption{Bookmarks Table Schema}
-	\label{tab:bookmarkschema}
-\end{table}
+The ``smallest addressable storage unit of a hard'' of a hard disk is a sector \cite[p. 30]{carrier}. Typically a sector is 512
+bytes. The Linux kernel treats hard disks as an array of these 512 byte sectors \cite{linuxdrivers}.
+An \texttt{extX} file system 
 
-Knowing the table schema of the records being searched for is of the utmost importance.  If all an investigator is interested in is
-seeing what was in a database when the phone was acquired, then the database file can be extracted from the image and opened in
-SQLite explorer.  If, on the other hand, the investigator is interested in records that may have been deleted, then the file system
-must be carved for structures that match the table schema.
+block groups
+inodes
+directory entries
+indirect blocks
+extents
 
-Following Pereira's work on carving for deleted Firefox history records, an Android image can be scanned for unallocated SQLite
-records.  Updating a record in a SQLite database stored on a YAFFS2 file system does not immediately overwrite the old record
-(remember YAFFS makes every effort to write sequentially).  From a forensics perspective, it is interesting to note that using the
-native Android tools to clear browser history does not remove the file system artifacts left by YAFFS2 wear-leveling mechanisms.
-Eventually the artifacts will be erased by the file system garbage collector, but on a phone with a significant amount of free space,
-that can take a very long time.
-
-The approach taken by Pereira, which has here been adapted and somewhat generalized, is to search for a signature that is unique to
-the content of the deleted record one is attempting to locate.  Pereira was looking for Firefox browsing history records in
-unallocated space, so he used \emph{http://} for his signature.  When looking for browsing history records on an Android based
-phone, the same signature can be successfully used.  The signature chosen depends on the records one is looking for.  One might use
-the regular expression \verb|\d{3}-\d{3}-\d{4}| to search for SMS records floating around the file system, as those records are guaranteed
-to have a phone number field (the actual field name is \texttt{address}). 
-
-Clearly a signature alone, however, is insufficient to distinguish SQLite records from other occurrences of the signature.  The
-signature is only used to locate candidate records, which then must be validated.  This validation is accomplished by stepping
-backward from the signature location, counting bytes.  The first value after the \texttt{id} in a SQLite record is the header size.
-If the number of bytes that have been stepped over, minus the number of bytes in data fields based on the record schema, is equal to
-the value of the byte the cursor has landed on (the header size), then a potentially valid SQLite record has been located.  The fact
-that the byte after the header size must by definition be zero is used as a sanity check.
-
-This project implemented SQLite validation in Python, using two functions.  One function ``backsteps'' from a given signature
-passing progressively larger slices to a validation function.  The validation function returns whether or not the slice could be a
-SQLite record.  The \texttt{backStep} function is shown in Table \ref{tab:backstep}. 
-
-\begin{table}[htb]
-\lstinputlisting{tables/backstep.py}
-\caption{SQLite Carving ``backstep'' Function}
-\label{tab:backstep}
-\end{table}
-
-The \texttt{rawData} argument passed to \texttt{backStep} is simply a slice of data that is larger than the record is believed to
-be.  When searching for browser history records, for example, this project opted for 512 bytes on either side of the record.  The
-size is arbitrary, so long as it is larger than the record being searched for, but choosing a raw data slice size that is too large
-will negatively impact validation performance.  The \texttt{bc} variable (backward cursor) is the current byte location.  The
-function then steps backward one byte at a time, calling \texttt{validateHdr} with a slice of raw data.  If the current
-slice appears to be valid, then all of the data after the signature is stored in \texttt{tailingRec}, and \texttt{validateHdr} will
-have already populated the header data.  The \texttt{validateHdr} function does the comparison between the record schema and
-the header and field sizes that have actually been found.  Effectively, the function does brute force carving by taking
-incrementally larger slices of data and testing for validity against the table schema.
 
 \section{Acquisition}
 At this point, the structure of the file system on an Android 2.3 device has been reviewed, as well as an example of carving
@@ -320,11 +267,14 @@ be powered off.  Finally, the device should be isolated from the network, either
 If the device is locked, the password will need to be guessed or bypassed, either through brute-force or a smudge attack.  A smudge
 attack involves reading the residual oil patterns off of a touch screen in order to determine the unlock pattern or PIN
 \cite{smudge}. The SIM card should be removed and analyzed separately, though SIM cards used in Android devices do not make
-particularly interesting pieces of evidence, as the majority of data is stored on the device itself.  If removable, the SD card
-should also be removed and analyzed separately (in the same fashion as a thumb drive). A zeroed SD card should be placed in the
-device for storing NAND images. 
+particularly interesting pieces of evidence, as the majority of data is stored on the device itself.
+
+\paragraph{Step three: image SD card}
+ If removable, the SD card should also be removed and analyzed separately (in the same fashion as a thumb drive). A zeroed SD card
+should be placed in the device for storing NAND images. If the SD card is not removable, as in the case of the Nexus S which uses
+eMMC to provide USB mass storage, then it can be imaged through \texttt{adb} \cite[pp. 211-218]{hoog}.
  
-\paragraph{Step three: root the device}
+\paragraph{Step four: root the device}
 Unless root access has previously been enabled on a device, some sort of privilege escalation is generally required before an image
 of the device can be taken. The fact that exploitation is regularly involved during the process of acquisition startles many, yet it
 can be no other way, because by default Android does not provide root access even to the device owner.  A substantial amount of
@@ -334,20 +284,31 @@ hobbyist communities for rooting methods. If the device cannot be rooted, then a
 acquisition will have to suffice. A logical acquisition consists of manually inspecting the device from the user interface, or
 installing an application that will systematically read unsecured data.
 
-\paragraph{Step four: acquire an image}
-An image of each partition on the device can be acquired with \texttt{nanddump}.  These images should be stored on the sterile SD
-card that was inserted into the device during initial seizure.  After the images have been transferred from the SD card to the
-analyst's machine, they can be carved and mounted with \texttt{nandsim} for perusal.  Acquiring an image of an Android device's
-file system presents a distinct challenge.  The conventional methods of forensic acquisition are either inadequate or not available.
-One of the most popular tools for acquiring an image of a conventional (spinning disk) hard drive is \texttt{dd}, which reads raw
-data, block by block, from one location and writes it to another, which, when the disk is offline, is sufficient to acquire a
-forensically valid image of the device.  Unfortunately, \texttt{dd} is not sufficient for YAFFS devices, as it operates above the
-MTD layer. Android images that are acquired by a utility that is not flash-aware have no hope of being forensically-sound. Such
-utilities ignore the OOB area of the flash device. YAFFS2 relies significantly on this OOB free area, and it is therefore of
-paramount importance that a flash-aware utility is used to acquire any Android image.  Without the OOB area it is impossible to
-fully reconstruct the YAFFS2 file system of an Android device.
+\paragraph{Step five: acquire an image of \texttt{userdata}}
+An image of each partition on the device can be acquired with either \texttt{dd} for \texttt{ext4} or \texttt{nanddump} for
+\texttt{YAFFS2}.  These images should be stored on the sterile SD card that was inserted into the device during initial seizure. Any
+Nexus device should already come with a funtional copy of \texttt{dd} that can be used to copy an \texttt{ext4} partition. Table
+After the image has been transferred from the SD card to the analyst's machine, it can be mounted for perusal or carved for
+deleted files.  Table \ref{tab:dd} shows the process of acquiring an \texttt{ext4 userdata} partition from a Nexus S phone.
+
+\begin{table}[htb]
+\lstset{numbers=none}
+\lstinputlisting{tables/dd.txt}
+\caption{Copying an \texttt{ext4} Partition with \texttt{dd}}
+\label{tab:dd}
+\end{table}
+
+Acquiring an image of a \texttt{YAFFS2} file system presents a distinct challenge.  One of the most popular tools for acquiring an
+image of a conventional (spinning disk) hard drive is \texttt{dd}, which reads raw data, block by block, from one location and
+writes it to another, which, when the disk is offline, is sufficient to acquire a forensically valid image of the device.
+Unfortunately, \texttt{dd} is not sufficient for \texttt{YAFFS2} devices, as it operates above the MTD layer, and \texttt{YAFFS2}
+makes use of the OOB free area. Android images that are acquired by a utility that is not flash-aware lose a lot of metadata. In the
+case of \texttt{YAFFS2}, it is difficult to discern between active and stale areas of the file system without the metadata stored in
+the OOB free area. Section \ref{sec:nanddump} discusses the use of \texttt{nanddump} to acquire an image that does contain the OOB
+area.
 
 \subsection{Nanddump}
+\label{sec:nanddump}
 Hoog's book \cite{hoog} provides an excellent primer on how Android forensics is performed.  Unfortunately, a great number of
 implementation details are glossed over in favor of describing opaque forensic tools, such as Hoog's own AFLogical/AFPhysical tools,
 or Cellebrite's more well-known UFED. These tools are only available to the law enforcement community, limiting their academic
@@ -524,7 +485,7 @@ RageAgainstTheCage is available on Sebastian Krahmer's blog and can be used to r
 	\item {\# Root}
 \end{enumerate}	
 
-\section{Accessing a Nanddump Image}
+\section{Analysis}
 
 Once a \texttt{nanddump} image of each partition has been acquired, what is one to do with them?  Images of more traditional
 file systems are normally mounted read-only via the ``loopback'' device in Linux.  That simply isn't possible for an MTD image, as
@@ -545,6 +506,93 @@ Android YAFFS2 images can be mounted if \texttt{nandsim} is started with the fol
 \texttt{sudo modprobe nandsim first\_id\_byte=0x20 second\_id\_byte=0xa2 third\_id\_byte=0x00 fourth\_id\_byte=0x15}.
 These parameters are drawn directly from the MTD documentation and are determined by the geometry of the image \cite{mtdfaq}
 After \texttt{nandsim} has been loaded, \texttt{/dev/mtdblock0} can be mounted read-only as a YAFFS2 file system and read.
+
+\subsection{Carving SQLite Records} A large percentage of forensically interesting information on an Android phone is
+indexed in SQLite databases.  The majority of these databases are stored on the \texttt{userdata} partition of the phone, mounted at
+\texttt{/data}.  Pulling data from these databases while they are intact is trivial: simply open the relevant database with SQLite
+and query the data.  It becomes more interesting when the data has been overwritten or deleted.  Murilo Tito Pereira has done
+excellent work on carving for deleted SQLite records, and his article on carving Firefox SQLite databases forms the basis for the
+forensic methods presented this section.  \cite{carvefirefox}
+
+The database used by the Android browser is a good example of forensically interesting data that might be deleted, but can still be
+recovered. The browser actually has several databases, but for now \texttt{browser.db} will suffice. The browser database is stored
+at \texttt{/data/data/com.android.browser/databases/browser.db}, and contains three tables: \texttt{android\_metadata},
+\texttt{bookmarks}, and \texttt{searches}.  The bookmarks table contains entries not only for bookmarks but browser history as well.
+The searches table contains search history. 
+
+\begin{table}[htb]
+\begin {center}
+	\begin{tabular}{| c | c | c |}
+	\hline
+	Field & Type & Comment \\
+	\hline
+	\_id & INTEGER PRIMARY KEY & \\
+	title & TEXT  &  Only used for bookmarks \\
+	url & TEXT  & Location of bookmark or history visit \\
+	visits & INTEGER  & Number of times site has been visited \\
+	date & LONG  &  Last visit \\
+	created & LONG &  Date created \\
+	description & TEXT &  User entered description \\
+	bookmark & INTEGER & Whether or not record is bookmark \\
+	favicon & BLOB &  For webpages \\
+	thumbnail & BLOB &  Shown in bookmarks screen \\
+	touch\_icon & BLOB &  Unknown \\
+	user\_entered & BLOB & Boolean, created by user or not \\
+	\hline
+	\end{tabular}
+\end{center}
+	\caption{Bookmarks Table Schema}
+	\label{tab:bookmarkschema}
+\end{table}
+
+Knowing the table schema of the records being searched for is of the utmost importance.  If all an investigator is interested in is
+seeing what was in a database when the phone was acquired, then the database file can be extracted from the image and opened in
+SQLite explorer.  If, on the other hand, the investigator is interested in records that may have been deleted, then the file system
+must be carved for structures that match the table schema.
+
+Following Pereira's work on carving for deleted Firefox history records, an Android image can be scanned for unallocated SQLite
+records.  Updating a record in a SQLite database stored on a YAFFS2 file system does not immediately overwrite the old record
+(remember YAFFS makes every effort to write sequentially).  From a forensics perspective, it is interesting to note that using the
+native Android tools to clear browser history does not remove the file system artifacts left by YAFFS2 wear-leveling mechanisms.
+Eventually the artifacts will be erased by the file system garbage collector, but on a phone with a significant amount of free space,
+that can take a very long time.
+
+The approach taken by Pereira, which has here been adapted and somewhat generalized, is to search for a signature that is unique to
+the content of the deleted record one is attempting to locate.  Pereira was looking for Firefox browsing history records in
+unallocated space, so he used \emph{http://} for his signature.  When looking for browsing history records on an Android based
+phone, the same signature can be successfully used.  The signature chosen depends on the records one is looking for.  One might use
+the regular expression \verb|\d{3}-\d{3}-\d{4}| to search for SMS records floating around the file system, as those records are guaranteed
+to have a phone number field (the actual field name is \texttt{address}). 
+
+Clearly a signature alone, however, is insufficient to distinguish SQLite records from other occurrences of the signature.  The
+signature is only used to locate candidate records, which then must be validated.  This validation is accomplished by stepping
+backward from the signature location, counting bytes.  The first value after the \texttt{id} in a SQLite record is the header size.
+If the number of bytes that have been stepped over, minus the number of bytes in data fields based on the record schema, is equal to
+the value of the byte the cursor has landed on (the header size), then a potentially valid SQLite record has been located.  The fact
+that the byte after the header size must by definition be zero is used as a sanity check.
+
+This project implemented SQLite validation in Python, using two functions.  One function ``backsteps'' from a given signature
+passing progressively larger slices to a validation function.  The validation function returns whether or not the slice could be a
+SQLite record.  The \texttt{backStep} function is shown in Table \ref{tab:backstep}. 
+
+\begin{table}[htb]
+\lstinputlisting{tables/backstep.py}
+\caption{SQLite Carving ``backstep'' Function}
+\label{tab:backstep}
+\end{table}
+
+The \texttt{rawData} argument passed to \texttt{backStep} is simply a slice of data that is larger than the record is believed to
+be.  When searching for browser history records, for example, this project opted for 512 bytes on either side of the record.  The
+size is arbitrary, so long as it is larger than the record being searched for, but choosing a raw data slice size that is too large
+will negatively impact validation performance.  The \texttt{bc} variable (backward cursor) is the current byte location.  The
+function then steps backward one byte at a time, calling \texttt{validateHdr} with a slice of raw data.  If the current
+slice appears to be valid, then all of the data after the signature is stored in \texttt{tailingRec}, and \texttt{validateHdr} will
+have already populated the header data.  The \texttt{validateHdr} function does the comparison between the record schema and
+the header and field sizes that have actually been found.  Effectively, the function does brute force carving by taking
+incrementally larger slices of data and testing for validity against the table schema.
+
+\subsection{Memory}
+Short paragraph on volatility, experimental for Android
 
 \section{Summary}
 
