@@ -516,10 +516,25 @@ RageAgainstTheCage is available on Sebastian Krahmer's blog and can be used to r
 
 \subsection{Acquisition of Volatile Memory}
 
-At the time of writing, one of the most recent developments in the field of Android forensics has been the successful acquisition of
-volatile memory. Joe Sylve and a team 
+At the time of writing, one of the more exciting and recent developments in the field of Android forensics has been the
+demonstration of a method for acquiring volatile memory from Android devices \cite{dmd}. Joe Sylve and the rest of the team involved
+with that project developed a kernel module, called the Droid Memory Dumper (DMD), capable of capturing memory from a running
+Android device. The module is capable of sending the memory capture either to a local file on the device's SD card or to a remote
+system over a network connection. While for some time it has been well known that acquiring live memory from an Android device
+should be possible, DMD is the first demonstration of how it can actually be accomplished.
 
-\cite{dmd}
+The authors of DMD leveraged The Volatility Framework (hereafter Volatility) for analysis of Android memory dumps. Volatility is a
+tool written in Python specifically for live memory forensics. One of the primary attractions of using Volatility is that it
+modularizes and abstracts away much of the underlying memory forensics work, allowing developers to contribute plugins for finding
+new artifacts in memory dumps with a minimum of duplicated effort. Volatility is largely used for Windows analysis, however, and
+though progress is being made toward supporting Linux memory dumps, little work had been previously done on Android. The team that
+developed DMD is contributing plugins to Volatility capable of analyzing Android memory dumps. 
+
+DMD is significant to this paper because it presages the ability to extract encryption keys from Android memory, which is precisely
+the type of attack that Chapter \ref{ch:ecryptfs} is concerned with. The plugins contributed to Volatility by the DMD team do not
+appear to include the ability to extract encryption keys from RAM, but producing such a plugin should not be difficult now that the
+acquisition problem has been solved. Existing work \cite{coldboot} on carving encryption keys from memory during cold boot attacks
+may be able to find keys from an Android memory dump with little or no modification.
 
 \section{Analysis}
 
