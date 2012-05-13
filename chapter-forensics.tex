@@ -178,34 +178,63 @@ allowing for a faster boot.
 
 \subsection{ext4}
 The \texttt{ext4} file system operates in a very different fashion than \texttt{YAFFS2}. While \texttt{YAFFS2} was designed from the
-very beginning to run on NAND memory, \texttt{ext4}, like its predecessors \texttt{ext3} and \texttt{ext2}, is aimed at spinning
-disks. The different hardware target lead to very different optimizations in the design of the file system. While \texttt{YAFFS2}
-went to great lengths to avoid overwriting NAND pages, \texttt{ext4} overwrites blocks frequently. Instead, \texttt{ext4} is
-interested in preventing the head on a hard disk from having to travel too far, as that introduces significant latency.  The fact
-that \texttt{ext4} looks very different from \texttt{YAFFS2} under the hood matters very little to the rest of the operating system,
-because the Linux kernel provides an abstraction layer called the virtual file system (hereafter VFS), which sits on top of what is
-normally considered to be the ``real'' file system. VFS allows Linux-based operating systems to switch between different file
-systems with relative ease. The VFS interface presented to the rest of the system remains essentially identical regardless of the
-file system in use, so the rest of the system need not worry about the particular file system being used. Forensics practioners, on
-the other hand, must be acutely aware of the file system in use. The \texttt{ext4} file system is enormously complex, but the basics
-are presented here.
+very beginning to run on NAND memory, \texttt{ext4} was optimized for spinning disks. \texttt{YAFFS2} went to great lengths to avoid
+overwriting NAND pages. In contrast, \texttt{ext4} overwrites frequently, with no concern for the number of times a physical area of the disk
+is written to. Instead, \texttt{ext4} is interested in preventing the head on a hard disk from having to travel too far, and thereby
+mitigating the significant latency introduced by mechanical movement. The fact that \texttt{ext4} looks very different From
+\texttt{YAFFS2} under the hood matters little to the rest of the operating system, because the Linux kernel provides an
+abstraction layer called the virtual file system (hereafter VFS), which sits on top of what is normally considered to be the
+``real'' file system. VFS allows Linux based operating systems to switch between different file systems with relative ease. The VFS
+interface presented to the rest of the system remains essentially identical regardless of the file system in use, so the rest of the
+system need not worry about the particular file system being used. Forensics practitioners, on the other hand, must be acutely aware
+of the file system in use. The \texttt{ext4} file system is enormously complex, but the basics are presented here.
 
 The \texttt{ext4} file system is an enhancement to the \texttt{ext3} file system, which in turn was an enhancement to the
-\texttt{ext3} file system. The fundamental mechanics of \texttt{ext2}, \texttt{ext3}, and \texttt{ext4} are very similar. Where the
-operation of each is basically the same, the file system in question is referred to as \texttt{extX}, following the convention
-introduced by Carrier \citeyear{carrier} in File System Forensic Analysis. This section relies heavily upon that text, which
-contains a concise exposition of \texttt{ext2} and \texttt{ext3}, including the relevant data structures..
+\texttt{ext2} file system. The fundamental mechanics of \texttt{ext2}, \texttt{ext3}, and \texttt{ext4} are very similar. Where the
+operation of each is basically the same, the file system in question is referred to as \texttt{ExtX}, following the convention
+introduced by Carrier \citeyear{carrier} in File System Forensic Analysis. 
 
-The ``smallest addressable storage unit of a hard'' of a hard disk is a sector \cite[p. 30]{carrier}. Typically a sector is 512
-bytes. The Linux kernel treats hard disks as an array of these 512 byte sectors \cite{linuxdrivers}.
-An \texttt{extX} file system 
+The ``smallest addressable storage unit'' of a hard disk is a sector, and for an \texttt{ExtX} file system it is a block
+\cite[Chapter 14]{carrier}. Typically the size of a sector is 512 bytes, and, by default, the Linux kernel treats all hard disks as
+an array of 512 byte sectors \cite{linuxdrivers}.  A typical \texttt{ExtX} file system will use 4KiB blocks (eight sectors), but one
+of the changes introduced by \texttt{ext4} was support for block sizes of up to 64KiB. Data is read and written to the disk in
+multiples of blocks, rather than bytes or bits, which are the units dealt used by applications. \texttt{ExtX} divides a disk into a
+series of block groups, the size of which is determined at the time of file system creation.  Each block group contains a copy of
+the ``superblock,'' which contains key metadata about the file system.  These copies can be used for recovery should the primary superblock 
+become corrupted.  Furthermore, because the metadata associated with a file is almost always held within the same block group as the
+actual data for that file, block groups increase the performance of \texttt{ExtX} by minimizing the amount of mechanical
+movement required of the hard disk. Additionally, the block group contains a ``group descriptor table,'' which holds metadata about the
+layout of the block group itself, and an ``inode table'' with holds information about the files in the block group. In
+\texttt{ext4} the block group layout has been modified with the introduction of ``flex block groups,'' which centralize the metadata
+associated with a number of block groups, but this scalability improvement does not alter the basic ideas behind block groups \cite{ext4implications}.
 
-block groups
-inodes
-directory entries
-indirect blocks
-extents
+Each file has a piece of metadata associated with it called an inode, and the inodes for each block group are stored in the inode table within
+the block group. All of the information about a file, excluding the filename and the actual contents of the file, are stored in the
+inode. The inode structure includes, for example, the user ID (UID), the permissions mode, and pointers to the actual data \cite[p.
+457]{carrier}. Chapter \ref{ch:ecryptfs} uses the fact that each inode has a UID associated with it to derive an encryption key for
+the contents of the file. Directories, or folders, in \texttt{ExtX} are simply files of a special type \cite[p. 424]{carrier}. The
+contents of a directory file is a list of directory entries, which are data structures that contain the actual names of the files in
+the directory. In \texttt{ext4} the directory entries are stored in a hash tree structure by default, instead of a simple list which
+was the default for \texttt{ext2} and \texttt{ext3}. A directory entry contains a pointer to the inode for the file, enabling data
+retrieval based on the name of a file. 
 
+When a file is deleted the directory entry is removed, the inode is deallocated, and the blocks associated with the file are freed,
+but the actual data remains until, by chance, it is overwritten. The pointers in the inode that referenced the actual
+data blocks are zeroed in \texttt{ext3} and \texttt{ext4}, making it necessary to carve\footnote{Carving is the process of searching
+for deleted files based on the structure of the files trying to be recovered. JPEG images, for example, can be identified because
+they begin with the magic number FF D8.} for deleted files during recovery.  Most block allocation schemes do make an effort to
+prevent file fragmentation, though, which increases the likelihood of being able to successfully carve for the file
+\cite{ext4implications}. There has been some discussion of introducing secure delete functionality into \texttt{ext4}, but at the
+time of writing it is not supported in most implementations \cite{ext4securedelete}.
+
+There is an incredible amount of complexity necessarily being glossed over here, but the basics of \texttt{ExtX} have been covered.
+A traditional spinning disk is addressed in sectors, and a series of sectors makes a block. \texttt{ExtX} contains a superblock,
+which is just an area holding metadata about the file system. \texttt{ExtX} divides the disk into a series of block groups, and each
+block group contains a copy of the superblock and metadata about the files within the group, including an inode table. Each file is
+associated with an inode in the inode table, and the inode holds metadata about the file, including the location of the blocks
+containing the file's data. Directories are just special files that hold filenames in directory entry structures, and a directory entry
+points to the inode for the file. Deleting a file does not ensure that the contents of the file are gone, which is a fact frequently
+used in forensics.
 
 \section{Acquisition}
 At this point, the structure of the file system on an Android 2.3 device has been reviewed, as well as an example of carving
@@ -484,6 +513,13 @@ RageAgainstTheCage is available on Sebastian Krahmer's blog and can be used to r
 	\item Wait for ADB session to end. When it ends, reconnect adb shell
 	\item {\# Root}
 \end{enumerate}	
+
+\subsection{Acquisition of Volatile Memory}
+
+At the time of writing, one of the most recent developments in the field of Android forensics has been the successful acquisition of
+volatile memory. Joe Sylve and a team 
+
+\cite{dmd}
 
 \section{Analysis}
 
