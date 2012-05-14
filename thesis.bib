@@ -1,6 +1,65 @@
-% This file was created with JabRef 2.6.
-% Encoding: UTF-8
-
+-@inproceedings{smudge,
+	author = {Adam Aviv and Katherine Gibson and Evan Mossop and Matt Blaze and Jonathan Smith},
+	booktitle = {USENIX 4th Workshop on Offensive Technologies},
+	publisher = {USENIX Association},
+	series = {WOOT'10},
+	title = {{Smudge Attacks on Smartphone Touch Screens}},
+	year = {2010}
+}
+@misc{ball,
+	author = {Craig Ball},
+	title = {Computer Forensics of Lawyers Who Can't Set a Digital Clock},
+	rl = {http://www.craigball.com}
+}
+@misc{eneaboot,		
+	author = {Mattias Bj\"{o}rnheden},
+	title = {The Android boot process from power on},
+	url = {http://www.androidenea.com/2009/06/android-boot-process-from-power-on.html},
+	lastchecked = {October 15, 2011},
+	year = {2009},
+}
+@article{chipoff,
+	author = {Marcel Breeuwsma and Martien de Jongh and Coert Klaver and Ronald van der Knijff and Mark Roeloffs},
+	title = {Forensic Data Recovery from Flash Memory},
+	journal = {Small Scale Digital Device Forensics Journal},
+	lastchecked = {October 8, 2011},
+	month = {June},	
+	year = {2007},
+	volume = {1},
+	number = {1},
+}
+@misc{lockscreenbypass0,
+	author = {Thomas Cannon},
+	title = {Android Lock Screen Bypass},
+	url = {http://thomascannon.net/blog/2011/02/android-lock-screen-bypass},
+	lastchecked = {December 21, 2011},
+	year = {2010}	
+}
+@article{Carrier2003,
+	author = {Brian Carrier},
+	title = {Defining Digital Forensic Examination and Analysis Tools},
+	journal = {International Journal of Digital Evidence},
+	year = {2003},
+	volume = {1},
+	number = {4},
+	month = {January},
+}
+@book{carrier,
+	title = {File System Forensic Analysis},
+	publisher = {Addison-Wesley},
+	year = {2005},
+	author = {Brian Carrier},
+	address = {Crawfordsville, IN}
+}
+@article{fdeworks,
+	author = {Eoghan Casey and Geoff Fellows and Matthew Geiger and Gerasimos Stellatos},
+	title = {The growing impact of full disk encryption on digital forensics},
+	journal = {Digital Investigation},
+	year = {2011},
+	volume = {8},
+	number = {2},
+	pages = {129--134}
+}
 @book{linuxdrivers,
 	author = {Jonathan Corbet and Alessandro Rubini and Greg Kroah-Hartman},
 	title = {Linux Device Drivers},
@@ -9,201 +68,150 @@
 	address = {Sebastapol, CA},
 	edition = {3rd},
 }
-
-@misc{arentpermissions,
+@lecture{arentpermissions,
 	author = {Anthony Lineberry and David Luke Richardson and Tim Wyatt},
 	title = {These Aren't The Permissions You're Looking For},
-	howpublished = {https://www.defcon.org/images/defcon-18/dc-18-presentations/Lineberry/DEFCON-18-Lineberry-Not-The-Permissions-You-Are-Looking-For.pdf}
+	url = {https://www.defcon.org/images/defcon-18/dc-18-presentations/Lineberry/DEFCON-18-Lineberry-Not-The-Permissions-You-Are-Looking-For.pdf},
+	howpublished = {Presented at Defcon 18},
 }
-
-@misc{ball,
-	author = {Craig Ball},
-	title = { Computer Forensics of Lawyers Who Can't Set a Digital Clock},
-	howpublished = {www.craigball.com/}
-}
-
-@book{carrier,
-	title = {File System Forensic Analysis},
-	publisher = {Addison-Wesley},
-	year = {2005},
+@misc{Carrier2002,
 	author = {Brian Carrier},
-	address = {Crawfordsville, IN}
+	month = {October},
+	year = {2002},
+	title = {Open Source Digital Forensic Tools: The Legal Argument},
+	url = {http://digital-evidence.org/papers/opensrc_legal.pdf},
+	note = {Retrieved 06/26/2011},
 }
-
-@MISC{Carrier2002,
-  author = {Brian Carrier},
-  month = {October},
-  year = {2002},
-  title = {Open Source Digital Forensic Tools: The Legal Argument},
-  howpublished = {digital-evidence.org/papers/opensrc\_legal.pdf},
-  note = {Retrieved 06/26/2011},
-  owner = {daniel},
-  timestamp = {2011.06.26}
-}
-
-@MISC{gartner,
-  author = {Roberta Cozza},
-  title = {Forecast: Mobile Communications Devices by Open Operating System,
-	Worldwide, 2007-2014},
-  howpublished = {www.gartner.com/DisplayDocument?ref=clientFriendlyUrl\&id=1428830}
-}
-
-@ARTICLE{antiandroid,
-  author = {Alessandro Distefano and Gianluigi Me and Francesco pace},
-  title = {Android anti-forensics through a local paradigm},
-  journal = {Digital Investigation},
-  year = {2010},
-  volume = {7 Suppl 1},
-  pages = {S83-S94}
-}
-
-@article{fdeworks,
-	author = {Eoghan Casey and Geoff Fellows and Matthew Geiger and Gerasimos Stellatos},
-	title = {The growing impact of full disk encryption on digital forensics},
+@article{antiandroid,
+	author = {Alessandro Distefano and Gianluigi Me and Francesco pace},
+	title = {Android anti-forensics through a local paradigm},
 	journal = {Digital Investigation},
+	year = {2010},
+	volume = {7 Suppl 1},
+	pages = {S83--S94}
+}
+@misc{exploidexplained,
+	author = {The Intrepidus Group},
+	title = {Android Root Source Code: Looking at the C-Skills},
+	url = {http://intrepidusgroup.com/insight/2010/09/android-root-source-code-looking-at-the-c-skills}
+}
+@lecture{defiling,
+	author = {Grucq},
+	title = {The Art of Defiling: Defeating Forensic Analysis on UNIX File Systems},
+	url = {http://video.google.com/videoplay?docid=-4786019601683862711},
+	howpublished = {Presented at HITB 2004},
+	year = {2004}
+}
+@book{hoog,
+	title = {Android Forensics},
+	publisher = {Syngress},
 	year = {2011},
-	volume = {8},
-	number = {2},
-	pages = {129-134}
+	author = {Andrew Hoog},
+	address = {Waltham, MA}
 }
-
-@MISC{exploidexplained,
-  author = {The Intrepidus Group},
-  title = {Android Root Source Code: Looking at the C-Skills},
-  howpublished = {intrepidusgroup.com/insight/2010/09/android-root-source-code-looking-at-the-c-skills}
+@inproceedings{securedelete,
+	author = {Jaeheung Lee and Junyoung Heo and Yookun Cho and Jiman hong and Sung Shin},
+	title = {Secure deletion for NAND flash file system},
+	booktitle = {Proceedings of the 2008 ACM symposium on Applied computing},
+	year = {2008},
+	publisher = {ACM}
 }
-
-@MISC{defiling,
-  author = {The Grucq},
-  title = {The Art of Defiling: Defeating Forensic Analysis on UNIX File Systems},
-  howpublished = {video.google.com/videoplay?docid=-4786019601683862711}
-}
-
-@BOOK{hoog,
-  title = {Android Forensics},
-  publisher = {Syngress},
-  year = {2011},
-  author = {Andrew Hoog}
-}
-
-@INPROCEEDINGS{securedelete,
-  author = {Jaeheung Lee and Junyoung Heo and Yookun Cho and Jiman hong and Sung
-	Y. Shin},
-  title = {Secure deletion for NAND flash file system},
-  booktitle = {Proceedings of the 2008 ACM symposium on Applied computing},
-  year = {2008},
-  publisher = {ACM}
-}
-
-@MISC{howyaffsworks,
-  author = {Charles Manning},
-  title = {How YAFFS Works},
-  url = {www.yaffs.net/files/yaffs.net/HowYaffsWorks.pdf},
-  year = {2007-2010},
+@misc{howyaffsworks,
+	author = {Charles Manning},
+	title = {How YAFFS Works},
+	url = {http://www.yaffs.net/files/yaffs.net/HowYaffsWorks.pdf},
+	year = {2010},
 	lastchecked = {October 3, 2011},
 }
-
-@ARTICLE{carvefirefox,
-  author = {Murilo Tito Pereira},
-  title = {Forensic analysis of the Firefox 3 Internet history and recovery
-	of deleted SQLite records},
-  journal = {Digital Investigation},
-  year = {2009},
-  volume = {5},
-  pages = {93-103}
+@article{carvefirefox,
+	author = {Murilo Tito Pereira},
+	title = {{Forensic analysis of the Firefox 3 internet history and recovery of deleted SQLite records}},
+	journal = {Digital Investigation},
+	year = {2009},
+	volume = {5},
+	number = {3-4},
+	pages = {93--103}
 }
-
-@MISC{whyencrypt,
-  author = {Ryan Radia},
-  title = {Why you should always encrypt your smartphone},
-  howpublished = {arstechnica.com/gadgets/guides/2011/01/why-you-should-always-encrypt-your-smartphone.ars}
+@misc{whyencrypt,
+	author = {Ryan Radia},
+	title = {Why you should always encrypt your smartphone},
+	url = {http://arstechnica.com/gadgets/guides/2011/01/why-you-should-always-encrypt-your-smartphone.ars}
 }
-
-@MISC{sqliteformat,
-  author = {SQlite},
-  title = {The SQLite Database File Format},
-  howpublished = {www.sqlite.org/fileformat2.html}
+@misc{sqliteformat,
+	author = {SQlite},
+	title = {The SQLite Database File Format},
+	url = {http://www.sqlite.org/fileformat2.html}
 }
-
-@MISC{compilingmtd,
-  title = {CompilingMTDUtils},
-  howpublished = {elinux.org/CompilingMTDUtils}
+@misc{compilingmtd,
+	title = {Compiling MTD Utils},
+	url = {http://elinux.org/CompilingMTDUtils}
 }
-
-@MISC{mtdfaq,
-  title = {Memory Technology Device (MTD) Subsystem for Linux FAQ},
-  howpublished = {www.linux-mtd.infradead.org/faq/general.html}
+@misc{mtdfaq,
+	title = {Memory Technology Device (MTD) Subsystem for Linux FAQ},
+	url = {http://www.linux-mtd.infradead.org/faq/general.html}
 }
-
-@MISC{udevcve,
-  title = {CVE-2009-1185},
-  howpublished = {cve.mitre.org/cgi-bin/cvename?name=CVE-2009-1185}
+@misc{udevcve,
+	title = {CVE-2009-1185},
+	url = {http://cve.mitre.org/cgi-bin/cvename?name=CVE-2009-1185},
+	year = {2009},
 }
-
-@MISC{lostiphone,
+@misc{lostiphone,
 	author = {Jesus Diaz},
 	title = {How Apple Lost the Next iPhone},
-	url = {gizmodo.com/5520438/how-apple-lost-the-next-iphone},
+	url = {http://gizmodo.com/5520438/how-apple-lost-the-next-iphone},
 	lastchecked = {October 3, 2011},
 	month = {April},
 	day = {19},
 	year = {2010},
 }
-
-@MISC{seizure,
+@misc{seizure,
 	author = {Glenn Greenwald},
 	title = {Homeland Security's laptop seizuers: Interview with Rep. Sanchez},
-	url = {politics.salon.com/2011/01/15/laptops/},
+	url = {http://politics.salon.com/2011/01/15/laptops/},
 	lastchecked = {October 3, 2011},
 	month = {January},
 	day = {15},
 	year = {2011},
 }
-
-@MISC{whispercore,
+@misc{whispercore,
 	title = {WhisperCore},
-	url = {www.whispersys.com/whispercore.html},
+	url = {http://www.whispersys.com/whispercore.html},
 	lastchecked = {October 3, 2011},
 }
-
-@MISC{schneiermaid,
+@misc{schneiermaid,
 	author = {Bruce Schneier},
-	title = {"Evil Maid" Attacks on Encrypted Hard Drives},
-	url = {www.schneier.com/blog/archives/2009/10/evil\_maid\_attac.html},
+	title = {{"Evil maid" attacks on encrypted hard drives}},
+	url = {http://www.schneier.com/blog/archives/2009/10/evil_maid_attac.html},
 	lastchecked = {October 3, 2011},
 	month = {October},
 	day = {23},
 	year = {2009},
 }
-
-@ARTICLE{attackingbitlocker,
+@article{attackingbitlocker,
 	author = {Sven Turpe and Andreas Poller and Jan Steffan and Jan-Peter Holtz and Jan Trukenmuller},
 	title = {Attacking the BitLocker Boot Process},
 	journal = {Proceedings of the 2nd International Conference on Trusted Computing},
-	url = {testlab.sit.fraunhofer.de/downloads/Publications/Attacking_the_BitLocker_Boot_Process_Trust2009.pdf},
+	url = {http://testlab.sit.fraunhofer.de/downloads/Publications/Attacking_the_BitLocker_Boot_Process_Trust2009.pdf},
 	lastchecked = {October 3, 2011},
 }
-
-@MISC{evilmaid,
+@misc{evilmaid,
 	author = {Joanna Rutkowska},
 	title = {Evil Maid goes after TrueCrypt!},
-	url = {theinvisiblethings.blogspot.com/2009/10/evil-maid-goes-after-truecrypt.html},
+	url = {http://theinvisiblethings.blogspot.com/2009/10/evil-maid-goes-after-truecrypt.html},
 	lastchecked = {October 3, 2011},
 	month = {October},
 	day = {16},
 	year = {2009},	
 }
-
-@MISC{whispernotar,
+@misc{whispernotar,
 	title = {WhisperCore 0.5.5},
-	url = {www.whispersys.com/updates.html},
+	url = {http://www.whispersys.com/updates.html},
 	lastchecked = {October 3, 2011},
 	month = {September},
 	day = {8},
 	year = {2011},
 }
-
-@MISC{whisperyaffs,
+@misc{whisperyaffs,
 	title = {WhisperYAFFS Wiki},
 	url = {https://github.com/WhisperSystems/WhisperYAFFS/wiki},
 	lastchecked = {October 3, 2011},
@@ -211,71 +219,52 @@
 	day = {3},
 	year = {2011},
 }
-
-@MISC{openlikefunnyhaha,
+@misc{openlikefunnyhaha,
 	author = {Ashlee Vance and Brad Stone},
 	title = {Google Holds Honeycomb Tight},
-	url = {www.businessweek.com/technology/content/mar2011/tc20110324_269784.htm},	
+	url = {http://www.businessweek.com/technology/content/mar2011/tc20110324_269784.htm},	
 	month = {March},
 	day = {24},
 	year = {2011},	
 }
-
-@MISC{clearlikemud,	
+@misc{clearlikemud,	
 	author = {Tom Warren},
 	title = {Microsoft clears up Linux confusion over Windows 8 Secure Boot feature},
-	url = {www.winrumors.com/microsoft-clears-up-linux-confusion-over-windows-8-secure-boot-feature},
+	url = {http://www.winrumors.com/microsoft-clears-up-linux-confusion-over-windows-8-secure-boot-feature},
 	month = {September},
 	day = {11},
 	year = {2011},
 }
-
-@MISC{uefi0,
+@misc{uefi0,
 	author = {Matthew Garrett},
 	title = {UEFI Secure Booting},
-	url = {mjg59.dreamwidth.org/5552.html},
+	url = {http://mjg59.dreamwidth.org/5552.html},
 	month = {September},
 	day = {20},
 	year = {2011},
 }
-
-@MISC{microsoftuefi,
+@misc{microsoftuefi,
 	author = {Steven Sinofsky},
 	title = {Protecting the pre-OS environment with UEFI},
-	url = {blogs.msdn.com/b/b8/archive/2011/09/22/protecting-the-pre-os-environment-with-uefi.aspx},
+	url = {http://blogs.msdn.com/b/b8/archive/2011/09/22/protecting-the-pre-os-environment-with-uefi.aspx},
 	month = {September},
 	day = {22},
 	year = {2011},
 }
-
-@MISC{uefi1,
+@misc{uefi1,
 	author = {Matthew Garrett},
 	title = {UEFI Secure Booting (Part 2)},
-	url = {mjg59.dreamwidth.org/5850.html},
+	url = {http://mjg59.dreamwidth.org/5850.html},
 	month = {September},
 	day = {23},
 	year = {2011},
 }
-
-@ARTICLE{chipoff,
-	author = {Marcel Breeuwsma and Martien de Jongh and Coert Klaver and Ronald van der Knijff and Mark Roeloffs},
-	title = {Forensic Data Recovery from Flash Memory},
-	url = {www.ssddfj.org/papers/SSDDFJ_V1_1_Breeuwsma_et_al.pdf},
-	journal = {Small Scale Digital Device Forensics Journal},
-	lastchecked = {October 8, 2011},
-	month = {June},	
-	year = {2007},
-	volume = {1},
-	number = {1},
-}
-
-@MISC{honeycombcrypt,
+@misc{honeycombcrypt,
 	title = {Implementation of Encryption in Android 3.0},
-	url = {source.android.com/tech/encryption/android_crypto_implementation.html},
+	url = {http://source.android.com/tech/encryption/android_crypto_implementation.html},
 	lastchecked = {October 9, 2011},
 }
-
-@MISC{notdroid,
+@misc{notdroid,
 	title = {This is not the droid you're looking for...},
 	url = {https://www.defcon.org/images/defcon-18/dc-18-presentations/Trustwave-Spiderlabs/DEFCON-18-Trustwave-Spiderlabs-Android-Rootkit-WP.pdf},
 	lastchecked = {October 4, 2011},
@@ -284,59 +273,43 @@
 	month = {June},
 	day = {21},
 }
-
-@MISC{googlesharing,
+@misc{googlesharing,
 	title = {GoogleSharing :: A Special Kind Of Proxy},
-	url = {googlesharing.net},
+	url = {http://googlesharing.net},
 	lastchecked = {October 4, 2011},
 	author = {Moxie Marlinspike},
 }
-
-@MISC{cmincognito,
+@misc{cmincognito,
 	title = {Incognito Mode | CyanogenMod},
 	url = {http://www.cyanogenmod.com/features/incognito-mode},
 	lastchecked = {October 4, 2011},
 }
-
-@ARTICLE{naval,
+@mastersthesis{naval,
 	title = {The Forensic Potential of Flash Memory},
 	author = {James E. Regan},
 	year = {2009},
 	month = {September}	
 }
-
 @article{Halcrow,
 	author = {Halcrow, Michael},
 	journal = {Proceedings of the 2005 Linux Symposium},
 	pages = {201--218},
 	title = {{eCryptfs : An Enterprise-class Cryptographic Filesystem for Linux}},
-	url = {ecryptfs.sourceforge.net/ecryptfs.pdf},
 	year = {2005}
 }
-
 @misc{securitydoc,
 	title = {Security and Permissions},
-	url = {developer.android.com/guid/topics/secuity/security.html},
+	url = {http://developer.android.com/guid/topics/secuity/security.html},
 	lastchecked = {January 4, 2012},
 }
-
 @misc{Dorrendorf2011,
-	author = {Dorrendorf, Leo},
+	author = {Leo Dorrendorf},
 	pages = {1--15},
 	title = {{Protecting Drive Encryption Systems Against Memory Attacks}},
 	year = {2011},
 	url = {http://eprint.iacr.org/2011/221.pdf},
 	lastchecked = {January 9, 2012},
 }
-
-@misc{eneaboot,		
-	author = {Mattias Bj\"{o}rnheden},
-	title = {The Android boot process from power on},
-	url = {http://www.androidenea.com/2009/06/android-boot-process-from-power-on.html},
-	lastchecked = {October 15, 2011},
-	year = {2009},
-}
-
 @misc{propertysystem,
 	author = {{rx wen}},
 	title = {Android property system},
@@ -346,33 +319,27 @@
 	url = {http://rxwen.blogspot.com/2010/01/android-property-system.html},
 	lastchecked = {January 1, 2012},		
 }
-
 @misc{ecryptfspki,
-	title = "eCryptfs: Public key support",
+	title = {{eCryptfs: Public key support}},
 	url = {http://article.gmane.org/gmane.linux.kernel/440305},
 	lastchecked = {February 17, 2012},
 	author = {Michael Halcrow},
 	year = {2006},
-	note = {Archived at http://www.webcitation.org/65Wh5jGYp},
 }
-
 @misc{miscdev,
-	title = "Miscellaneous Character Drivers",
+	title = "miscellaneous Character Drivers",
 	url = {http://www.linuxjournal.com/article/2920},
 	lastchecked = {February 17, 2012},
 	author = {Alessandro Rubini},
 	year = {1998},
-	note = {Archived at http://www.webcitation.org/65WjVbF6F},
 }
-
 @misc{arstechnica,
-	title = "From encryption to darknets: As governments snoop, activists fight back",
-	url = "http://arstechnica.com/business/the-networked-society/2012/02/from-encryption-to-darknets-as-governments-snoop-activists-fight-back.ars",
+	title = {From encryption to darknets: As governments snoop, activists fight back},
+	url = {http://arstechnica.com/business/the-networked-society/2012/02/from-encryption-to-darknets-as-governments-snoop-activists-fight-back.ars},
 	lastchecked = {February 17, 2012},
 	author = {Cyrus Farivar},
 	year = {2012},
 }
-
 @article{dmd,
 	title = {Acquisition and analysis of volatile memory from android devices},
 	author = {Joe Sylve and Andrew Case and Lodovico Marziale and Golden Richard},
@@ -380,10 +347,9 @@
 	journal = {Digital Investigation},
 	volume = {8},
 	number = {3-4},
-	pages = {175-184},	
+	pages = {175--184},	
 	month = {February},
 }
-
 @misc{dhsfoia,
 	title = {Via FOIA: 75MB of zipped DHS training materials on seizure and surveillance of phones.},
 	url = {https://twitter.com/#!/csoghoian/status/169781744592109568},
@@ -391,42 +357,12 @@
 	author = {Chistopher Soghoian},
 	note = {Actual materials at http://t.co/tmocf3rB},	
 }
-
-
-@article{Carrier2003,
-  author = {Brian Carrier},
-  title = {Defining Digital Forensic Examination and Analysis Tools},
-  journal = {International Journal of Digital Evidence},
-  year = {2003},
-  volume = {1},
-  number = {4},
-  month = {January},
-  owner = {daniel},
-  timestamp = {2011.06.26}
-}
-
-@article{smudge,
-	author = {Adam J. Aviv and Katherine Gibson and Evan Mossop and Matt Blaze and Jonathan M. Smith},
-	title = {Smudge Attacks on Smartphone Touch Screens},
-	journal = {USENIX WOOT '10},
-	year = {2010},	
-}
-
 @misc{rubberhose,
 	author = {Chris Soghoian},
 	title = {Turkish police may have beaten encryption key out of TJ Maxx suspect},
 	url = {http://news.cnet.com/8301-13739_3-10069776-46.html},
 	lastchecked = {January 19, 2012},
 	year = {2009}
-}
-
-% Lock screen bypasses
-@misc{lockscreenbypass0,
-	author = {Thomas Cannon},
-	title = {Android Lock Screen Bypass},
-	url = {http://thomascannon.net/blog/2011/02/android-lock-screen-bypass},
-	lastchecked = {December 21, 2011},
-	year = {2010}	
 }
 @misc{lockscreenbypass1,
 	author = {Jason Kincaid},
@@ -455,14 +391,15 @@
 	title = {Java Cryptography Architecture (JCA) Reference Guide},
 	lastchecked = {February 19, 2012},
 }
-@misc{otr,
-	url = {http://www.cypherpunks.ca/otr/otr-wpes.pdf},
+@inproceedings{otr,
 	title = {Off-the-Record Communication, or, Why Not To Use PGP},
-	lastchecked = {Feburary 19, 2012},
+	booktitle = {Proceedings of the Workshop on Privacy in the Electronic Society 2004},
+	pages = {77--84},
+	year = {2004}
 }
-@article{ext4implications,
+@inproceedings{ext4implications,
 	author = {Kevin Fairbanks and Christopher Lee and Henry Iii},
-	journal = {Symposium A Quarterly Journal In Modern Foreign Literatures},
+	booktitle = {Proceedings of the Sixth Annual Workshop on Cyber Security and Information Intelligence Research},
 	title = {{Forensic Implications of Ext4}},
 	year = {2010}
 }
@@ -471,14 +408,12 @@
 	title = {Securely deleting files from ext4 filesystems},
 	lastchecked = {April 26, 2012},
 	year = {2011},		
-	url = {http://lwn.net/Articles/462437},
+	url = {http://lwn.net/articles/462437},
 }
 @inproceedings{coldboot,
-	author = {Alex Halderman and Seth Schoen and Nadia Heninger and William Clarkson and William Paul and Joseph Caladrino and
-Ariel Feldman and Jacob Appelbaum and Edward Felten},
+	author = {Alex Halderman and Seth Schoen and Nadia Heninger and William Clarkson and William Paul 
+		and Joseph Caladrino and Ariel Feldman and Jacob Appelbaum and Edward Felten},
 	booktitle = {Proceedings of the 17th USENIX Security Symposium},
 	title = {{Lest we remember: cold-boot attacks on encryption keys}},
-	url = {http://dl.acm.org/citation.cfm?id=1506429},
 	year = {2008}
 }
-
