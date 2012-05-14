@@ -1,0 +1,1 @@
+[daniel@misdirection ~]$ sudo mount -o loop userdata.img /mnt/android/userdata

@@ -558,6 +558,18 @@ Android YAFFS2 images can be mounted if \texttt{nandsim} is started with the fol
 These parameters are drawn directly from the MTD documentation and are determined by the geometry of the image \cite{mtdfaq}
 After \texttt{nandsim} has been loaded, \texttt{/dev/mtdblock0} can be mounted read-only as a YAFFS2 file system and read.
 
+Mounting an ext4 image is much easier. The majority of Linux distributions have moved to using ext4 as their default file system,
+and thus come with excellent ext4 support out of the box. An ext4 image can be mounted for perusal by passing the loop mount option,
+as shown in Table \ref{tab:loopext4}.
+
+\begin{table}[htb]
+\lstset{numbers=none}
+\lstinputlisting{tables/loopext4.txt}
+\caption{Loop Mounting an ext4 Image}
+\label{tab:loopext4}
+\end{table}
+
+
 \subsection{Carving SQLite Records} A large percentage of forensically interesting information on an Android phone is
 indexed in SQLite databases.  The majority of these databases are stored on the \texttt{userdata} partition of the phone, mounted at
 \texttt{/data}.  Pulling data from these databases while they are intact is trivial: simply open the relevant database with SQLite
