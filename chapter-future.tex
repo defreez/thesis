@@ -28,7 +28,7 @@ and running it through \texttt{checkPassword}. The password is stored in a stand
 way to store strings in memory.
 \begin{table}[htb]
 \lstinputlisting{tables/unlock.java}
-\caption{The wrong way to handle passwords in java}
+\caption{The Wrong Way to Handle Passwords in Java}
 \label{tab:badhandling}
 \end{table}
 The Sun recommended method for storing passwords in memory is to use a \texttt{char} array, not a \texttt{String} object
@@ -130,7 +130,7 @@ browser.  Bookmarks and page visits are stored nearly identically by the Android
 if it is a normal page visit and to 1 if the URL is a bookmark.  Bookmarks also commonly store thumbnails of the saved page.
 \begin{figure}[htb]
 \includegraphics[scale=0.75]{BookmarksSchema.png}
-\caption{Bookmarks table schema in SQLite Browser}
+\caption{Bookmarks Table Schema in SQLite Browser}
 \label{fig:bookmarkschema}
 \end{figure}
 
@@ -144,7 +144,7 @@ table \ref{tab:incognito} disables all inserts into the history database.
 
 \begin{table}[htb]
 \lstinputlisting{tables/incognito.java}
-\caption{Basic incognito mode: bypass history insert}
+\caption{Basic Incognito Mode: Bypass History Insert}
 \label{tab:incognito}
 \end{table}
 

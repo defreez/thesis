@@ -80,7 +80,7 @@ strengthens the file system against offline cryptanalysis. Figure \ref{fig:ecryp
 \begin{figure}[!htb]
 \begin{center}
 \includegraphics[scale=0.4]{eCryptfsNormalOperation.png} \end{center}
-\caption{eCryptfs normal key operation} \label{fig:ecryptfsnormal} \end{figure}
+\caption{eCryptfs Normal Key Operation} \label{fig:ecryptfsnormal} \end{figure}
 
 \section{eCryptfs boundary mode}
 \label{sec:boundarymode}
@@ -161,7 +161,7 @@ options \texttt{ro}. This is very similar to a standard mount command from a she
 be translated by \texttt{init} into an actual mount call to the kernel. 
 \begin{table}[!htb]
 \lstinputlisting{tables/init-mount}
-\caption{Mounting a file system from within init.herring.rc}
+\caption{Mounting a File System from within \texttt{init.herring.rc}}
 \label{tab:initmount}
 \end{table}
 
@@ -217,7 +217,7 @@ the key into the kernel.
 
 \begin{table}[!htb]
 \lstinputlisting{tables/generate-key} 
-\caption{Function added to vold for eCryptfs key generation}
+\caption{Function Added to \texttt{vold} for eCryptfs Key Generation}
 \label{tab:generate-key}
 \end{table}
 
@@ -262,7 +262,7 @@ successfully mounted the encrypted partition and the master key has been inserte
 is shown in Table \ref{tab:post-fs-data-trigger}.  
 \begin{table}[!htb] 
 \lstinputlisting{tables/post-fs-data-trigger} 
-\caption{Trigger in init to setup decrypted data partition}
+\caption{Trigger in \texttt{init} to Setup Decrypted Data Partition}
 \label{tab:post-fs-data-trigger} 
 \end{table} 
 An attempt is made every boot to mount
@@ -277,7 +277,7 @@ property if the file system type is ``ecryptfs,'' as shown in Table \ref{tab:ini
 
 \begin{table}[!htb] 
 \lstinputlisting{tables/init-ecryptfs-mount}
-\caption{Reading eCryptfs mount options from system property} 
+\caption{Reading eCryptfs Mount Options from System Property} 
 \label{tab:init-ecryptfs-mount}
 \end{table}
 
@@ -361,7 +361,7 @@ Ideally, the list would be accessible through a configuration interface presente
 
 \begin{table}[!htb]
 \lstinputlisting{tables/mountservice.java}
-\caption{Clearing keys from the mount service}
+\caption{Clearing Keys from the Mount Service}
 \label{tab:mountservice}
 \end{table}
 
@@ -391,7 +391,7 @@ What is Alice to do?
 \begin{center}
 \includegraphics[scale=0.5]{dhs.png}
 \end{center}
-\caption{DHS mobile forensics training} 
+\caption{DHS Mobile Forensics Training} 
 \label{fig:dhs}
 \end{figure}
 
