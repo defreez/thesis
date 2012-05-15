@@ -1,26 +1,23 @@
 \chapter{CONCLUSION}
-
 There is an uncomfortable tension between computer forensics and privacy. Computer forensics draws attention to all of the pieces of
 information an individual leaves behind on a device.  Privacy preserving technologies strive to hide, destroy, or otherwise prevent
 the recovery of these same bits of information. A delicate balance between the two must be struck, as individuals may find
 themselves requiring the use of either forensic tools or privacy tools, depending on the situation.  Android forensics is developing
 at an astonishing pace.  Already, live-system forensics is being introduced for Android devices, and soon live memory acquisition of
 phones and tablets will be commonplace. For activists, dissidents, and plain-old citizens crossing borders, it is imperative that
-methods exist to protect mobile data against these increasingly sophisticated acquisition techniques.  Toward that end, this study
-has focused on the privacy side of the equation.
+methods exist to protect mobile data against these increasingly sophisticated acquisition techniques.  
 
-This paper gave a short overview of Android forensics techniques, emphasizing the methods by which the data
-on an Android device may be acquired. These methods explicitly attempt to subvert the privacy of data on a device by making a
-low-level copy, and therefore serve as an excellent litmus test for privacy tools. Encrypting a device, so long as the
-boot environment and the integrity of the hardware itself are protected, provides significant mitigation against the acquisition of
-data. Traditional methods of encryption, however, do not provide significant protection of a device as it is running, particularly
-if the attacker has a way of bypassing the lock screen.
+This paper gave a short overview of Android forensics techniques, emphasizing the methods by which the data on an Android device may
+be acquired. These methods explicitly attempt to subvert the privacy of data on a device by making a low-level copy, and therefore
+serve as an excellent litmus test for privacy tools. Encrypting a device, so long as the boot environment and the integrity of the
+hardware itself are protected, helps prevent the acquisition of data. Traditional methods of encryption, however, do not provide
+significant protection of a device while it is running, particularly if the attacker has a way of bypassing the lock screen.
 
-This study has proposed a method of encryption capable of protecting a device even if it is seized while running.  The key
+This thesis has proposed a method of encryption capable of protecting a device even if it is seized while running.  The key
 distinction between the method proposed - eCryptfs boundary mode - and traditional mobile full-disk encryption, is that eCryptfs
-boundary mode independently keys Android applications to provide additional protection. The keys of select applications can be wiped
-whenever the device is locked, while leaving the rest of the data accessible. This completely prevents logical acquisition of the
-chosen applications, and could be extended to thwart live memory analysis. Coupling this technique with other projects
-that provide secure communications, such as Orbot and TextSecure, would provide a privacy-oriented mobile OS capable of withstanding
-significant forensic inquiry. Properly used, such a platform would afford individuals a much greater level of confidence that even
-if they lose control of their device, their data is safe.
+boundary mode independently keys Android applications. The keys of select applications can be wiped whenever the device is locked,
+leaving the rest of the data accessible. This completely prevents logical acquisition of the chosen applications, and could be
+extended to thwart live memory analysis. Coupling this technique with other projects that provide secure communications, such as
+Orbot and TextSecure, would provide a privacy-oriented mobile OS capable of withstanding significant forensic inquiry. Properly
+used, such a platform would afford individuals a much greater level of confidence that, even if they lose control of their device,
+their data is safe.
