@@ -167,17 +167,17 @@ in YAFFS2 the concept of a checkpoint was introduced to essentially store a snap
 allowing for a faster boot.
 
 \subsection{ext4}
-The ext4 file system operates in a very different fashion than YAFFS2. While YAFFS2 was designed from the
-very beginning to run on NAND memory, ext4 was optimized for spinning disks. YAFFS2 went to great lengths to avoid
-overwriting NAND pages. In contrast, ext4 overwrites frequently, with no concern for the number of times a physical area of the disk
-is written to. Instead, ext4 is interested in preventing the head on a hard disk from having to travel too far, and thereby
-mitigates the significant latency introduced by mechanical movement. The fact that ext4 looks very different From
-YAFFS2 under the hood matters little to the rest of the operating system, because the Linux kernel provides an
-abstraction layer called the virtual file system (hereafter VFS), which sits on top of what is normally considered to be the
-``real'' file system. VFS allows Linux based operating systems to switch between different file systems with relative ease. The VFS
-interface presented to the rest of the system remains essentially identical regardless of the file system in use, so the rest of the
-system need not worry about the particular file system being used. Forensics practitioners, on the other hand, must be acutely aware
-of the file system in use. The ext4 file system is enormously complex, but the basics are presented here.
+The ext4 file system operates in a very different fashion than YAFFS2. While YAFFS2 was designed from the beginning to run on NAND
+memory, ext4 was optimized for spinning disks. YAFFS2 went to great lengths to avoid overwriting NAND pages. In contrast, ext4
+overwrites frequently, with no concern for the number of times a physical area of the disk is written to. Instead, ext4 is
+interested in preventing the head on a hard disk from having to travel too far, and thereby mitigates the significant latency
+introduced by mechanical movement. The fact that ext4 looks very different From YAFFS2 under the hood matters little to the rest of
+the operating system, because the Linux kernel provides an abstraction layer called the virtual file system (hereafter VFS), which
+sits on top of what is normally considered to be the ``real'' file system. VFS allows Linux based operating systems to switch
+between different file systems with relative ease. The VFS interface presented to the rest of the system remains essentially
+identical regardless of the file system in use, so the rest of the system need not worry about the particular file system being
+used. Forensics practitioners, on the other hand, must be acutely aware of the file system in use. The ext4 file system is
+enormously complex, but the basics are presented here.
 
 The ext4 file system is an enhancement to the ext3 file system, which in turn was an enhancement to the
 ext2 file system. The fundamental mechanics of ext2, ext3, and ext4 are very similar. Where the
