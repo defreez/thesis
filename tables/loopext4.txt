@@ -1,1 +1,1 @@
-[daniel@misdirection ~]$ sudo mount -o loop userdata.img /mnt/android/userdata
+[daniel@misdirection ~]$ sudo mount -o loop,ro,noexec userdata.img /mnt/android/userdata

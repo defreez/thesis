@@ -1,4 +1,4 @@
-\chapter{Future Research and Other Projects}
+\chapter{FUTURE RESEARCH AND OTHER PROJECTS}
 \label{ch:future}
 
 \section{Improvements to eCryptfs Boundary Mode}
@@ -12,7 +12,7 @@ cone.'' What follows are a few ideas for future work.
 
 \subsection{Configurable Application Security}
 There is, as it stands, no way to configure which applications will have their boundary keys cleared when a device sleeps. 
-Each application \texttt{uid} and package name must be hardcoded, which is only meant to demonstrate that the 
+Each application UID and package name must be hardcoded, which is only meant to demonstrate that the 
 boundary keys do function. A user interface would be beneficial. This interface could tie to the ``manage applications'' menu and
 should provide an easy, intuitive way for the user to select which applications will be protected while the device is locked.
 
@@ -24,7 +24,7 @@ step on the privacy side of this arms race is to prevent all access to secured a
 live memory analysis. The primary hurdle is that very little of the code involved was
 designed to withstand memory-based attacks. Android does \emph{not} handle the unlock password or the key material derived from that
 password securely. Table \ref{tab:badhandling} shows the code responsible for retrieving the unlock password from the lock screen
-and running it through \texttt{checkPassword}. The password is stored in a standard Java string, which is \emph{not} a secure
+and running it through \texttt{checkPassword}. The password is stored in a standard Java string, which is not a secure
 way to store strings in memory.
 \begin{table}[htb]
 \lstinputlisting{tables/unlock.java}
@@ -35,20 +35,20 @@ The Sun recommended method for storing passwords in memory is to use a \texttt{c
 \cite{securejava}. This is because \texttt{java.lang.String} objects are immutable. They cannot be zeroed out after usage. Arrays of
 characters can, however, be zeroed. It is not conceptually difficult to audit the password handling routines in Android for insecure
 handling, but it is time consuming and tedious. Validating that the password was being handled securely would require developing a
-tool for recovering password keys from memory. Joe Sylve's work could be used \cite{dmd} for validation, but the tools accompanying his paper 
+tool for recovering password keys from memory. Joe Sylve's \citeyear{dmd} work could be used for validation, but the tools accompanying his paper 
 had not yet been released at the time of writing.
 
-\subsection{Utilize \texttt{ecryptfsd} and encrypt SD card}
+\subsection{Utilize ecryptfsd and encrypt SD card}
 As a demonstration of what could be done, boundary keys are currently being calculated directly in the kernel. This allowed for
 rapid development, but may not be the wisest place. Instead of hooking the passphrase keying mode of
 eCryptfs, an additional keying mode with a different header format could be developed. This mode could call out to
-\texttt{ecryptfsd} for boundary key calculation. Pushing this portion out into userspace would provide a great deal more flexibility
+ecryptfsd for boundary key calculation. Pushing this portion out into userspace would provide a great deal more flexibility
 regarding the criteria to use for generating boundary keys. If someone wanted to use the GID\footnote{Group ID} instead of the UID
 for a particular eCryptfs volume, for example, that could be easily configured. The ability to use the GID would be
 advantageous because it would afford encryption of external storage with eCryptfs. The problem now is that all SD card files are
 owned by \texttt{system}. Clearing the boundary key for \texttt{system} is not an option, as it would result in instability of the
 device. The SD card files have a group owner of \texttt{sdcard\_rw}, though, so if the boundary key were calculated using the
-GID, then it could be cleared. More generally, calling out to \texttt{ecryptfsd} would allow for arbitrary logic when
+GID, then it could be cleared. More generally, calling out to ecryptfsd would allow for arbitrary logic when
 boundary keys are being created.
 
 \section{Data Contraception}
@@ -61,14 +61,13 @@ case for most newer phones, then it may be nearly impossible to remove artifacts
 is a great start, but relying solely on encryption still leaves the chance that if the key is exposed, then historical forensic
 artifacts can be recovered.
 
-Data ``contraception,'' is more reliable, if more difficult to implement and validate.  Data contraception is a term first
-introduced by The Grucq, who pioneered the field of anti-forensics \cite{defiling}.  The idea is that forensic analysis cannot find
-that which has not been created.  The cost is significant modification to the underlying architecture of whatever application or
-operating system is creating the forensic artifacts of concern.  The most obvious and descriptive example from the Android platform
-is browser history.  The ability to obtain browser history from any platform is one of the most basic forensic techniques, and it
-remains central to any Android analysis.  This is the principle of ``Incognito Mode" in the Chrome desktop browser and the Android
-browser in versions 3.x and later. When incognito mode is enabled, all browsing history remains in memory and never touches disk. A
-Linux live CD is capable of doing the same thing, but with an entire operating system instead of just a browser.
+Data ``contraception,'' a term coined by The Grucq \citeyear{defiling}, is more reliable.  The idea is that forensic analysis cannot
+find that which has not been created.  The cost is significant modification to the underlying architecture of whatever application
+or operating system is creating the forensic artifacts of concern.  The most obvious and descriptive example from the Android
+platform is browser history.  The ability to obtain browser history from any platform is one of the most basic forensic techniques,
+and it remains central to any Android analysis.  This is the principle of ``Incognito Mode" in the Chrome desktop browser and the
+Android browser in versions 3.x and later. When incognito mode is enabled, all browsing history remains in memory and never touches
+disk. A Linux live CD is capable of doing the same thing, but with an entire operating system instead of just a browser.
 
 As of yet, there has been little exploration of the possibility of a memory-only Android device, where no data is ever written. 
 
@@ -92,7 +91,7 @@ fashion, tests which demonstrate that it does retrieve the information the tool 
 recover browser history, for example, it may be tested by salting a device with known browser history and attempting to retrieve the
 data with the tool.  As noted by Carrier, The National Institute of Standards and Technology (NIST) Computer Forensic Tool Testing
 (CFTT) group publishes a wide variety of test methodologies and the results of those tests.  While CFTT tests provide good reference
-material, and provide detailed tests for classic forensic techniques such as disk imaging, none of their published documents provide
+material, and detailed tests for classic forensic techniques such as disk imaging, none of their published documents provide
 a specific testing methodology for modern smart-phones. 
 
 While a reference tool may be developed specifically for the purpose of developing a privacy tool, doing so increases the risk of
@@ -123,13 +122,14 @@ browser cache leaves browser history discoverable.
 
 \subsubsection{Browser History Validation}
 
-The browser history on an Android device is stored in the \texttt{browser.db} database.  In a vanilla distribution of Android , this
+The browser history on an Android device is stored in the \texttt{browser.db} database.  In a vanilla distribution of Android, this
 database is stored in the \texttt{/data/data/com.android.browser/databases} directory.  Oddly enough, the browser history is stored
 in the bookmarks table.  The screen clipping in Figure \ref{fig:bookmarkschema} shows the bookmarks table as it is seen in SQLite
-browser.  Bookmarks and page visits are stored nearly identically by the Android browser, with the bookmark integer being set to 0
+Browser.  Bookmarks and page visits are stored nearly identically by the Android browser, with the bookmark integer being set to 0
 if it is a normal page visit and to 1 if the URL is a bookmark.  Bookmarks also commonly store thumbnails of the saved page.
 \begin{figure}[htb]
-\includegraphics[scale=0.75]{BookmarksSchema.png}
+\center
+\includegraphics[scale=0.6]{BookmarksSchema.png}
 \caption{Bookmarks Table Schema in SQLite Browser}
 \label{fig:bookmarkschema}
 \end{figure}
@@ -156,8 +156,8 @@ in the popular CyanogenMod ROM does. This was tested side-by-side with CyanogenM
 \item \url{www.slashdot.org} was chosen as the site for salting the device.
 \item The browser history was visually inspected in the browser itself.
 \item The browser database was pulled with \texttt{adb}.
-\item A case-insensitive substring search of the entire data partition was performed with the Linux \texttt{strings} utility.
-\item A \texttt{nanddump} was carved for deleted SQLite records containing browser history.
+\item A case-insensitive substring search of the entire data partition was performed with the Linux strings utility.
+\item A {nanddump} was carved for deleted SQLite records containing browser history.
 \item The absence of references to the salt site was confirmed.
 \item The native Android browser was opened, and only \url{www.slashdot.org} was visited.
 \item The browser history was pulled from the device in the same manner as above.
@@ -166,11 +166,9 @@ in the popular CyanogenMod ROM does. This was tested side-by-side with CyanogenM
 \item Repeated for device running the custom history bypass and analyzed acquired data.
 \end{enumerate}
 
-As expected, after the data partition is wiped there is no information in the browser history.  The browser database itself is
-missing until the browser is launched for the first time.  After the salt site is visited, it is clearly visible in the browser
-history available on the device and in the browser database as a unique record.  When incognito mode is enabled in CyanogenMod,
-neither method produces results indicative of a visit to the salt site.
-
+The browser database itself is missing until the browser is launched for the first time.  After the salt site is visited, it is
+clearly visible in the browser history available on the device and in the browser database as a unique record.  When incognito mode
+is enabled in CyanogenMod, neither location indicates of a visit to the salt site.
 
 \subsubsection{Browser Cache Validation}
 The Android browser cache is a particularly interesting forensic artifact.  The browser cache is implemented within the webkit
@@ -203,7 +201,7 @@ The following test method was used:
 \end{enumerate}
 
 On the empty device no databases and no cache files were found in the \texttt{/data/data/com.android.browser} directory.  As
-expected, the logical acquisition process was successful in retrieving cached data after the browser has been opened and
+expected, the logical acquisition process was successful in retrieving cached data after the browser had been opened and
 \url{www.slashdot.org} visited.  Once the browser had been opened on a device running stock Android, the \texttt{webviewCache.db}
 database was populated with data from the default page that loads. 
 
@@ -214,12 +212,12 @@ site in the web cache.
 
 In CyanogenMod 7, the \texttt{webviewCache.db} records and the cache files created in
 \texttt{/data/data/com.android.browser/cache/webviewCache} directory are indistinguishable from stock Android.  Completely disabling
-cache, in contrast, entirely prevents the creation of cache files and entries into webviewCache.db.  In fact, webviewCache.db is
-never created, as it is initialized as a temporary database.  After visiting \url{www.slashdot.org} in the native Android browser, a
-logical acquisition using \texttt{adb} recovered no cache data from \texttt{/data/data/com.android.browser}.  While the incognito
-mode built into CyanogenMod 7 passed the browser history artifact test, it does not pass the browser cache artifact test. This is
-because the browser cache is implemented by webkit, and the CyanogenMod 7 incognito mode operates entirely within the browser
-application. 
+cache, in contrast, entirely prevents the creation of cache files and entries into \texttt{webviewCache.db}.  In fact,
+\texttt{webviewCache.db} is never created, as it is initialized as a temporary database.  After visiting \url{www.slashdot.org} in
+the native Android browser, a logical acquisition using \texttt{adb} recovered no cache data from
+\texttt{/data/data/com.android.browser}.  While the incognito mode built into CyanogenMod 7 passed the browser history artifact
+test, it does not pass the browser cache artifact test. This is because the browser cache is implemented by webkit, and the
+CyanogenMod 7 incognito mode operates entirely within the browser application. 
 
 \section{Other Projects}
 
@@ -257,9 +255,9 @@ proven to be authentic \cite{otr}.
 \section{Summary}
 
 If privacy tools are to be developed that are capable of securing data against state-of-the-art forensic techniques, then there is
-still a great deal of work that needs to be done. The field of mobile forensics is progressing at a rate that far exceeds the
-field of mobile privacy. An easy-to-use form of disk encryption that is resistant to live memory analysis is desperately needed.  If
-securing a device requires intimate knowledge of that device's internals, then in practice it will never be secured. This paper has
-taken steps toward building an encryption scheme for Android that is resistant to logical analysis and could, with minimal
-development, be resistant to live memory analysis. This encryption method in particular, and privacy tools in general, need to
-be rigorously and thoroughly validated. If there are bugs in them, the privacy community needs to find them before an attacker does.
+still a great deal of work that needs to be done. The field of mobile forensics is progressing at a rate that far exceeds the field
+of mobile privacy. An easy-to-use form of disk encryption that is resistant to live memory analysis is needed. If securing a device
+requires intimate knowledge of that device's internals, then in practice it will never be secured. This paper has taken steps toward
+building an encryption scheme for Android that is resistant to logical analysis and could, with some development, be resistant to
+live memory analysis. This encryption method in particular, and privacy tools in general, need to be rigorously and thoroughly
+validated. If there are bugs in them, the privacy community needs to find them before an attacker does.

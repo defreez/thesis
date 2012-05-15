@@ -1,9 +1,9 @@
-\chapter{File System Encryption Boundaries}
+\chapter{FILE SYSTEM ENCRYPTION BOUNDARIES}
 \label{ch:ecryptfs}
 
 \section{Overview} 
 With Android 4.0 (Ice Cream Sandwich or ICS), Google introduced native support for full-disk encryption. Ice Cream Sandwich encrypts
-the entire \texttt{/data} partition with \texttt{dm-crypt}, which provides transparent block-level encryption, sitting in-between
+the entire \texttt{/data} partition with dm-crypt, which provides transparent block-level encryption, sitting in-between
 the file system and the device. From a privacy perspective, introducing block-level encryption is a significant step forward for
 Android because it makes offline attacks against a mobile device much more difficult; the data is locked away securely as soon as
 the phone is turned off, assuming a strong passphrase. Live acquisition, however, remains a possibility if the unlock screen can be
@@ -15,7 +15,7 @@ system security, rather than cryptography, remains the principle protection. Whi
 exploits against a locked ICS device, an alarming number of bugs have been found over time in various implementations of the lock
 screen \cite{hoog, lockscreenbypass0, lockscreenbypass1, lockscreenbypass2}.
 
-This chapter describes a novel method which can foil the logical acquisition of an Android device, even if the lock screen is
+This chapter describes a method which can foil the logical acquisition of an Android device, even if the lock screen is
 bypassed. This means that sensitive data cannot be copied off of the phone if the correct password was not entered at the lock
 screen. It is likely that a sophisticated attacker could still retrieve the decryption keys from memory, but the method presented
 could be extended without too much difficulty to prevent that as well, meaning a running Android device could remain
@@ -26,13 +26,13 @@ is locked, keys for select applications storing sensitive data are removed from 
 
 \section{eCryptfs} 
 \label{sec:ecryptfs}
-There are two basic approaches to disk encryption: block-based and file-based. Android 4.x uses \texttt{dm-crypt}, which is
+There are two basic approaches to disk encryption: block-based and file-based. Android 4.x uses dm-crypt, which is
 block-based, while eCryptfs is file-based.  In a block-based encryption scheme, encryption happens ``below'' the file system. The
 encryption mechanism is inserted between the file system and the block device. When the file system goes to write a block of data,
 that block is encrypted prior to physically being written to disk. The file system is unaware of the encryption. The advantage of
 this method is that it is simple, transparent, and encrypts everything on the device. The primary disadvantage is a lack of granular
 control. It is difficult, in a block-based encryption scheme, to treat one file any differently than another.  It can be done, but
-requires keeping a separate mapping between files and blocks. A cryptographic file system, in contrast, performs encryption at the
+requires keeping a separate mapping between files and blocks \cite{Dorrendorf2011}. A cryptographic file system, in contrast, performs encryption at the
 file level. The data is encrypted \emph{before} it reaches the block device driver. This allows for much greater control over how
 files are encrypted, with the primary disadvantages being complexity of implementation and inability to protect swap
 space.\footnote{The eCryptfs FAQ contains a more complete comparison between block-based and file-based encryption methods. The
@@ -40,11 +40,11 @@ inability to encrypt swap space is not particularly relevant to Android, which t
 
 Michael Halcrow was the principal architect of eCryptfs, which extended Erez Zadok's Cryptfs \cite{Halcrow}. It was designed after
 the FiST stackable file system framework, which allows it to run on top of an existing file system, such as ext4. The idea behind
-``stacking'' file systems is an underlying file system (ext4 in this case) can be used to provide most of the basic functionality,
-while the new features exist in a relatively thin layer on top of that file system. From an end-user perspective, eCryptfs is almost
-completely transparent after initial setup.  A special directory is created that houses private data, and all of the files stored in
-this directory will be encrypted. The encrypted directory is then mounted somewhere else as an eCryptfs file system, and the files
-viewed from the eCryptfs mount point are transparently decrypted. 
+``stacking'' file systems is that an underlying file system (ext4 in this case) can be used to provide most of the basic
+functionality, while the new features exist in a relatively thin layer on top of that file system. From an end-user perspective,
+eCryptfs is almost completely transparent after initial setup.  A special directory is created that houses private data, and all of
+the files stored in this directory will be encrypted. The encrypted directory is then mounted somewhere else as an eCryptfs file
+system, and the files viewed from the eCryptfs mount point are transparently decrypted. 
 
 The extensions to eCryptfs described in this chapter are primarily modifications
 to how eCryptfs handles keys. A number of methods are supported by eCryptfs for handling the private key material, but this paper is
@@ -72,7 +72,7 @@ strengthens the file system against offline cryptanalysis. Figure \ref{fig:ecryp
 	\item{A new encryption key, FEK, is randomly generated for each file to be written.}
 	\item{The FEK associated with a file is encrypted with F(EK)$^{2}$ to create the EFEK, and stored in the header for the file.}
 	\item{The signature of F(EK)$^{2}$ is also stored in the header of the file.}
-	\item{When a file is decrypted, the stored F(EK)${2}$ signature is compared against the list of signatures for the mount point,
+	\item{When a file is decrypted, the stored F(EK)$^{2}$ signature is compared against the list of signatures for the mount point,
 		and if a match is found, the appropriate key is retrieved and the file is decrypted.}
 \end{enumerate}
 }
@@ -126,10 +126,10 @@ Boundary keys are generated by concatenating the master key with the UID of the 
 are used as F(EK)$^{2}$, and the master key generated from the user's passphrase becomes F(EK)$^{3}$. Currently only 128 bit keys
 hashed with MD5 are supported because that was the most accessible key length and algorithm already available within eCryptfs, but
 it would not be a significant amount of work to expand the supported set of key sizes and hash algorithms.  Dorrendorf
-\citeyear{Dorrendorf2011} suggests using an HMAC\footnote{HMAC stands for Hash-based Message Authentication Code. See RFC 2104.}
-used to verify message integrity by function. Using an HMAC would be an improvement, though typical attacks against straight hashing
-would be difficult here, since the extension that could be added to the master key is limited to the size of a UID. Moving to SHA1
-for the hash function would probably be more important, and eCryptfs is moving in that direction. 
+\citeyear{Dorrendorf2011} suggests using an HMAC.\footnote{HMAC stands for Hash-based Message Authentication Code. See RFC 2104.}
+Using an HMAC would indeed be an improvement over simple concatenation, though typical attacks against straight hashing would be
+difficult here, because the extension that could be added to the master key is limited to the size of a UID. Moving to SHA1 for the
+hash function would probably be more signficant.
 
 As seen in Figure \ref{fig:ecryptfsboundary}, a list of boundary keys is kept alongside the list of master keys (internally referred
 to as global authentication tokens).  When a file is opened, the boundary key for the relevant UID is retrieved. If the boundary key
@@ -148,30 +148,29 @@ taking a quick look at the internals of the Android boot process. During startup
 execute that is not hardwired into a device. Unlike a desktop Linux system, where open-source bootloaders such as GRUB are used,
 phone manufacturers typically use proprietary bootloaders. While the sources for these bootloaders are not open to inspection, the
 principles they operate on are well known. The bootloader, for at least the Nexus series of devices, can be interacted with via the
-\texttt{fastboot} protocol. The Android Open Source Project includes the source for the \texttt{fastboot} utility, which can be used
+fastboot protocol. The Android Open Source Project includes the source for the fastboot utility, which can be used
 to unlock the bootloader, flash images, and perform other functions that only the bootloader can do.  During normal startup the
 primary task of the bootloader is to load the Android kernel into memory and pass control of the system over to it. 
 
 The Android kernel will initialize the hardware and prepare the device itself for use. On an Android device, the \texttt{boot}
 partition is separated from the \texttt{system} and \texttt{userdata} partitions (see chapter \ref{ch:forensics}). The boot
 partition contains the kernel and a ``ramdisk.''  The ramdisk is a small file system that contains the core binaries and
-configuration files needed to start the system. In most Linux-based systems, Android included, \texttt{init} is the ``grandmother''
-of all processes. Everything outside of the kernel is launched by \texttt{init} directly or by a process that was
-previously started by \texttt{init} \cite{eneaboot}. The Android \texttt{init} process is specialized for Android and does not coincide with
-\texttt{init} as it is implemented on any other Linux distribution, thus hereafter \texttt{init} refers to \texttt{init} as it is
-implemented in Android.  The configuration for \texttt{init} is held in two files on the ramdisk, \texttt{init.rc} and
-\texttt{init.PRODUCTNAME.rc} where \texttt{PRODUCTNAME} is the internal name for the board on the device. The Nexus S, for example, is termed
-``Herring,'' so \texttt{init} looks at \texttt{init.rc} and \texttt{init.herring.rc}.\footnote{A note on naming: the device and the
-board for the device are named separately, but necessarily correlate. So, the Nexus One has a device name of ``passion,'' but a
-board/kernel name of ``mahimahi.'' The Nexus S has a device name of ``crespo'' or ``crespo4g,'' depending on whether it is a Nexus S
-or a Nexus S 4G, but they both have a board/kernel name of ``Herring.''} These configuration files are written in a script syntax
-specific to \texttt{init} that supports basic functions which should be familiar, such as \texttt{mount}, \texttt{chmod}, and
-\texttt{chown}, as well as more advanced functionality such as triggers based upon system properties.  Triggers in \texttt{init}
-will be examined more thoroughly in section \ref{ssec:encryptionboot}. These scripts set up the file system layout of the device and
-start all of the system services that make up Android as the user knows it. A typical line in an \texttt{init} script might look
-like Table \ref{tab:initmount} which tells \texttt{init} to mount the \texttt{system} partition with the mount flags \texttt{wait}, and the mount
-options \texttt{ro}. This is very similar to a standard mount command from a shell, but the syntax is slightly different. This will
-be translated by \texttt{init} into an actual mount call to the kernel. 
+configuration files needed to start the system. In most Linux-based systems, Android included, init is the ``grandmother'' of all
+processes \cite{eneaboot}. Everything outside of the kernel is launched by init directly or by a process that was previously started
+by init. The Android init process is specialized for Android and does not coincide with init as it is implemented on any other Linux
+distribution, thus hereafter init refers to init as it is implemented in Android.  The configuration for init is held in two files
+on the ramdisk, \texttt{init.rc} and \texttt{init.PRODUCTNAME.rc} where \texttt{PRODUCTNAME} is the internal name for the board on
+the device. The Nexus S, for example, is termed ``Herring,'' so init looks at \texttt{init.rc} and
+\texttt{init.herring.rc}.\footnote{A note on naming: the device and the board for the device are named separately, but necessarily
+correlate. So, the Nexus One has a device name of ``passion,'' but a board/kernel name of ``mahimahi.'' The Nexus S has a device
+name of ``crespo'' or ``crespo4g,'' depending on whether it is a Nexus S or a Nexus S 4G, but they both have a board/kernel name of
+``Herring.''} These configuration files are written in a script syntax specific to init that supports basic functions which should
+be familiar, such as \texttt{mount}, \texttt{chmod}, and \texttt{chown}, as well as more advanced functionality such as triggers
+based upon system properties.  Triggers in init will be examined more thoroughly in section \ref{ssec:encryptionboot}. These scripts
+set up the file system layout of the device and start all of the system services that make up Android as the user knows it. A
+typical line in an init script might look like Table \ref{tab:initmount} which tells init to mount the \texttt{system} partition
+with the mount flags \texttt{wait}, and the mount options \texttt{ro}. This is very similar to a standard mount command from a
+shell, but the syntax is slightly different. This will be translated by init into an actual mount call to the kernel. 
 \begin{table}[!htb]
 \lstinputlisting{tables/init-mount}
 \caption{Mounting a File System from within \texttt{init.herring.rc}}
@@ -184,11 +183,11 @@ be translated by \texttt{init} into an actual mount call to the kernel.
 As described in the documentation for the implementation of encryption in Honeycomb\footnote{Honeycomb was the release of Android
 immediately preceding Ice Cream Sandwich, and available for tablets only. There is no official documentation for the encryption
 mechanism of Ice Cream Sandwich, but it functions as described in the Honeycomb document.} \cite{honeycombcrypt}, most of the heavy
-lifting related to handling encrypted devices is performed by \texttt{vold}, the Android volume daemon. The volume daemon is the
-system service responsible for keeping track of storage on an Android device. The primary mechanism for \texttt{init} to communicate
-with the outside world, including \texttt{vold}, is the notion of a \emph{system property}.  Android has an elaborate property system
-which is outside the scope of this discussion, but essentially \texttt{init} maintains a shared memory region where properties can
-be set and retrieved. This shared region is visible to every process on the system \cite{propertysystem}. These ``native'' system
+lifting related to handling encrypted devices is performed by vold, the Android volume daemon. The volume daemon is the
+system service responsible for keeping track of storage on an Android device. The primary mechanism for init to communicate
+with the outside world, including vold, is the notion of a \emph{system property}.  Android has an elaborate property system
+which is outside the scope of this discussion, but essentially init maintains a shared memory region where properties can
+be set and retrieved. This region is visible to every process on the system \cite{propertysystem}. These ``native'' system
 properties are distinct from system properties in Java, though native system properties are available to Java code via
 JNI\footnote{JNI is the ``Java Native Interface,'' which is used to execute native code, typically C++, from within Java. Android
 makes extensive use of JNI.}. The Honeycomb implementation document describes how these properties are used during boot with an
@@ -202,80 +201,77 @@ properly encrypted. It sends the command ``cryptfs cryptocomplete" to vold, and 
 successfully, or -1 on internal error, or -2 if encryption was not completed successfully. \cite{honeycombcrypt}
 \end{quote}
 
-To summarize, \texttt{init} always attempts to mount \texttt{/data} as if it were unencrypted. This fails if the device is
-encrypted, and then sets the appropriate system properties to denote the results of the attempted mount. When the framework starts,
-\texttt{init} reads those properties, and calls \texttt{vold} if necessary. When called upon, it is the responsibility of
-\texttt{vold} to handle setup for the \texttt{dm-crypt} device, making sure it gets decrypted and mounted at \texttt{/data}, while it
-is the responsibility of the minimal framework to accept a password from the user and pass it to \texttt{vold}. Once \texttt{/data}
-is successfully mounted, the rest of the framework services are started and the system is ready for use.
+To summarize, init always attempts to mount \texttt{/data} as if it were unencrypted. This fails if the device is encrypted, and
+then init sets the appropriate system properties to denote the results of the attempted mount. When the framework starts, init reads
+those properties, and calls vold if necessary. When called upon, it is the responsibility of vold to handle setup
+for the dm-crypt device, making sure it gets decrypted and mounted at \texttt{/data}, while it is the responsibility of the
+minimal framework to accept a password from the user and pass it to vold. Once \texttt{/data} is successfully mounted, the
+rest of the framework services are started and the system is ready for use.
 
-\subsection{Supporting eCryptfs in \texttt{vold}} \label{sec:ecryptfsvold} Just as the brains for handling \texttt{dm-crypt} were
-placed in \texttt{vold} by Google, here all of the support for handling eCryptfs volumes is also placed in \texttt{vold}. Normally,
-eCryptfs ships with a fully developed set of user space utilities to help with key and volume management. Rather than cross-compiling
-the full set of utilities, the decision was made by the author to build only a minimal set of eCryptfs user space functionality into
-an external library, available in the source tree accompanying this paper at \texttt{external/libecryptfs}.  The eCryptfs code was
-mostly kept intact, with the exception of the hash function. The stock utilities use Mozilla's \texttt{libnss} to perform the
-necessary hashes, but Android does not have \texttt{libnss} and cross-compilation is non-trivial. Android does, however, ship with
-the OpenSSL crypto libraries, which include a full set of hash functions. Those functions were used in lieu of \texttt{libnss}.
-Additionally, Android does not ship with keyutils, which is the user space library for interacting with the kernel key retention
-service.  This library is required by \texttt{libecryptfs} to insert the key into the kernel. The keyutils library is included in
-the source tree accompanying this paper at \texttt{external/libkeyutils}. 
+\subsection{Supporting eCryptfs in vold} \label{sec:ecryptfsvold} Just as the brains for handling dm-crypt were placed in vold by
+Google, here all of the support for handling eCryptfs volumes is also placed in vold. Normally, eCryptfs ships with a fully
+developed set of user space utilities to help with key and volume management. Rather than cross-compiling the full set of utilities,
+the decision was made by the author to build only a minimal set of eCryptfs user space functionality into an external library,
+available in the source tree accompanying this paper at \texttt{external/libecryptfs}.  The eCryptfs code was mostly kept intact,
+with the exception of the hash function. The stock utilities use Mozilla's libnss to perform the necessary hashes, but Android does
+not have libnss and cross-compilation is not easy. Android does, however, ship with the OpenSSL crypto libraries, which include a
+full set of hash functions. Those functions were used in lieu of libnss.  Additionally, Android does not ship with keyutils, which
+is the user space library for interacting with the kernel key retention service.  This library is required by libecryptfs to insert
+the key into the kernel. The keyutils library is included in the source tree accompanying this paper at
+\texttt{external/libkeyutils}. 
 
 Normally, if an eCryptfs volume is mounted by hand, a user generates a key from a passphrase and adds it to a keyring in the kernel
 by using \texttt{ecryptfs-add-passphrase}.  This key is used as the master key for the eCryptfs volume. On Android the same
-procedure is followed, but \texttt{vold} replaces \texttt{ecryptfs-add-passphrase}, and the signature of the key is recorded in the
-system property \texttt{vold.ecryptfs\_options}, which actually contains the literal mount options required to mount an eCryptfs
-volume on the device. Table \ref{tab:generate-key} shows the actual code in \texttt{vold} which calls \texttt{libecryptfs} to insert
-the key into the kernel. 
+procedure is followed, but vold replaces \texttt{ecryptfs-add-passphrase}, and the signature of the key is recorded in the system
+property \texttt{vold.ecryptfs\_options}, which actually contains the literal mount options required to mount an eCryptfs volume on
+the device. Table \ref{tab:generate-key} shows the actual code in vold which calls libecryptfs to insert the key into the kernel. 
 
 \begin{table}[!htb]
 \lstinputlisting{tables/generate-key} 
-\caption{Function Added to \texttt{vold} for eCryptfs Key Generation}
+\caption{Function Added to vold for eCryptfs Key Generation}
 \label{tab:generate-key}
 \end{table}
 
-The \texttt{vold} function \texttt{cryptfs\_check\_passwd}, which is used to verify that a password is correct for mounting an
+The vold function \texttt{cryptfs\_check\_passwd}, which is used to verify that a password is correct for mounting an
 encrypted volume, has been modified to include a call to the new \texttt{cryptfs\_generate\_ecryptfs\_key}. Thus, when a user enters
 their password to decrypt the device at boot, the corresponding eCryptfs mount key is inserted into the keyring at the same time.
 
 The Android kernel must also support eCryptfs and key retention, which the default Android kernel does not. Enabling support for
-these options is easy, however, as it simply involves enabling the appropriate options in the kernel configuration, building the
-kernel, and placing it into the appropriate device folder within the Android Open Source Project, prior to building. The code for
-this paper includes the modified kernel source in the \texttt{kernel} subdirectory, and the compiled kernel can be found in
-\texttt{device/samsung/crespo} (crespo because a Nexus S was used for testing).
+these options involves enabling the appropriate options in the kernel configuration, building the kernel, and placing it into the
+appropriate device folder within the Android Open Source Project, prior to building. The code for this paper includes the modified
+kernel source in the \texttt{kernel} subdirectory, and the compiled kernel can be found in \texttt{device/samsung/crespo} (crespo
+because a Nexus S was used for testing).
 
 \subsection{Enabling eCryptfs Encryption} Normally, an Android 4.0 device is encrypted in-place, that is the existing data is
-encrypted without being moved, but this is a difficult operation with eCryptfs. In-place encryption is a relatively easy operation
-with block level encryption, as the device can be unmounted and each block encrypted where it lies. On the other hand, a multitude
-of problems present themselves when the issue of encrypting existing data files with eCryptfs is contemplated.  The typical process
-for encrypting existing files with eCryptfs is to create an empty eCryptfs mount and then copy the existing files to the eCryptfs
-file system.  This could be done, but it would come with the requirement that no more than half the data partition be in use prior to
+encrypted without being moved, but this is a difficult operation with eCryptfs. In-place encryption is a much easier operation with
+block level encryption, as the device can be unmounted and each block encrypted where it lies. On the other hand, a multitude of
+problems present themselves when the issue of encrypting existing data files with eCryptfs is contemplated.  The typical process for
+encrypting existing files with eCryptfs is to create an empty eCryptfs mount and then copy the existing files to the eCryptfs file
+system.  This could be done, but it would come with the requirement that no more than half the data partition be in use prior to
 encryption. Even if that constraint were accepted, Android does not include a native file copy utility.\footnote{Although Android
-\texttt{init} does have a file copy, it is quite rudimentary and would not suffice for the purpose at hand.} Copy functionality
-could be written, of course, but a robust file copy is not as simple as it may seem. Instead of reinventing the wheel, a third-party
-shell such as Busybox could be included in the system build, but then core OS functions are relying on shell scripts. In short,
-encrypting existing files with eCryptfs on Android is possible, but appeared to be more trouble than it was worth.
+init does have a file copy, it is quite rudimentary and would not suffice for the purpose at hand.} Copy functionality could be
+written, of course, but a robust file copy is not as simple as it may seem. Instead of reinventing the wheel, a third-party shell
+such as Busybox could be included in the system build, but then core OS functions are relying on shell scripts. In short, encrypting
+existing files with eCryptfs on Android is possible, but appeared to be more trouble than it was worth.
 
 There is a way to avoid the in-place encryption problem, however. When a device is encrypted, the command ``cryptfs enablecrypto
-inplace'' is sent to \texttt{vold}, which instructs it to perform an in-place encryption of the \texttt{userdata} partition. Yet
-\texttt{vold} also supports the command ``cryptfs enablecrypto wipe,'' though is not enabled in the official Android release. The
-Android mount service, which is the Java service that makes the call to \texttt{vold}, can be easily modified to send the ``wipe''
-incantation instead of ``inplace.'' It is important to note that this does not securely wipe the device. It merely recreates the
-file system. Any data that existed prior to encrypting the device should be treated, for forensics purposes, as if it still exists.
-Mooreover, the entire data partition is not encrypted with eCryptfs. Only \texttt{/data/data} is encrypted, as a demonstration. This
-includes all of the application data on the phone, but certainly not all of the available forensic artifacts.
+inplace'' is sent to vold, which instructs it to perform an in-place encryption of the \texttt{userdata} partition. Yet vold also
+supports the command ``cryptfs enablecrypto wipe,'' though is not enabled in the official Android release. The Android mount
+service, which is the Java service that makes the call to vold, can be easily modified to send the ``wipe'' incantation instead of
+``inplace.'' It is important to note that this does not securely wipe the device. It merely recreates the file system.  Moreover,
+the entire data partition is not encrypted with eCryptfs. Only \texttt{/data/data} is encrypted, as a demonstration. This includes
+all of the application data on the phone, but certainly not all of the available forensic artifacts.
 
-For the phone to boot after \texttt{/data/data} has been encrypted, \texttt{init} needs to be instructed to mount
-\texttt{/data/data} as an eCryptfs volume. This can be done with one line in \texttt{init.rc} at the end of the
-\texttt{post-fs-data} section. The \texttt{post-fs-data} section is executed as a trigger by \texttt{init}. Triggers in
-\texttt{init} respond to system properties being set to a certain value. When an encrypted phone boots, after \texttt{vold} has
-successfully mounted the encrypted partition and the master key has been inserted into the keyring, the system property
-\texttt{vold.decrypt} is set to the value \texttt{trigger\_post\_fs\_data}. The act of setting this property signals to
-\texttt{init} that the \texttt{post-fs-data} section of \texttt{init.rc} should be run. Triggers are easy to implement, and this one
-is shown in Table \ref{tab:post-fs-data-trigger}.  
+For the phone to boot after \texttt{/data/data} has been encrypted, init needs to be instructed to mount \texttt{/data/data} as an
+eCryptfs volume. This can be done with one line in \texttt{init.rc} at the end of the \texttt{post-fs-data} section. The
+\texttt{post-fs-data} section is executed as a trigger by init. Triggers in init respond to system properties being set to a certain
+value. When an encrypted phone boots, after vold has successfully mounted the encrypted partition and the master key has been
+inserted into the keyring, the system property \texttt{vold.decrypt} is set to the value \texttt{trigger\_post\_fs\_data}. The act
+of setting this property signals to init that the \texttt{post-fs-data} section of \texttt{init.rc} should be run. The trigger is
+shown in Table \ref{tab:post-fs-data-trigger}.  
 \begin{table}[!htb] 
 \lstinputlisting{tables/post-fs-data-trigger} 
-\caption{Trigger in \texttt{init} to Setup Decrypted Data Partition}
+\caption{Trigger in init to Setup Decrypted Data Partition}
 \label{tab:post-fs-data-trigger} 
 \end{table} 
 An attempt is made every boot to mount
@@ -283,9 +279,9 @@ An attempt is made every boot to mount
 
 A final modification was necessary to correctly retrieve the mount options for mounting the eCryptfs volume. Retrieving these
 options is complicated by the fact that eCryptfs expects the key signature of the master key to be passed as a mount option.
-Including this kind of dynamic behavior would be difficult in \texttt{init.rc}, so it was placed in \texttt{init} proper. This is
+Including this kind of dynamic behavior would be difficult in \texttt{init.rc}, so it was placed in init proper. This is
 the reason why \texttt{cryptfs\_generate\_ecryptfs\_key} stored the necessary mount options in a system property, as discussed in
-section \ref{sec:ecryptfsvold}. The mount function in \texttt{init} has been modified to read the mount options from this system
+section \ref{sec:ecryptfsvold}. The mount function in init has been modified to read the mount options from this system
 property if the file system type is ``ecryptfs,'' as shown in Table \ref{tab:init-ecryptfs-mount}.
 
 \begin{table}[!htb] 
@@ -304,20 +300,20 @@ memory to completely prevent key extraction through live analysis (see chapter \
 \subsection{Messaging in eCryptfs}
  
 There is a messaging system built into eCryptfs for handling communication between user space and kernel space. Normally, eCryptfs
-supports running a daemon called \texttt{ecryptfsd} that can be called upon to perform tasks outside of the kernel.  Typically,
-\texttt{ecryptfsd} is used for an entirely different keying mode, where eCryptfs volumes are encrypted with a public key and
+supports running a daemon called ecryptfsd that can be called upon to perform tasks outside of the kernel.  Typically,
+ecryptfsd is used for an entirely different keying mode, where eCryptfs volumes are encrypted with a public key and
 decrypted with a private key.  In this keying mode, when an encrypted file is opened eCryptfs reads a public key out of the file
-header, instead of an EFEK, and then calls out to \texttt{ecryptfsd} to retrieve the corresponding private key material \cite{ecryptfspki}. More
-generally, \texttt{ecryptfsd} provides a way for the keying mechanism of eCryptfs to be extended.  Chapter \ref{ch:future} includes
-a discussion of how boundary keys might be re-implemented using \texttt{ecryptfsd}, affording a considerable increase in
+header, instead of an EFEK, and then calls out to ecryptfsd to retrieve the corresponding private key material \cite{ecryptfspki}. More
+generally, ecryptfsd provides a way for the keying mechanism of eCryptfs to be extended.  Chapter \ref{ch:future} includes
+a discussion of how boundary keys might be re-implemented using ecryptfsd, affording a considerable increase in
 flexibility.
 
 Messaging within eCryptfs works by reading and writing messages to the device handle \texttt{/dev/ecryptfs}, which is registered as
 a ``miscellaneous'' device. A miscellaneous device is a small driver implemented to support a special purpose not general enough to
-warrant a new device class in the kernel. In this case the purpose is communication with \texttt{ecryptfsd}.\footnote{Previously,
+warrant a new device class in the kernel. In this case the purpose is communication with ecryptfsd.\footnote{Previously,
 \texttt{NETLINK} messages were used, which is a socket-like mechanism for communication with the kernel, but that method has lost
-favor within eCryptfs.} As the current implementation of boundary keys does not rely on calling out to \texttt{ecryptfsd} for key
-computation, running \texttt{ecryptfsd} is not necessary, and the messaging system can still be used by writing to
+favor within eCryptfs.} As the current implementation of boundary keys does not rely on calling out to ecryptfsd for key
+computation, running ecryptfsd is not necessary, and the messaging system can still be used by writing to
 \texttt{/dev/ecryptfs} directly. 
 
 Three new messages have been defined: \texttt{ECRYPTFS\_MSG\_CLEARMASTER}, \texttt{ECRYPTFS\_MSG\_CLEARBOUNDARY}, and
@@ -326,7 +322,7 @@ respectively. The payload of a \texttt{clearmaster} message must be the path to 
 cleared, as each mounted eCryptfs file system is keyed independently. When \texttt{clearmaster} is received by the kernel, all
 references to the master key - F(EK)$^{3}$ - within the kernel are removed from memory. This will \emph{not} remove the
 actual key from the user's keyring. It is the responsibility of user space to remove the key from the keyring, which in the Android
-implementation is handled by \texttt{vold}.  Technically, what \texttt{clearmaster} does is ``walk'' the list of global
+implementation is handled by vold.  Technically, what \texttt{clearmaster} does is ``walk'' the list of global
 authentication tokens associated with a given mount point, zero them all with \texttt{memset}, and remove them from the list.  At
 this point the key itself must be removed from the user's keyring or all files will remain decryptable. One \texttt{clearboundary}
 message for each boundary key being cleared should be sent after the master key has been cleared. If the boundary keys are cleared
@@ -336,23 +332,23 @@ followed by a string specifying the mount point of the eCryptfs file system. Bou
 keys: the list associated with the mount point is walked, each structure is zeroed, and the items removed.  No boundary keys are
 held in user space memory, so they have actually been removed as soon as the message is sent to the kernel. 
 
-In order for key removal to function properly, it was necessary to force eCryptfs to recalculate the cryptographic context for
-each file as it is opened, which does have some impact on performance. Normally the FEK is stored in a lookaside cache after the
-file is opened, but that allows access to the file even after the master and boundary keys have been cleared. The \texttt{release}
-function in eCryptfs has been modified to remove the FEK from cache upon file close.
+In order for key removal to function properly, it was necessary to force eCryptfs to recalculate the cryptographic context for each
+file as it is opened, which does have a noticeable, but not egregious, impact on performance. It is merely anecdotal data, but the
+author was able to use eCryptfs boundary mode on a daily basis without significant irritation.  Normally the FEK is stored in a
+lookaside cache after the file is opened, but that allows access to the file even after the master and boundary keys have been
+cleared. The \texttt{release} function in eCryptfs has been modified to remove the FEK from cache upon file close.
 
-
-Within Android, these messages are sent by \texttt{vold}, relying on the same stripped-down \texttt{libecryptfs} mentioned
-previously.  A set of new functions has been defined in \texttt{vold} that receive messages from the Java-based mount service and
-relay them to the kernel. These functions, in turn, are exposed as \texttt{vold} commands that are accessible from the Android
-framework. Any application with permission to control \texttt{vold} can clear or re-register keys by executing one of the following
+Within Android, these messages are sent by vold, relying on the same stripped-down \texttt{libecryptfs} mentioned
+previously.  A set of new functions has been defined in vold that receive messages from the Java-based mount service and
+relay them to the kernel. These functions, in turn, are exposed as vold commands that are accessible from the Android
+framework. Any application with permission to control vold can clear or re-register keys by executing one of the following
 commands: \texttt{cryptfs clearmaster}, \texttt{cryptfs clearboundary <uid>}, or \texttt{cryptfs regmaster}. Note that while the
-kernel messages require a mount point to be passed, the \texttt{vold} commands do not. This implementation assumes that
-\texttt{/data/data} is the only mounted eCryptfs volume. It would be easy to extend the \texttt{vold} commands to support
-multiple encrypted volumes. Additionally, the \texttt{clearmaster} command in \texttt{vold} unlinks the master key from the
+kernel messages require a mount point to be passed, the vold commands do not. This implementation assumes that
+\texttt{/data/data} is the only mounted eCryptfs volume. It would be easy to extend the vold commands to support
+multiple encrypted volumes. Additionally, the \texttt{clearmaster} command in vold unlinks the master key from the
 user space keyring
 handled by the kernel key retention service, which contains the actual private key material for the eCryptfs mount. This key
-material was originally generated from the unlock passphrase and stored in the keyring by \texttt{vold}.
+material was originally generated from the unlock passphrase and stored in the keyring by vold.
 
 When an Android device goes to sleep, either because the user pressed the power button or because the inactivity timeout was
 triggered, the \texttt{ACTION\_SCREEN\_OFF} intent\footnote{Intents are messages within the Android framework. See
@@ -411,9 +407,8 @@ What is Alice to do?
 Alice begins running an Android distribution that supports eCryptfs boundary mode. She configures the device such that the boundary
 key for ColorNote is cleared every time the phone is locked or goes to to sleep. When she is using the phone, her private to-do list
 is easily accessible. After the keys have been removed, the application fails to start entirely unless the phone has been properly
-unlocked. Attempting to access the databases through \texttt{adb} simply returns \texttt{I/O error}. While this does not, by any
-means, provide perfect security, Alice has forced the issue out of the realm of traditional post-mortem forensics. If an attacker
-wanted to recover the data, either live memory analysis would need to be performed, or an out-of-band attack executed. The
-passphrase might be determined from the smudge patterns on the screen, or the key simply extracted from Alice directly through a
-rubber-hose attack. Neither the acquisition process described in chapter \ref{ch:forensics} nor inspection of the device from the
-user interface as it is running will compromise Alice's data.
+unlocked. Attempting to access the databases through ADB simply returns \texttt{I/O error}. While this does not, by any means,
+provide perfect security, Alice has forced the issue out of the realm of traditional post-mortem forensics. If an attacker wanted to
+recover the data, either live memory analysis would need to be performed, or an out-of-band attack executed. With some refinements,
+even live memory analysis could be protected against.  As it stands, neither the acquisition process described in chapter
+\ref{ch:forensics}, nor inspection of the device from the user interface as it is running, will compromise Alice's data.
