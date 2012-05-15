@@ -91,20 +91,20 @@ does not use MTD devices for \texttt{system} or \texttt{userdata}.
 \label{tab:mount}
 \end{table}	
 
-\subsection{YAFFS2 - Yet Another Flash File System} 
+\subsection{YAFFS2} 
 \label{sec:yaffs2}
-Many Android devices still use YAFFS2 as the file system of choice for user data
-that is not stored on an external SD card.  YAFFS2 is very different from other file systems such as NTFS or ext4.
-YAFFS1,\footnote{The file system was actually just called YAFFS, but for the sake of clarity it is here referred to as YAFFS1.} which
-preceded YAFFS2,  was the first file system specifically designed for NAND flash, and so its structure is optimized for the specific
-requirements imposed by NAND flash.  Chief among these requirements is the limit on the number of overwrites performed.  NAND pages
-have a finite lifetime, and a file system that does not distribute wear will quickly wear out some pages.  The pages storing the FAT
-in FAT32, for example, would quickly become corrupt without a hardware flash translation layer (FTL), as is used in thumb drives to
-distribute wear more evenly.  YAFFS2 is designed to operate without a hardware FTL, which is good news for forensic investigators,
-as it affords a software view into the flash device.  Overwriting NAND pages requires that those pages first be erased, which in
-NAND incurs a heavy performance hit.  This leads to what is known as the ``write once" requirement, which is that NAND pages should
-be written to only once unless it is absolutely necessary to overwrite them. The write once requirement has influenced the design of
-YAFFS2 more than any other single factor.
+YAFFS2 stands for Yet Another Flash File System, version 2. Many Android devices use YAFFS2 as the file system of choice for user
+data that is not stored on an external SD card.  YAFFS2 is very different from other file systems such as NTFS or ext4.
+YAFFS1,\footnote{The file system was actually just called YAFFS, but for the sake of clarity it is here referred to as YAFFS1.}
+which preceded YAFFS2,  was the first file system specifically designed for NAND flash, and so its structure is optimized for the
+specific requirements imposed by NAND flash.  Chief among these requirements is the limit on the number of overwrites performed.
+NAND pages have a finite lifetime, and a file system that does not distribute wear will quickly wear out some pages.  The pages
+storing the FAT in FAT32, for example, would quickly become corrupt without a hardware flash translation layer (FTL), as is used in
+thumb drives to distribute wear more evenly.  YAFFS2 is designed to operate without a hardware FTL, which is good news for forensic
+investigators, as it affords a software view into the flash device.  Overwriting NAND pages requires that those pages first be
+erased, which in NAND incurs a heavy performance hit.  This leads to what is known as the ``write once" requirement, which is that
+NAND pages should be written to only once unless it is absolutely necessary to overwrite them. The write once requirement has
+influenced the design of YAFFS2 more than any other single factor.
 
 YAFFS2 is known as a ``log-structured'' file system.  A log-structured file system does not reuse flash pages when a piece of data is
 updated.  Rather, it simply writes the updated data to the next available location.  A monotonically increasing sequence number
