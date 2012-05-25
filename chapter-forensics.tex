@@ -133,8 +133,7 @@ Linux MTD presents the NAND device as a series of pages (usually 2kB), similar t
 accompanied by 64 bytes known as the ``Out-of-band area," or OOB, which is partially used by the MTD itself and partially used by
 the YAFFS1 file system. The MTD driver itself uses the OOB area to store error correction data, and additionally defines an area that
 can be used by the file system for whatever purposes it chooses, called the OOBFREE area.  The layout of the OOB can be seen in the
-\texttt{struct} in Table \ref{tab:oob}, taken from the Android source code. This \texttt{struct} is extremely important for anyone
-attempting to analyze a YAFFS based file system.
+\texttt{struct} in Table \ref{tab:oob}, taken from the Android source code. 
 
 \begin{table}[htb]
 \lstinputlisting{tables/oobstruct.c}
@@ -142,7 +141,7 @@ attempting to analyze a YAFFS based file system.
 \label{tab:oob}
 \end{table}
 
-The most important part of this struct, for our purposes, is the definition of the \texttt{oobfree} array.  The first element of the
+The most important part of this \texttt{struct}, for our purposes, is the definition of the \texttt{oobfree} array.  The first element of the
 \texttt{oobfree} array gives the offset into the area that is available for file system usage, and the second element determines the
 size of that area.  There may be multiple arrays in \texttt{oobfree} leading to complex, non-contiguous free areas, but Android
 appears to use one contiguous block.  This is not the standard layout used by Linux. Every file and directory within a YAFFS based
