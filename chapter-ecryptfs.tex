@@ -19,9 +19,9 @@ This chapter describes a method which can foil the logical acquisition of an And
 bypassed. This means that sensitive data cannot be copied off of the phone if the correct password was not entered at the lock
 screen. It is likely that a sophisticated attacker could still retrieve the decryption keys from memory, but the method presented
 could be extended without too much difficulty to prevent that as well, meaning a running Android device could remain
-cryptographically secure any time the device was locked. This is accomplished by stacking an additional cryptographic file system -
-eCryptfs - on top of the normal ext4 file system. The eCryptfs module being used has been modified to incorporate the concept of
-boundaries, where different portions of the file system use different keys, based on the user id of the file owner. When the phone
+cryptographically secure any time the device was locked. This is accomplished by stacking an additional cryptographic file system 
+-- eCryptfs -- on top of the normal ext4 file system. The eCryptfs module being used has been modified to incorporate the concept of
+boundaries, where different portions of the file system use different keys, based on the user identifier of the file owner. When the phone
 is locked, keys for select applications storing sensitive data are removed from memory, preventing access to those applications.
 
 \section{eCryptfs} 
@@ -64,9 +64,8 @@ corresponding F(EK)$^{2}$ signature, and if a corresponding key is found, the EF
 to produce the FEK. The FEK, in turn, is used to decrypt the rest of the file.  This separation of master and session keys
 strengthens the file system against offline cryptanalysis. Figure \ref{fig:ecryptfsnormal} shows this process:
 
-\vbox{
 \begin{enumerate}
-	\item{The user enters a passphrase}
+	\item{The user enters a passphrase.}
 	\item{A utility turns this passphrase into the FEKEK, or F(EK)$^{2}$, which is stored in the kernel.}
 	\item{F(EK)$^{2}$ is hashed, and that signature is registered as being available for a given mount point.}
 	\item{A new encryption key, FEK, is randomly generated for each file to be written.}
@@ -75,17 +74,16 @@ strengthens the file system against offline cryptanalysis. Figure \ref{fig:ecryp
 	\item{When a file is decrypted, the stored F(EK)$^{2}$ signature is compared against the list of signatures for the mount point,
 		and if a match is found, the appropriate key is retrieved and the file is decrypted.}
 \end{enumerate}
-}
 
 \begin{figure}[!htb]
 \begin{center}
-\includegraphics[scale=0.4]{eCryptfsNormalOperation.png} \end{center}
+\fbox{\includegraphics[scale=0.4]{eCryptfsNormalOperation.png}} \end{center}
 \caption{eCryptfs Normal Key Operation} \label{fig:ecryptfsnormal} \end{figure}
 
 \section{eCryptfs boundary mode}
 \label{sec:boundarymode}
 The modifications to eCryptfs presented in this chapter are inspired by the work of Leo Dorrendorf on increasing the resilience of
-encrypted file systems to memory-based attacks \cite{Dorrendorf2011}. The keying method of eCryptfs has been modified to add a
+encrypted file systems to memory-based attacks \citeyear{Dorrendorf2011}. The keying method of eCryptfs has been modified to add a
 notion of security boundaries between different parts of the file system, toward the end of providing a usable mobile device even
 while portions of the file system cannot be accessed. In the traditional keying mode for eCryptfs, the master key is
 F(EK)$^{2}$, and it must always remain memory resident, for if it is removed then no files can be accessed whatsoever.
@@ -94,7 +92,7 @@ been introduced. When the device is locked, this key tier allows the master key 
 boundary keys, leaving accessible only the portion of the file system necessary to keep the device operational.
 
 The question of where to draw boundaries immediately arises. The Android security architecture is designed, first and foremost,
-around ``sandboxing'' applications . From a storage perspective, this means that applications are not allowed to access either
+around ``sandboxing'' applications. From a storage perspective, this means that applications are not allowed to access either
 system data or data associated with other applications. The official documentation on security and permissions describes it this way: 
 \begin{quote} 
 A central design point of the Android security architecture is that no application, by default, has permission to perform any
@@ -128,8 +126,7 @@ hashed with MD5 are supported because that was the most accessible key length an
 it would not be a significant amount of work to expand the supported set of key sizes and hash algorithms.  Dorrendorf
 \citeyear{Dorrendorf2011} suggests using an HMAC.\footnote{HMAC stands for Hash-based Message Authentication Code. See RFC 2104.}
 Using an HMAC would indeed be an improvement over simple concatenation, though typical attacks against straight hashing would be
-difficult here, because the extension that could be added to the master key is limited to the size of a UID. Moving to SHA1 for the
-hash function would probably be more signficant.
+difficult here, because the extension that could be added to the master key is limited to the size of a UID.
 
 As seen in Figure \ref{fig:ecryptfsboundary}, a list of boundary keys is kept alongside the list of master keys (internally referred
 to as global authentication tokens).  When a file is opened, the boundary key for the relevant UID is retrieved. If the boundary key
@@ -138,7 +135,7 @@ when an application is opened for the first time after the device has been unloc
 
 \begin{figure}[!htb] 
 \begin{center}
-\includegraphics[scale=0.4]{eCryptfsBoundaryMode.png}\end{center}
+\fbox{\includegraphics[scale=0.4]{eCryptfsBoundaryMode.png}}\end{center}
 \caption{eCryptfs Boundary Mode} \label{fig:ecryptfsboundary} \end{figure}
 
 \section{Supporting eCryptfs Boundaries in Android}
@@ -249,9 +246,9 @@ problems present themselves when the issue of encrypting existing data files wit
 encrypting existing files with eCryptfs is to create an empty eCryptfs mount and then copy the existing files to the eCryptfs file
 system.  This could be done, but it would come with the requirement that no more than half the data partition be in use prior to
 encryption. Even if that constraint were accepted, Android does not include a native file copy utility.\footnote{Although Android
-init does have a file copy, it is quite rudimentary and would not suffice for the purpose at hand.} Copy functionality could be
+init does have a file copy function, it is quite rudimentary and would not suffice for the purpose at hand.} Copy functionality could be
 written, of course, but a robust file copy is not as simple as it may seem. Instead of reinventing the wheel, a third-party shell
-such as Busybox could be included in the system build, but then core OS functions are relying on shell scripts. In short, encrypting
+such as Busybox could be included in the system build, but then core OS functions would be relying on shell scripts. In short, encrypting
 existing files with eCryptfs on Android is possible, but appeared to be more trouble than it was worth.
 
 There is a way to avoid the in-place encryption problem, however. When a device is encrypted, the command ``cryptfs enablecrypto
@@ -302,7 +299,7 @@ memory to completely prevent key extraction through live analysis (see chapter \
 There is a messaging system built into eCryptfs for handling communication between user space and kernel space. Normally, eCryptfs
 supports running a daemon called ecryptfsd that can be called upon to perform tasks outside of the kernel.  Typically,
 ecryptfsd is used for an entirely different keying mode, where eCryptfs volumes are encrypted with a public key and
-decrypted with a private key.  In this keying mode, when an encrypted file is opened eCryptfs reads a public key out of the file
+decrypted with a private key.  In this keying mode, when an encrypted file is opened, eCryptfs reads a public key out of the file
 header, instead of an EFEK, and then calls out to ecryptfsd to retrieve the corresponding private key material \cite{ecryptfspki}. More
 generally, ecryptfsd provides a way for the keying mechanism of eCryptfs to be extended.  Chapter \ref{ch:future} includes
 a discussion of how boundary keys might be re-implemented using ecryptfsd, affording a considerable increase in
@@ -320,7 +317,7 @@ Three new messages have been defined: \texttt{ECRYPTFS\_MSG\_CLEARMASTER}, \text
 \texttt{ECRYPTFS\_MSG\_REGMASTER}, hereafter referred to as \texttt{clearmaster}, \texttt{clearboundary}, and \texttt{regmaster},
 respectively. The payload of a \texttt{clearmaster} message must be the path to the mount point for which the master key should be
 cleared, as each mounted eCryptfs file system is keyed independently. When \texttt{clearmaster} is received by the kernel, all
-references to the master key - F(EK)$^{3}$ - within the kernel are removed from memory. This will \emph{not} remove the
+references to the master key -- F(EK)$^{3}$ -- within the kernel are removed from memory. This will \emph{not} remove the
 actual key from the user's keyring. It is the responsibility of user space to remove the key from the keyring, which in the Android
 implementation is handled by vold.  Technically, what \texttt{clearmaster} does is ``walk'' the list of global
 authentication tokens associated with a given mount point, zero them all with \texttt{memset}, and remove them from the list.  At
@@ -386,14 +383,14 @@ Alice would like to send Bob some flowers. Unfortunately, flowers have been rece
 of affection. A busy woman, Alice tends to make lists for herself so that she does not forget important things, like sending Bob
 flowers. She is heavily invested in \emph{ColorNote}, a note-taking application, which does offer password protection and encrypted
 backups, but does not encrypt notes on the device. A closed source application, encryption cannot be added without considerable
-effort. Alice is worried that her phone will be taken, her to-do list will be discovered, and that she will be locked away when the
+effort. Alice is worried that her phone will be taken, her to-do list will be discovered, and she will be locked away when the
 government sees that she has been buying flowers. This fear was stoked by a document recently uncovered with a Freedom of
 Information Act request, revealing that at least one government was looking at to-do lists during mobile seizures, as shown in
 Figure \ref{fig:dhs} \cite{dhsfoia}. Alice wants to prevent someone with physical access to her device, should it be confiscated,
 from seeing the contents of her to-do list. Android 4.x would protect her to-do list if the phone was captured while powered off, but
 it has been rumored the government is hoarding OS exploits against phones, among other things. If the government can bypass the lock
 screen on her phone, then it is all over for the poor lady. Alice would like to protect her to-do list even in the event that her
-phone is seized and the lock screen can be bypassed, so that a ``logical acquisition,'' in forensics parlance, would be fruitless.
+phone is seized and the lock screen bypassed, so that a ``logical acquisition,'' in forensics parlance, would be fruitless.
 What is Alice to do?
 
 \begin{figure}[!htb]
@@ -411,4 +408,4 @@ unlocked. Attempting to access the databases through ADB simply returns \texttt{
 provide perfect security, Alice has forced the issue out of the realm of traditional post-mortem forensics. If an attacker wanted to
 recover the data, either live memory analysis would need to be performed, or an out-of-band attack executed. With some refinements,
 even live memory analysis could be protected against.  As it stands, neither the acquisition process described in chapter
-\ref{ch:forensics}, nor inspection of the device from the user interface as it is running, will compromise Alice's data.
+\ref{ch:forensics}, nor inspection of the device from the user interface as it is running, would compromise Alice's data.
