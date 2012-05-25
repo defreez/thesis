@@ -147,8 +147,8 @@ size of that area.  There may be multiple arrays in \texttt{oobfree} leading to 
 appears to use one contiguous block.  This is not the standard layout used by Linux. Every file and directory within a YAFFS based
 file system has an object header that is stored within this OOBFREE area. The object header describes the contents of the object,
 which is stored in the data area of the chunk. This object header will include the object name, type, and length.  Notice that
-because the object header contains the length, it must be written to every time the file length is changed.  Because YAFFS based
-file system write sequentially, the new object header will be placed at the end of the object (with the same chunk id), and the old
+because the object header contains the length, it must be written to every time the file length is changed.  Because a YAFFS based
+file system writes sequentially, the new object header will be placed at the end of the object (with the same chunk id), and the old
 object header will be marked deleted. 
 
 YAFFS1 and YAFFS2 are actually remarkably simple compared to other file systems. To reiterate, the NAND device is divided into
