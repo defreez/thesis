@@ -200,17 +200,17 @@ centralize the metadata associated with a number of block groups, but this scala
 behind block groups \cite{ext4implications}.
 
 Each file has a piece of metadata associated with it called an inode, and the inodes for each block group are stored in the inode
-table within the block group. All of the information about a file, excluding the filename and the actual contents of the file, are
+table within the block group. All of the information about a file, excluding the filename and the actual content of the file, are
 stored in the inode. The inode structure includes, for example, the user ID (UID), the permissions mode, and pointers to the actual
 data \cite[p.  457]{carrier}. Chapter \ref{ch:ecryptfs} uses the fact that each inode has a UID associated with it to derive an
-encryption key for the contents of the file. Directories in ExtX are just a special type of file. The contents of a directory file
+encryption key for the content of the file. Directories in ExtX are just a special type of file. The content of a directory file
 is a list of directory entries, which are data structures that contain the actual names of the files in the directory. In ext4 the
 directory entries are stored in a hash tree structure by default, instead of a simple list which was the default for ext2 and ext3.
 A directory entry contains a pointer to the inode for the file, enabling data retrieval based on the name of a file. 
 
-When a file is deleted the directory entry is removed, the inode is deallocated, and the blocks associated with the file are freed,
+When a file is deleted, the directory entry is removed, the inode is deallocated, and the blocks associated with the file are freed,
 but the actual data remains until, by chance, it is overwritten. The pointers in the inode that referenced the actual
-data blocks are zeroed in ext3 and ext4, making it necessary to carve\footnote{Carving is the process of searching
+data blocks are zeroed in ext3 and ext4, making it necessary to \emph{carve}\footnote{Carving is the process of searching
 for deleted files based on the structure of the files trying to be recovered. JPEG images, for example, can be identified because
 they begin with the magic number FF D8.} for deleted files during recovery.  Most block allocation schemes do make an effort to
 prevent file fragmentation, though, which increases the likelihood of being able to successfully carve for the file
@@ -223,8 +223,8 @@ which is just an area holding metadata about the file system. ExtX divides the d
 block group contains a copy of the superblock and metadata about the files within the group, including an inode table. Each file is
 associated with an inode in the inode table, and the inode holds metadata about the file, including the location of the blocks
 containing the file's data. Directories are just special files that hold filenames in directory entry structures, and a directory entry
-points to the inode for the file. Deleting a file does not ensure that the contents of the file are gone, which is a fact frequently
-used in forensics.
+points to the inode for the file. Deleting a file does not ensure that the contents of the file are gone, which is a fact that is frequently
+taked advantage of in forensics.
 
 \section{Acquisition}
 This section describes how the data on an Android device can be retrieved.  In a digital investigation, the primary source of
@@ -264,15 +264,15 @@ analyst ends up with, then, is only an approximation of a forensically-sound dup
 In broad strokes, the acquisition of an Android device is not much different than the acquisition of a desktop computer. 
 The device must be seized, and an image of the device must be created that is as forensically sound as possible.  There are,
 however, several Android specific details that must be addressed.  What follows is an overview of the steps necessary for acquiring
-an Android device, partially drawn from Andrew Hoog's book \emph{Android Forensics} \cite{hoog}.
+an Android device, partially drawn from Andrew Hoog's book \emph{Android Forensics} \citeyear{hoog}.
 
-\paragraph{Step zero: build tools and document procedures}
+\paragraph{Step zero: Build tools and document procedures.}
 Perhaps it goes without saying, but it is imperative that the acquisition tools and procedures be developed \emph{prior} to
 acquisition.  If the device is using YAFFS2 as the file system (the majority of devices at the time of writing), \texttt{nanddump}
 should  be used.  The process of building \texttt{nanddump} from source is described later in the chapter.  The Android Debug
 Bridge, provided with the Android SDK as a means of communicating with the device over a USB cable, should be installed and tested. 
 
-\paragraph{Step one: initial seizure}
+\paragraph{Step one: Seize device.}
 The target device must first be secured in the analyst's possession, physically and electronically.  If the device is unlocked at
 the time of seizure, it should be immediately determined if a passcode or disk encryption is enabled. If either protection is
 enabled, as much data as possible should be acquired while the device is running and unlocked.  If the device is encrypted and
@@ -281,18 +281,18 @@ retrieved from the settings menu prior to shutting the device down and USB debug
 logical analysis is going to be performed, or the device is encrypted, it should be powered off.  Finally, the device should be
 isolated from the network, either by turning it off or placing it in a Faraday bag.
 
-\paragraph{Step two: unlock the device}
+\paragraph{Step two: Unlock the device.}
 If the device is locked, the password will need to be guessed or bypassed, either through brute-force, a smudge attack, or some
 other means.  A smudge attack involves reading the residual oil patterns off of a touch screen in order to determine the unlock
 pattern or PIN \cite{smudge}. The SIM card should be removed and analyzed separately, though SIM cards used in Android devices do
 not make particularly interesting pieces of evidence, as the majority of data is stored on the device itself.
 
-\paragraph{Step three: image SD card}
+\paragraph{Step three: Image SD card.}
  If removable, the SD card should also be removed and analyzed separately (in the same fashion as a thumb drive). A zeroed SD card
 should be placed in the device for storing NAND images. If the SD card is not removable, as in the case of the Nexus S which uses
 eMMC to provide USB mass storage, then it can be imaged through \texttt{adb} \cite[pp. 211-218]{hoog}.
  
-\paragraph{Step four: root the device}
+\paragraph{Step four: Root the device.}
 Unless root access has previously been enabled on a device, some sort of privilege escalation is generally required before an image
 of the device can be taken. The fact that exploitation is regularly involved during the process of acquisition startles many, yet it
 is often the only way to obtain access. By default, Android does not provide root access even to the device owner.  A substantial
@@ -302,7 +302,7 @@ security and hobbyist communities for rooting methods. If the device cannot be r
 and a logical acquisition will have to suffice. A logical acquisition consists of manually inspecting the device from the user
 interface, or installing an application that will systematically read unsecured data.
 
-\paragraph{Step five: acquire an image of \texttt{userdata}} An image of each partition on the device can be acquired with either
+\paragraph{Step five: Acquire an image of the device.} An image of each partition on the device can be acquired with either
 \texttt{dd} for ext4 or \texttt{nanddump} for YAFFS2.  These images should be stored on the sterile SD card that was previously
 inserted into the device.  
 
@@ -329,7 +329,7 @@ area.
 
 \subsection{Nanddump}
 \label{sec:nanddump}
-Hoog's book \cite{hoog} provides an excellent primer on how Android forensics is performed.  Unfortunately, a great number of
+Hoog's book \citeyear{hoog} provides an excellent primer on how Android forensics is performed.  Unfortunately, a great number of
 implementation details are glossed over in favor of describing opaque forensic tools, such as Hoog's own AFLogical/AFPhysical tools,
 or Cellebrite's more well-known UFED. These tools are only available to the law enforcement community, limiting their academic
 value. The tool used here for acquiring Android images is \texttt{nanddump}. Hoog's tool set makes use of the same tool.
@@ -396,7 +396,7 @@ significant hardware and personnel resources.
 In an ironic and unfortunate turn of events for a community celebrating an open source operating system, the source code for a
 number of the exploits used to obtain root access on Android is not available.  These exploits work well and are largely safe,
 allowing the hobbyist community to root their phones, while the forensic analyst is left without tools due to his or her inability
-to explain how the exploit works.  Fortunately, one of the most talented researchers in the field, whose code has been used in a
+to explain how the exploit works.  Fortunately, Sebastian Khramer, one of the most talented researchers in the field and whose code has been used in a
 number of Android root exploits, freely published proof-of-concept code on his blog, ``C-Skills."\footnote{c-skills.blogspot.com}
 While each device is different, and each model could conceivably require a different method of exploitation, ports of old Linux bugs
 are frequently found to be applicable to most versions of Android.  Hardware manufacturers seem to spend little time hardening
@@ -407,7 +407,7 @@ common method of identifying public vulnerabilities. The full database is availa
  
 Modern Linux systems use \texttt{udev} as their device manager.  \texttt{Udev} is the interface between userspace and the kernel as
 far as device registration are concerned.  All messages and events about new devices, including hotplugs, are passed through
-\texttt{udev}.  When a user plugs a USB drive into their machine and it is automatically mounted, \texttt{udev} has handled a
+\texttt{udev}.  When users plug a USB drive into their machines and it is automatically mounted, \texttt{udev} has handled a
 message from the kernel that a device was attached and forwarded it along to the correct abstraction layer.  All devices under
 \texttt{/dev} are handled by \texttt{udev}, which necessarily runs as root.  Android uses \texttt{udev}, but instead of giving
 \texttt{udev} its own service (normally \texttt{udevd}), it has been moved into \texttt{init}, which is typically the first
@@ -421,8 +421,8 @@ Sebastian Krahmer provided proof-of-concept C code.  Anthony Lineberry, David Lu
 \citeyear{arentpermissions} took the C implementation and linked it to Java via JNI, allowing it to be run by any Android
 application.
 
-Krahmer's implementation - commonly referred to as ``exploid," though ``exploid" can refer to a number of exploits derived from
-Krahmer's code - crafts a \texttt{NETLINK\_KOBJECT\_UEVENT} that directs \texttt{udev} to spawn a copy of ``exploid" on the next
+Krahmer's implementation -- commonly referred to as ``exploid," though ``exploid" can refer to a number of exploits derived from
+Krahmer's code -- crafts a \texttt{NETLINK\_KOBJECT\_UEVENT} that directs \texttt{udev} to spawn a copy of ``exploid" on the next
 hotplug event, as shown in Table \ref{tab:exploid}.  Instructions will typically direct the end-user to turn WiFi on and off,
 triggering a hotplug event.  When \texttt{udev} spawns another copy of ``exploid," it will be running as root, so exploid copies
 \texttt{/bin/sh} to \texttt{/bin/rootshell} with setuid root, so that the shell will always execute as root.  It is a beautiful
@@ -521,16 +521,17 @@ forensic methods presented this section.  \cite{carvefirefox}
 
 Knowing the table schema of the records being searched for is of the utmost importance.  The database used by the Android browser is
 a good example of useful data that might have been deleted, but can still be recovered.  The browser actually has several databases,
-but for now \texttt{browser.db} will suffice. The browser database is stored at
+but for the purposes of this study\texttt{browser.db} will suffice. The browser database is stored at
 \texttt{/data/data/com.android.browser/databases/browser.db}, and contains three tables: \texttt{android\_metadata},
-\texttt{bookmarks}, and \texttt{searches}.  The bookmarks table contains entries not only for bookmarks but browser history as well.
+\texttt{bookmarks}, and \texttt{searches}.  The bookmarks table contains entries not only for, bookmarks but browser history as well.
 The searches table contains search history. 
 
+\vspace{0.1in}
 \begin{table}[htb]
 \begin {center}
 	\begin{tabular}{| c | c | c |}
 	\hline
-	Field & Type & Comment \\
+	\textbf{Field} & \textbf{Type} & \textbf{Comment} \\
 	\hline
 	\_id & INTEGER PRIMARY KEY & \\
 	title & TEXT  &  Only used for bookmarks \\
