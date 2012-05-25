@@ -42,7 +42,7 @@
 \let\oldenumerate=\enumerate
 \let\oldendenumerate=\endenumerate
 \renewenvironment{enumerate}
-	{\singlespacing\oldenumerate
+	{\oldenumerate
 		\setlength{\itemsep}{0pt}
 		\setlength{\parskip}{0pt}}
 	{\oldendenumerate}	
@@ -50,10 +50,10 @@
 \let\olditemize=\itemize
 \let\oldenditemize=\enditemize
 \renewenvironment{itemize}
-	{\singlespacing\olditemize
+	{\begin{samepage}\olditemize
 		\setlength{\itemsep}{0pt}
 		\setlength{\parskip}{0pt}}
-	{\oldenditemize}
+	{\oldenditemize\end{samepage}}
 
 % 1.5 line spacing
 \onehalfspacing
