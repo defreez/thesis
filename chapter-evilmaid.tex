@@ -5,12 +5,12 @@ aware, the only demonstrated evil maid attack on Android \protect\cite{androidev
 
 There is, it would seem, an obvious method of protecting data against the forensic inquiry outlined in chapter \ref{ch:forensics}.
 Full Disk Encryption (FDE) is generally regarded as the best way to protect data in the event a device falls into the wrong hands,
-be it thief or forensic investigator \cite{fdeworks}.  For Android, in particular, Whisper Systems has included FDE in their
+be they those of a thief or forensic investigator \cite{fdeworks}.  For Android, in particular, Whisper Systems has included FDE in their
 security-oriented build WhisperCore \cite{whispercore}, and Google itself has included FDE in Android 3.x and 4.x. Though Chapter
 \ref{ch:ecryptfs} is primarily concerned with devices running Ice Cream Sandwich, this chapter focuses on the implementation of FDE
 provided in WhisperCore.  The ability to modify Android is at the heart of this paper, and WhisperCore is the only popular FDE
 implementation for Android provided by aftermarket modifications to the OS.  Partially prompted by Twitter's purchase of Whisper
-Systems and the subsequent unavailability of WhisperCore, Chris Soghoian once commented to Ars Technica: \begin{quote} \ldots these
+Systems and the subsequent unavailability of WhisperCore, Chris Soghoian once commented to \emph{Ars Technica}: \begin{quote} \ldots these
 applications that people are creating, that activists are creating, and then abandoning six months after their funding runs out --
 those are just a waste of time. Those are never going to go anywhere and they're never going to be used by anyone. We need
 technologies that can be used by millions of consumers, without playing with configuration options. \cite{arstechnica} \end{quote}
@@ -21,12 +21,15 @@ same time, WhisperCore on the Nexus One is vulnerable to the evil maid attack de
 only be relied on so long as an attacker has not had physical access to the device. It demonstrates in a very real way the dangers
 of leaving a device unguarded. 
 
-Chapter \ref{ch:introduction} asserted that three conditions were necessary for encryption to succeed as a privacy-preserving tool.
+\begin{samepage}
+Chapter \ref{ch:introduction} asserted that three conditions were necessary for encryption to succeed as a privacy-preserving tool:
+
 \begin{enumerate}
 	\item{The encryption passphrase must be strong.}
 	\item{An attacker cannot have access to the device before it used.}
 	\item{An attacker cannot have access to the device while it is running.}
 \end{enumerate}
+\end{samepage}
 A fourth condition might be added, which is that the attacker is not willing to extract the key through force, what the security
 industry likes to call ``rubber-hose'' cryptanalysis \cite{rubberhose}.  The first item is mostly self-explanatory. If a phone is
 encrypted with the PIN ``1111'' then it does not matter how secure the implementation is, decrypting the device will be easy. The
@@ -48,7 +51,7 @@ itself is protected, the device could be physically modified. There is, when it 
 against an evil maid attack.  For those truly concerned about privacy, if an electronic device is ever out of their hands it should
 be destroyed. There are simply too many ways that an adversary might tamper with the device. This chapter describes
 one.\footnote{Even if the device's software is completely secure, the device itself could be physically modified to record a
-passhprase as it is entered.}
+passphrase as it is entered.}
 
 Against a desktop or laptop computer, evil maid attacks are typically implemented by booting from an alternate device, such as a
 thumb drive in Joanna Rutkowska's \citeyear{evilmaid} classic attack against TrueCrypt.  Mobile devices offer natural protection against evil
@@ -60,7 +63,7 @@ because it requires an unlocked bootloader, is inherently vulnerable to evil mai
 comparatively resistant because the Nexus S bootloader can be relocked without reverting to stock images.  
 
 \section{Attacking WhisperCore}
-WhisperCore was a security-oriented Android distribution developed by Whisper Systems until that company was purchased by Twitter.
+WhisperCore, released in March 2011, was a security-oriented Android distribution developed by Whisper Systems until that company was purchased by Twitter in November 2011.
 WhisperCore was available for the flagship Android phones of the time (Nexus One and Nexus S). In addition to FDE, WhisperCore
 provided a significant number of security features, including a firewall, encrypted backups, and encrypted voice and text messaging.
 Some of these features can be used on a stock build of Android and remain available in the Android market, while others require the
@@ -69,11 +72,11 @@ Dutch certificate authority DigiNotar was compromised in 2011, for example, not 
 they went so far as to extend the Android framework with a certificate blacklisting system to prevent an SSL connection from any
 application using even an intermediate DigiNotar certificate \cite{whispernotar}. 
 
-Deploying WhisperCore to a phone necessarily involves unlocking the bootloader.  The Nexus series of phones use the HBOOT
-bootloader, which uses the fastboot protocol to communicate with a computer connected via USB.  Nexus phones are popular in the
+Deploying WhisperCore to a phone necessarily involves unlocking the bootloader. Nexus phones are popular in the
 Android community not only because they provide a ``pure" Android experience, but because they have bootloaders which can be easily
 unlocked.  To unlock a Nexus One, connect it to a computer which has the \texttt{fastboot} utility installed and issue one command:
-\texttt{fastboot oem unlock}.
+\texttt{fastboot oem unlock}. The \texttt{fastboot} utility is readily available from many hobbyist Android sites, or it can be built
+as part of the Android Open Source Project.
 
 Unlocking the bootloader wipes the phone and activates fastboot extended commands, enabling a user to flash custom images on the
 phone.  The WhisperCore installer does this for the user automatically (after a warning).  WhisperCore flashes a custom system
@@ -117,7 +120,7 @@ of the kernel, which conveniently uses the Android build system for cross-compil
 WhisperYAFFS is sufficient to boot WhisperCore.
 
 In order to retrieve the unlock password, a little bit of code is tacked on to the \texttt{yaffs\_UnlockEncryptedFilesystem}
-function in \texttt{yaffs\_vfs\_glue.c}. A section is added which reads the password as the user enters it and writes it out to a
+function in \texttt{yaffs\_vfs\_glue.c}, as shown in Table \ref{tab:storepass}. A section is added which reads the password as the user enters it and writes it out to a
 file on the unencrypted system partition.  The SD card would have been the first choice for a location to store the password, but
 WhisperCore contains an option to encrypt the SD card as well. The system partition is normally read-only (RO), so it is first
 remounted read-write. The password is written to \texttt{/system/etc/em.txt}, though the location is arbitrary. After the password
@@ -127,25 +130,26 @@ password out over the network.
 
 \begin{table}[htb]
 \lstinputlisting{tables/evilmaid-storepass.c}
-\label{tab:storepass}
 \caption{Evil Maid Patch: Store Unlock Password}
+\label{tab:storepass}
 \end{table}
 
 The system partition, while a conveniently accessible location for writing during unlock, cannot be read offline.  When the
 hypothetical evil maid returns to collect the device, \texttt{/system} will not be available because the device does not have USB
 debugging enabled.  How then, does the evil maid retrieve the password? Hardcode a backdoor.  If the user enters ``evilmaid" as the
-password, then the saved password is read from disk.  The partition is decrypted and the phone boots normally. 
+password, then the saved password is read from disk.  The partition is decrypted and the phone boots normally. The backdoor is shown in 
+Table \ref{tab:backdoor}.
 
 \begin{table}[htb]
 \lstinputlisting{tables/evilmaid-backdoor.c}
-\label{tab:backdoor}
 \caption{Evil Maid Patch: Backdoor}
+\label{tab:backdoor}
 \end{table}
 
 Finally, switching out the kernel will change the ``vermagic'' string.\footnote{The vermagic string identifies the kernel version
-that a kernel module was compiled for.} The vermagic string must match for kernel modules to load.  In a Nexus One, wireless is
+for which a kernel module was compiled.} The vermagic string must match for kernel modules to load.  In a Nexus One, wireless is
 provided by the \texttt{bcm4329.ko} kernel module, thus if the vermagic string changes wireless will not work.  Breaking wireless is
-likely to tip off the target, so in the evil maid kernel the vermagic string has been hardcoded in the \texttt{Makefile} to match
+likely to tip off the target, so in the evil maid kernel, the vermagic string has been hardcoded in the \texttt{Makefile} to match
 WhisperCore.  The compile version can also be hardcoded by preventing \texttt{scripts/mkcompile\_h} from overwriting
 \texttt{compile.h}.  The advantage of doing so is that the ``Kernel version" visible from the ``About phone" settings menu will be
 indistinguishable from WhisperCore.
@@ -161,22 +165,20 @@ is unlocked.  A prebuilt boot image for WhisperCore 0.5.5 running on a Nexus One
 
 To recap, the following steps will successfully perform an evil maid attack against WhisperCore on a Nexus One:
 
-\vbox{
-	\begin{enumerate}
-		\item{Obtain the evil kernel.}
-		\item{Build the kernel with \texttt{build-kernel.sh} (requires functioning Android build environment, and assumes
-			the kernel is in a subdirectory of AOSP root).}
-		\item{Unpack the WhisperCore boot image with \texttt{exbootimg}.}
-		\item{Pack an evil maid boot image with \texttt{mkbootimg} using the evil maid kernel and the WhisperCore ramdisk.}
-		\item{When the target is away, flash the new boot image.}
-		\item{Wait for the target to decrypt the phone.}
-		\item{Steal the phone.}
-	\end{enumerate}
-}
+\begin{enumerate}
+	\item{Obtain the evil kernel.}
+	\item{Build the kernel with \texttt{build-kernel.sh} (requires functioning Android build environment, and assumes
+		the kernel is in a subdirectory of AOSP root).}
+	\item{Unpack the WhisperCore boot image with \texttt{exbootimg}.}
+	\item{Pack an evil maid boot image with \texttt{mkbootimg} using the evil maid kernel and the WhisperCore ramdisk.}
+	\item{When the target is away, flash the new boot image.}
+	\item{Wait for the target to decrypt the phone.}
+	\item{Steal the phone.}
+\end{enumerate}
 
 \section{Conclusion}
 While the Android community has a tendency to ridicule locked bootloaders, securing the boot environment significantly mitigates
-offline attacks against FDE.  Unfortunately, the methods typically used to secure the Android boot
+offline attacks against full disk encryption.  Unfortunately, the methods typically used to secure the Android boot
 environment have not taken into account the need to protect third party images.  This is demonstrated by the differing resilience to
 evil maid attacks exhibited by WhisperCore on the Nexus One and the Nexus S.  On the Nexus One, WhisperCore is incapable of
 defending against an evil maid attack because the bootloader must remain unlocked.  On the Nexus S, which allows for the bootloader
