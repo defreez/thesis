@@ -194,7 +194,7 @@ group contains a copy of the ``superblock.'' The superblock contains key metadat
 for recovery should the primary superblock become corrupted.  Furthermore, because the metadata associated with a file is almost
 always held within the same block group as the actual data for that file, block groups increase the performance of ExtX by
 minimizing the amount of mechanical movement required of the hard disk. Additionally, the block group contains a ``group descriptor
-table,'' which holds metadata about the layout of the block group itself, and an ``inode table'' with holds information about the
+table,'' which holds metadata about the layout of the block group itself, and an ``inode table,'' which holds information about the
 files in the block group. In ext4 the block group layout has been modified with the introduction of ``flex block groups,'' which
 centralize the metadata associated with a number of block groups, but this scalability improvement does not alter the basic ideas
 behind block groups \cite{ext4implications}.
