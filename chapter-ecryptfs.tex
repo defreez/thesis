@@ -2,7 +2,7 @@
 \label{ch:ecryptfs}
 
 \section{Overview} 
-With Android 4.0 (Ice Cream Sandwich or ICS), Google introduced native support for full-disk encryption. Ice Cream Sandwich encrypts
+With Android 4.0 (Ice Cream Sandwich or ICS), Google introduced native support for full disk encryption. Ice Cream Sandwich encrypts
 the entire \texttt{/data} partition with dm-crypt, which provides transparent block-level encryption, sitting in-between
 the file system and the device. From a privacy perspective, introducing block-level encryption is a significant step forward for
 Android because it makes offline attacks against a mobile device much more difficult; the data is locked away securely as soon as
@@ -386,20 +386,21 @@ backups, but does not encrypt notes on the device. A closed source application, 
 effort. Alice is worried that her phone will be taken, her to-do list will be discovered, and she will be locked away when the
 government sees that she has been buying flowers. This fear was stoked by a document recently uncovered with a Freedom of
 Information Act request, revealing that at least one government was looking at to-do lists during mobile seizures, as shown in
-Figure \ref{fig:dhs} \cite{dhsfoia}. Alice wants to prevent someone with physical access to her device, should it be confiscated,
+Figure \ref{fig:dhs} \cite{dhsfoia}. 
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[scale=0.46]{dhs.png}
+\end{center}
+\caption{DHS Mobile Forensics Training} 
+\label{fig:dhs}
+\end{figure}
+Alice wants to prevent someone with physical access to her device, should it be confiscated,
 from seeing the contents of her to-do list. Android 4.x would protect her to-do list if the phone was captured while powered off, but
 it has been rumored the government is hoarding OS exploits against phones, among other things. If the government can bypass the lock
 screen on her phone, then it is all over for the poor lady. Alice would like to protect her to-do list even in the event that her
 phone is seized and the lock screen bypassed, so that a ``logical acquisition,'' in forensics parlance, would be fruitless.
 What is Alice to do?
 
-\begin{figure}[!htb]
-\begin{center}
-\includegraphics[scale=0.5]{dhs.png}
-\end{center}
-\caption{DHS Mobile Forensics Training} 
-\label{fig:dhs}
-\end{figure}
 
 Alice begins running an Android distribution that supports eCryptfs boundary mode. She configures the device such that the boundary
 key for ColorNote is cleared every time the phone is locked or goes to to sleep. When she is using the phone, her private to-do list

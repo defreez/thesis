@@ -32,7 +32,7 @@ tools of their own.
 The goal of this paper is to describe the forensic techniques used to acquire data from Android devices, and
 then to demonstrate a relevant defense. It details the practical obstacles to modifying an operating system that consists of
 millions of lines of code, spread across hundreds of projects in over a dozen languages.  The defense, unsurprisingly, is
-encryption. Recent releases of Android include the option of full-disk encryption, which works very well when certain conditions are
+encryption. Recent releases of Android include the option of full disk encryption, which works very well when certain conditions are
 met: the attacker cannot have physical access to the device prior to use, the encryption passphrase must be strong, and the attacker
 cannot have access to the device while it is running.  All of these conditions are discussed later in the paper, but it
 is the last condition that is of particular concern. People simply do not turn off their phones very often, which dramatically
@@ -42,7 +42,7 @@ that increases the safety of data on a running device.
 
 Chapter \ref{ch:forensics} introduces Android forensics. It discusses how data on an Android device can be acquired. While the
 analysis of acquired data is briefly discussed, chapter \ref{ch:forensics} focuses on the process of acquisition because that is the
-critical point at which data must be protected. Next, chapter \ref{ch:fde} discusses full-disk encryption in WhisperCore, a
+critical point at which data must be protected. Next, chapter \ref{ch:fde} discusses full disk encryption in WhisperCore, a
 third-party distribution of Android. The chapter uses an attack against WhisperCore to exemplify the perils of losing physical
 control of a device. Chapter \ref{ch:ecryptfs} provides the technical details of a novel method of encrypting data on an Android
 device, called eCryptfs boundary mode. It shows how the eCryptfs file system can be used to provide independent keys for each

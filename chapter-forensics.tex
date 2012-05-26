@@ -120,12 +120,14 @@ official YAFFS documentation \cite{howyaffsworks}, each chunk in YAFFS1
 has the following information associated with it:
 
 \begin{itemize}
-	\item {\bf ObjectId}: Identifies which object the chunk belongs to.\
-	\item {\bf ChunkId}: Identifies where in the file this chunk belongs. 
-		A chunkId of zero signifies that this chunk contains an object header. 
-		ChunkId 1 is the first chunk, ChunkId 2 the second, and so on.
-	\item {\bf Deletion Marker}: Shows that this chunk is no longer in use.
-	\item {\bf Byte count}: Number of bytes of data if this is a data chunk.
+\begin{samepage}
+\item {\bf ObjectId}: Identifies which object the chunk belongs to.\
+\item {\bf ChunkId}: Identifies where in the file this chunk belongs. 
+	A chunkId of zero signifies that this chunk contains an object header. 
+	ChunkId 1 is the first chunk, ChunkId 2 the second, and so on.
+\item {\bf Deletion Marker}: Shows that this chunk is no longer in use.
+\item {\bf Byte count}: Number of bytes of data if this is a data chunk.
+\end{samepage}
 \end{itemize}
 
 YAFFS1 relies on the Linux kernel's Memory Technology Device (MTD) driver to provide an interface to the actual NAND device.  The
@@ -529,27 +531,27 @@ The searches table contains search history.
 \vspace{0.1in}
 \begin{table}[htb]
 \begin {center}
-	\begin{tabular}{| c | c | c |}
-	\hline
-	\textbf{Field} & \textbf{Type} & \textbf{Comment} \\
-	\hline
-	\_id & INTEGER PRIMARY KEY & \\
-	title & TEXT  &  Only used for bookmarks \\
-	url & TEXT  & Location of bookmark or history visit \\
-	visits & INTEGER  & Number of times site has been visited \\
-	date & LONG  &  Last visit \\
-	created & LONG &  Date created \\
-	description & TEXT &  User entered description \\
-	bookmark & INTEGER & Whether or not record is bookmark \\
-	favicon & BLOB &  For webpages \\
-	thumbnail & BLOB &  Shown in bookmarks screen \\
-	touch\_icon & BLOB &  Unknown \\
-	user\_entered & BLOB & Boolean, created by user or not \\
-	\hline
-	\end{tabular}
+\begin{tabular}{| c | c | c |}
+\hline
+\textbf{Field} & \textbf{Type} & \textbf{Comment} \\
+\hline
+\_id & INTEGER PRIMARY KEY & \\
+title & TEXT  &  Only used for bookmarks \\
+url & TEXT  & Location of bookmark or history visit \\
+visits & INTEGER  & Number of times site has been visited \\
+date & LONG  &  Last visit \\
+created & LONG &  Date created \\
+description & TEXT &  User entered description \\
+bookmark & INTEGER & Whether or not record is bookmark \\
+favicon & BLOB &  For webpages \\
+thumbnail & BLOB &  Shown in bookmarks screen \\
+touch\_icon & BLOB &  Unknown \\
+user\_entered & BLOB & Boolean, created by user or not \\
+\hline
+\end{tabular}
 \end{center}
-	\caption{Bookmarks Table Schema}
-	\label{tab:bookmarkschema}
+\caption{Bookmarks Table Schema}
+\label{tab:bookmarkschema}
 \end{table}
 
 Following Pereira's work on carving for deleted Firefox history records, an Android image can be scanned for unallocated SQLite

@@ -45,15 +45,15 @@
 	{\oldenumerate
 		\setlength{\itemsep}{0pt}
 		\setlength{\parskip}{0pt}}
-	{\oldendenumerate}	
+	{\oldendenumerate}
 
 \let\olditemize=\itemize
 \let\oldenditemize=\enditemize
 \renewenvironment{itemize}
-	{\begin{samepage}\olditemize
+	{\olditemize
 		\setlength{\itemsep}{0pt}
 		\setlength{\parskip}{0pt}}
-	{\oldenditemize\end{samepage}}
+	{\oldenditemize}
 
 % 1.5 line spacing
 \onehalfspacing
