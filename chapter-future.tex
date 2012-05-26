@@ -7,8 +7,7 @@
 The illustration which concludes the previous chapter, of Alice securely reminding herself to send flowers, may be contrived, but it
 is a pattern that can be used to secure locally stored data for nearly any application. The scenario was tested on an actual phone,
 running actual code, and it works, but there is a lot that still needs to be done before this could be used in any practical sense.
-As Dan Kaminsky once tweeted, ``The game is not to secure you, or me. Security for security people is just a self licking ice cream
-cone.'' What follows are a few ideas for future work.
+What follows are a few ideas for future work.
 
 \subsection{Configurable Application Security}
 There is, as it stands, no way to configure which applications will have their boundary keys cleared when a device sleeps. 
@@ -38,7 +37,7 @@ handling, but it is time consuming and tedious. Validating that the password was
 tool for recovering password keys from memory. Joe Sylve's \citeyear{dmd} work could be used for validation, but the tools accompanying his paper 
 had not yet been released at the time of writing.
 
-\subsection{Utilize ecryptfsd and encrypt SD card}
+\subsection{Utilize ecryptfsd and encrypt SD Card}
 As a demonstration of what could be done, boundary keys are currently being calculated directly in the kernel. This allowed for
 rapid development, but may not be the wisest place. Instead of hooking the passphrase keying mode of
 eCryptfs, an additional keying mode with a different header format could be developed. This mode could call out to
@@ -84,7 +83,7 @@ for privacy tools, the test is only meaningful in the context of this reference 
 history, for example, presupposes that a reference tool which recovers browser history is available and can itself successfully pass
 traditional forensic validation, to an extent appropriate to the situation.
 
-Brian Carrier has provided a clear and thoughtful expose \cite{Carrier2003} on the requirements of forensic tools.  Though his paper
+Brian Carrier has provided a clear and thoughtful expose \citeyear{Carrier2003} on the requirements of forensic tools.  Though his paper
 is primarily a legal argument for using open-source acquisition and extraction tools, the insights he provides along the way have
 direct counterparts in the privacy arena and can be used as general guidelines here.  Every forensic tool must pass, in a repeatable
 fashion, tests which demonstrate that it does retrieve the information the tool purports to retrieve.  If a forensic tool claims to
@@ -101,7 +100,7 @@ validated against forensic techniques developed by someone other than the author
 field of Android forensics is relatively new, and there was until very recently little literature on how Android forensics is
 performed. The field is growing at an astonishing rate, however, and tools are becoming easier to find.
 
-\subsubsection{Why Validation is Necessary: CyanogenMod Incognito Mode}
+\subsection{Why Validation is Necessary: CyanogenMod Incognito Mode}
 
 CyanogenMod is a popular after-market build of Android that is compatible with many Android devices.  While the primary developer of
 CyanogenMod is Steve Kondik, who goes by the handle Cyanogen, it is a community project; notably, several members of the
@@ -115,12 +114,12 @@ Kondik.
 
 One of the features of CyanogenMod that is actively promoted is incognito mode. The incognito mode in CyanogenMod 7 is not, however,
 the incognito mode that is included with Ice Cream Sandwich, as CyanogenMod 7 is based on Gingerbread. According to the CyanogenMod
-web site, incognito mode prevents browsing and download history from being saved, in addition to deleting all cookies.
-\footnote{http://www.cyanogenmod.com/features/incognito-mode} It does actually do these things, and the browser history removal has
+web site, incognito mode prevents browsing and download history from being saved, in addition to deleting all cookies.\footnote{
+http://www.cyanogenmod.com/features/incognito-mode} It does actually do these things, and the browser history removal has
 been validated.  Unfortunately, the discovery of a very important artifact, cache, is not being protected against. Failure to remove
 browser cache leaves browser history discoverable.
 
-\subsubsection{Browser History Validation}
+\subsection{Browser History Validation}
 
 The browser history on an Android device is stored in the \texttt{browser.db} database.  In a vanilla distribution of Android, this
 database is stored in the \texttt{/data/data/com.android.browser/databases} directory.  Oddly enough, the browser history is stored
@@ -170,7 +169,7 @@ The browser database itself is missing until the browser is launched for the fir
 clearly visible in the browser history available on the device and in the browser database as a unique record.  When incognito mode
 is enabled in CyanogenMod, neither location indicates of a visit to the salt site.
 
-\subsubsection{Browser Cache Validation}
+\subsection{Browser Cache Validation}
 The Android browser cache is a particularly interesting forensic artifact.  The browser cache is implemented within the webkit
 framework, rather than the browser application.  There are, therefore, no content providers in the Android API that expose the
 browser cache, making it difficult to erase from the user interface, yet the cache is written as normal files to the data partition
@@ -179,25 +178,25 @@ browser history itself, and often the data is of more use than the browser histo
 Because the files are written to disk, even if the application data is cleared, the cached files can usually be recovered,
 especially if a log-structured file system such as YAFFS2 is being used.  Because the browser cache is not implemented within the
 browser application itself, some trivial attempts to implement incognito mode in the Android browser have overlooked the browser
-cache.  This test will do a three-way comparison: the results of a custom method completely disabling cache are contrasted with
+cache.  This test does a three-way comparison: the results of a custom method completely disabling cache are contrasted with
 stock Gingerbread and CyanogenMod 7.
 
-In order to validate that the browser cache is prevented from being written to disk, attempts to retrieve the cache will be made using
+In order to validate that the browser cache is prevented from being written to disk, attempts to retrieve the cache are made using
 \texttt{adb}.  It has been established elsewhere that once data is written to flash, there is a high probability of recovery even if
 the data is deleted \cite{naval}. The database \texttt{/data/data/com.android.browser/databases/webviewCache.db} contains the index of the
 browser cache, and \texttt{/data/data/com.android.browser/cache/webviewCache} and subdirectories contains the actual cache files.
 The following test method was used:
 
 \begin{enumerate}
-\item \url{www.slashdot.org} was  the chosen site for salting the device
-\item The browser cache in the above locations was pulled from an empty device
-\item It was confirmed that there are no records in the SQLite database referring to the salt site
-\item It was confirmed that there are no files in \texttt{/data/data/com.android.browser/cache/webviewCache} or subdirectories containing a case-insensitive substring match for the word 'slashdot'
-\item The native Android browser was opened, and only \url{www.slashdot.org} was visited
-\item The browser cache was pulled from the device
-\item It was confirmed that records in the SQLite database and files indicating a visit to \url{www.slashdot.org} existed
-\item Repeated for device running CyanogenMod 7 (visiting \url{www.slashdot.org} with incognito mode enabled) and analyzed acquired data
-\item Repeated for device with custom cache bypass and analyzed acquired data
+\item \url{www.slashdot.org} was the chosen site for salting the device.
+\item The browser cache in the above locations was pulled from an empty device.
+\item It was confirmed that there are no records in the SQLite database referring to the salt site.
+\item It was confirmed that there are no files in \texttt{/data/data/com.android.browser/cache/webviewCache} or subdirectories containing a case-insensitive substring match for the word ``slashdot.''
+\item The native Android browser was opened, and only \url{www.slashdot.org} was visited.
+\item The browser cache was pulled from the device.
+\item It was confirmed that records in the SQLite database and files indicating a visit to \url{www.slashdot.org} existed.
+\item Repeated for device running CyanogenMod 7 (visiting \url{www.slashdot.org} with incognito mode enabled) and analyzed acquired data.
+\item Repeated for device with custom cache bypass and analyzed acquired data.
 \end{enumerate}
 
 On the empty device no databases and no cache files were found in the \texttt{/data/data/com.android.browser} directory.  As
@@ -207,13 +206,13 @@ database was populated with data from the default page that loads.
 
 After visiting \url{www.slashdot.org} and pulling the database with \texttt{adb}, a \texttt{SELECT * FROM cache WHERE url LIKE
 '\%slashdot\%'} listed several records.  Similarly, a \texttt{grep -ri 'slashdot' webviewCache} showed a significant amount of
-\url{www.slashdot.org} data in the cache files.  This validates that the forensic tool is able to find references to a particular
+\url{www.slashdot.org} data in the cache files.  These results validate that the forensic tool is able to find references to a particular
 site in the web cache.
 
 In CyanogenMod 7, the \texttt{webviewCache.db} records and the cache files created in
-\texttt{/data/data/com.android.browser/cache/webviewCache} directory are indistinguishable from stock Android.  Completely disabling
-cache, in contrast, entirely prevents the creation of cache files and entries into \texttt{webviewCache.db}.  In fact,
-\texttt{webviewCache.db} is never created, as it is initialized as a temporary database.  After visiting \url{www.slashdot.org} in
+\texttt{/data/data/com.android.browser/cache/webviewCache} directory were indistinguishable from stock Android.  Completely disabling
+cache, in contrast, entirely prevented the creation of cache files and entries into \texttt{webviewCache.db}.  In fact,
+\texttt{webviewCache.db} was never created, as it is normally initialized as a temporary database.  After visiting \url{www.slashdot.org} in
 the native Android browser, a logical acquisition using \texttt{adb} recovered no cache data from
 \texttt{/data/data/com.android.browser}.  While the incognito mode built into CyanogenMod 7 passed the browser history artifact
 test, it does not pass the browser cache artifact test. This is because the browser cache is implemented by webkit, and the
@@ -221,18 +220,18 @@ CyanogenMod 7 incognito mode operates entirely within the browser application.
 
 \section{Other Projects}
 
-Chapter \ref{ch:fde} introduced full-disk encryption in WhisperCore, but there are other noteworthy privacy-oriented projects for Android. 
+Chapter \ref{ch:fde} introduced full disk encryption in WhisperCore, but there are other noteworthy privacy-oriented projects for Android. 
 
 \subsubsection{Orbot and Orweb}
 
 Orbot is an implementation of Tor for Android. Tor stands for ``the onion router,'' and is an implementation of onion routing, which
 was patented by the United States Navy in the late 1990s.  Onion routing works by randomly routing traffic through a series of
-relays, encrypting the traffic in a series of layers, one for each relay (like layers in an onion). Routers in the Tor network know
+relays, with each relay decrypting one layer of the message, like layers in an onion. Routers in the Tor network know
 which router a packet came from, and which router is next, but nothing else. The entrance and exit routers can see the content of
 the message, but are unaware of the destination and source, respectively. This allows for relatively anonymous internet connections,
-and has been used worldwide to access the internet in countries which censor the internet. Orbot works on a non-rooted Android
+and has been used worldwide to access the internet in countries where the internet is censored. Orbot works on a non-rooted Android
 phone, but is much easier to configure if the device has root access available. Because users often betray their identity through
-their browser, even when using Tor, the Tor project ships a configured version of Firefox that is tailored for privacy. The Android
+their browser, even when using Tor, the Tor project\footnote{https://www.torproject.org} ships a configured version of Firefox that is tailored for privacy. The Android
 equivalent of the Tor browser is Orweb.
 
 
@@ -240,15 +239,15 @@ equivalent of the Tor browser is Orweb.
 
 Whisper Systems, which was acquired by Twitter in late 2011, produced a number of other great projects that were included with
 WhisperCore. RedPhone was one of these. It provided an Android implementation of encrypted voice traffic.  Unfortunately the
-RedPhone service was shutdown after Whisper Systems was acquired by Twitter. TextSecure, however, was open-sourced. TextSecure
-provides encrypted SMS messaging for Android using the Off-the-Record (OTR) protocol. OTR is wonderfully clever. It gets its name
-from ``off the record'' journalism sourcing, where the source remains anonymous. In OTR, in addition to traditional encryption, two
+RedPhone service was shut down after Whisper Systems was acquired by Twitter. TextSecure, however, was open-sourced, and remains available. 
+TextSecure provides encrypted SMS messaging for Android using a version of the Off-the-Record (OTR) protocol. OTR is wonderfully clever. It gets its name
+from ``off the record'' journalism sourcing, where a reporter's source remains anonymous. In OTR, in addition to traditional encryption, two
 features are included: perfect forward secrecy and deniability. Perfect forward secrecy uses temporary session keys that are not
-reproducible if the master key is compromised. So, to return to our earlier xample, if Alice sends a message to Bob, and at a later
+reproducible if the master key is compromised. So, to return to our earlier example, if Alice sends a message to Bob, and at a later
 date the NSA compromises either Alice's or Bob's key (or both), the conversation cannot be recreated.  Deniability refers to the
 ability of the participants in a conversation to deny that the conversation ever happened. In OTR, the participants are able to
 authenticate each other during the conversation, but a third-party cannot prove that the conversation occurred. To be clear, it can
-be established that \emph{a} conversation occurred between the two participants, but the contents of that conversation cannot be
+be established that \emph{a} conversation occurred between the two participants, but the \emph{contents} of that conversation cannot be
 proven to be authentic \cite{otr}.
 
 
@@ -257,7 +256,7 @@ proven to be authentic \cite{otr}.
 If privacy tools are to be developed that are capable of securing data against state-of-the-art forensic techniques, then there is
 still a great deal of work that needs to be done. The field of mobile forensics is progressing at a rate that far exceeds the field
 of mobile privacy. An easy-to-use form of disk encryption that is resistant to live memory analysis is needed. If securing a device
-requires intimate knowledge of that device's internals, then in practice it will never be secured. This paper has taken steps toward
+requires intimate knowledge of that device's internals, then in practice it will never be secured. This study has taken steps toward
 building an encryption scheme for Android that is resistant to logical analysis and could, with some development, be resistant to
 live memory analysis. This encryption method in particular, and privacy tools in general, need to be rigorously and thoroughly
 validated. If there are bugs in them, the privacy community needs to find them before an attacker does.
