@@ -150,7 +150,7 @@ to unlock the bootloader, flash images, and perform other functions that only th
 primary task of the bootloader is to load the Android kernel into memory and pass control of the system over to it. 
 
 The Android kernel will initialize the hardware and prepare the device itself for use. On an Android device, the \texttt{boot}
-partition is separated from the \texttt{system} and \texttt{userdata} partitions (see chapter \ref{ch:forensics}). The boot
+partition is separated from the \texttt{system} and \texttt{userdata} partitions (see Chapter \ref{ch:forensics}). The boot
 partition contains the kernel and a ``ramdisk.''  The ramdisk is a small file system that contains the core binaries and
 configuration files needed to start the system. In most Linux-based systems, Android included, init is the ``grandmother'' of all
 processes \cite{eneaboot}. Everything outside of the kernel is launched by init directly or by a process that was previously started
@@ -292,7 +292,7 @@ property if the file system type is ``ecryptfs,'' as shown in Table \ref{tab:ini
 Encrypting the data partition of a device with separate keys for each application serves little purpose if the
 boundary keys are not removed when the device is locked. This section describes how pressing the power button on a device can
 trigger the removal of the master key and any specified boundary keys. This demonstration does not sufficiently sanitize freed
-memory to completely prevent key extraction through live analysis (see chapter \ref{ch:future} for more details).
+memory to completely prevent key extraction through live analysis (see Chapter \ref{ch:future} for more details).
 
 \subsection{Messaging in eCryptfs}
  
@@ -408,5 +408,5 @@ is easily accessible. After the keys have been removed, the application fails to
 unlocked. Attempting to access the databases through ADB simply returns \texttt{I/O error}. While this does not, by any means,
 provide perfect security, Alice has forced the issue out of the realm of traditional post-mortem forensics. If an attacker wanted to
 recover the data, either live memory analysis would need to be performed, or an out-of-band attack executed. With some refinements,
-even live memory analysis could be protected against.  As it stands, neither the acquisition process described in chapter
+even live memory analysis could be protected against.  As it stands, neither the acquisition process described in Chapter
 \ref{ch:forensics}, nor inspection of the device from the user interface as it is running, would compromise Alice's data.
