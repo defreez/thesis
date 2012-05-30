@@ -3,7 +3,7 @@ website. It was posted there first to provide a timely commentary on secure boot
 aware, the only demonstrated evil maid attack on Android \protect\cite{androidevilmaid}.}}
 \label{ch:fde}
 
-There is, it would seem, an obvious method of protecting data against the forensic inquiry outlined in chapter \ref{ch:forensics}.
+There is, it would seem, an obvious method of protecting data against the forensic inquiry outlined in Chapter \ref{ch:forensics}.
 Full Disk Encryption (FDE) is generally regarded as the best way to protect data in the event a device falls into the wrong hands,
 be they those of a thief or forensic investigator \cite{fdeworks}.  For Android, in particular, Whisper Systems has included FDE in their
 security-oriented build WhisperCore \cite{whispercore}, and Google itself has included FDE in Android 3.x and 4.x. Though Chapter
@@ -33,7 +33,7 @@ Chapter \ref{ch:introduction} asserted that three conditions were necessary for 
 A fourth condition might be added, which is that the attacker is not willing to extract the key through force, what the security
 industry likes to call ``rubber-hose'' cryptanalysis \cite{rubberhose}.  The first item is mostly self-explanatory. If a phone is
 encrypted with the PIN ``1111'' then it does not matter how secure the implementation is, decrypting the device will be easy. The
-third item will be discussed in chapter \ref{ch:ecryptfs}.  It is the second condition that will now be taken up. 
+third item will be discussed in Chapter \ref{ch:ecryptfs}.  It is the second condition that will now be taken up. 
 
 \section{Evil Maid}
 Encryption has been exceedingly successful at protecting data at rest, but implementations often remain susceptible to a class of
@@ -89,7 +89,7 @@ possible, leaving the device susceptible to evil maid attacks.
 WhisperCore includes two separate FDE implementations, one for the Nexus One and one for the Nexus S. WhisperCore on the Nexus
 One implements an encryption layer on top of YAFFS2, which is the native file system.  On the Nexus S, where ext4 is the native
 file system, DM-Crypt (device-mapper crypto target), which is a block-level encryption layer, is used rather than a cryptographic
-file system (see chapter \ref{ch:ecryptfs} for more on the difference between block-level and file-level encryption).  DM-Crypt is the
+file system (see Chapter \ref{ch:ecryptfs} for more on the difference between block-level and file-level encryption).  DM-Crypt is the
 same encryption mechanism that Google uses for Android devices that support FDE, and often how Linux desktops are encrypted.  The
 rest of this section will focus on WhisperCore as it exists running on a Nexus One phone.
 
