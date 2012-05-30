@@ -408,7 +408,7 @@ Sebastian Krahmer's port of CVE-2009-1185.\footnote{CVE stands for "Common Vulne
 common method of identifying public vulnerabilities. The full database is available at \texttt{cve.mitre.org}. }
  
 Modern Linux systems use \texttt{udev} as their device manager.  \texttt{Udev} is the interface between userspace and the kernel as
-far as device registration are concerned.  All messages and events about new devices, including hotplugs, are passed through
+far as device registration is concerned.  All messages and events about new devices, including hotplugs, are passed through
 \texttt{udev}.  When users plug a USB drive into their machines and it is automatically mounted, \texttt{udev} has handled a
 message from the kernel that a device was attached and forwarded it along to the correct abstraction layer.  All devices under
 \texttt{/dev} are handled by \texttt{udev}, which necessarily runs as root.  Android uses \texttt{udev}, but instead of giving
